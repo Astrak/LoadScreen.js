@@ -39,7 +39,8 @@ The load screen is composed of an overlay available at `ls.domElement` and a cen
 * `percentInfo` *(boolean)* : to display the progression in percent. Defaults to `false`.
 * `sizeInfo` *(boolean)* : to display the progression in MB. Defaults to `false`.
 * `textInfo` *(array or boolean)* : Two messages to display during loading. If `false`, no textual information are displayed. Defaults to `[ 'Loading', 'Creating scene' ]`.
-For a custom loader, set `type` to `'custom'`. Append your element to `ls.infoContainer` to put it in the middle, or to `ls.domElement` for a top line for example. Set `background` to `'none'` if you need. You can then update your loader with the `onProgress` callback.
+
+For a 100% custom loader, set `type` to `'custom'`, to get an empty `infoContainer`. Append your element to `ls.infoContainer` to put it in the middle, or simply to `ls.domElement` for a top line for example. Set `background` to `'none'` if you need. You can then update your loader with the `onProgress` callback.
 
 ##Options
 * `forcedStart` *(boolean)* : defines whether the load should start if the canvas is out of sight. Setting it to `true` can lead to page freezes. Defaults to `false`. 
