@@ -1,0 +1,19 @@
+{
+  "name": "LoadScreen.js",
+  "version": "0.0.1",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-uglify": "^1.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Astrak/LoadScreen.js.git"
+  },
+  "keywords": [
+    "loadscreen",
+    "loader"
+  ],
+  "author": "Astrak",
+  "license": "MIT"
+}
