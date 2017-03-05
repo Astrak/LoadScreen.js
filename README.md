@@ -25,37 +25,44 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
     .onComplete( function () { ls.remove(); animate(); } )
     .start( resources );
 ##Format your resources
-    //in threejs only for now :
-    resources (facultative) = {
+(Threejs only for now)
+    resources = {
         textures: {
             myTexture1 : { 
-                path: string,
-                size: number,//in Ko
-                //other threejs textures properties can be added, like 
-                //minFilter: THREE.LinearFilter
+                path: 'path/to/pic.jpg',
+                size: 2789,//in Ko
+                //other threejs textures properties can be specified, like :
+                minFilter: THREE.LinearFilter
             }
         },
         geometries: {
             myGeometry1 : {
-                path: string,
-                size: number,//in Ko
-                //next are facultative :
-                flatShading: bol,//defaults to false. If true, geometry.computeFlatVertexNormals() will be called.
-                bufferGeometry: bol//defaults to false. If true, and if the loader's output is not a BufferGeometry, BufferGeometry.fromGeometry( output ) will be called.
-                //other threejs geometries properties can be added
+                path: 'path/to/geometry.json',
+                size: 9498,//in Ko
+                //next are both optional
+                flatShading: bol,//defaults to false. 
+                //If true, geometry.computeFlatVertexNormals() will be called.
+                bufferGeometry: bol//defaults to false. 
+                //If true, and if the loader's output is not a BufferGeometry, 
+                //new BufferGeometry().fromGeometry( output ) will be called.
+                //other threejs geometries properties can be added, like : 
             }
         },
         meshes: {
             myMesh1: {
-                geometry: string,//'myGeometry1' for instance
-                material: THREE.Material,//for instance, new THREE.MeshPhongMaterial({ color : 0xff8899, side : THREE.DoubleSide }). Do not indicate textures in the material, they will be added by the script.
-                //next are facultative :
-                //other threejs meshes properties and materials can be added here
-                //if properties are not related to the material or mesh, they are added to mesh.userData.
-                //exemple :
-                map: myTexture1,//assigned to the material once loaded
+                geometry: 'myGeometry1'
+                material: new THREE.MeshPhongMaterial({//without maps
+                    color : 0xff8899, 
+                    side : THREE.DoubleSide 
+                }),
+                //next are optional
+                //specify any other threejs meshes or materials properties 
+                map: 'myTexture1',//assigned to material
                 castShadow: true,//assigned to the mesh
-                unknownOfThreejsParam : { title: 'blabla', content: 'blabla' }//assigned to mesh.userData
+                unknownOfThreejsParam : { 
+                    title: 'blabla', 
+                    content: 'blabla' 
+                }//assigned to mesh.userData
             }
         }
     }
