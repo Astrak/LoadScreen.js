@@ -3,17 +3,24 @@
 	licence : MIT
 	dependencies : threejs, loaders needed for your files, TweenLite
 	usage : 
-		| var ls = new LoadScreen( renderer, { 
-		| 	 look: 'circular', 
-		| 	 background: 'darkslategrey', 
-		| 	 textInfo: [ 'Loading assets', 'Creating objects' ], 
-		| 	 percentInfo: true 
-		| });
-		| window.addEventListener( 'resize', function () { renderer.setSize( width, height ); ls.setSize( width, height ); } );
-		| ls.onProgress( function ( progress ) { console.log( progress ); } )
-		| .onComplete( function () { ls.remove(); animate(); } )
-		| .setOptions({ forcedStart: false, verbose: false })
-		| .start( resources );
+		var ls = new LoadScreen( renderer, { 
+			type: 'circle', 
+			background: 'darkslategrey', 
+			textInfo: [ 'Loading assets', 'Creating objects' ],
+			percentInfo: false 
+		});
+
+		window.addEventListener( 'resize', function () { 
+			renderer.setSize( width, height ); 
+			ls.setSize( width, height ); 
+		});
+
+		ls
+		.onProgress( function ( progress ) { console.log( progress ); } )
+		.onComplete( function () { ls.remove(); animate(); } )
+		.setOptions({ forcedStart: false, verbose: true, tweenDuration: 2 })
+		.start( resources );
+	todo : second progress bar at top of screen for assets loading after start
 */
 
 function LoadScreen ( renderer, style ) {
@@ -26,7 +33,7 @@ function LoadScreen ( renderer, style ) {
 		the loadScreen.onProgress callback, that receives the progress value (from 0 to 1) as argument.
 		otherwise @style is an object with this structure 
 		{
-			look: string,//'linear' or 'circular', defaults to 'linear'
+			type: string,//'bar' or 'circle', defaults to 'bar'
 			background: string,//'#ddd' as default, css color of background 
 			progressContainer: string,//'#baa' as default, css color of progressContainer 
 			progressBar: string,//'#756' as default, css color of progressBar 
@@ -38,16 +45,19 @@ function LoadScreen ( renderer, style ) {
 
 	var that = this;
 
-	var verbose = false,
-		forcedStart =
+	var infos = null;
 
-	//pointers
+	var verbose = false, forcedStart = false, tweenDuration = 1;
+
+	//defs
 	this.progress = 0;
+	this.tween = { progress : 0 };
 	this.forcedStart = false;
 	this.domElement = null;
-	this.loaderContainer = null;
+	this.infoContainer = null;
 	this.removed = false;
 	this.verbose = false;
+	this.resources = null;
 
 	//methods
 	this.remove = null;
@@ -55,26 +65,29 @@ function LoadScreen ( renderer, style ) {
 	//callbacks
 	this.onProgress = onProgress;
 	this.onComplete = onComplete;
-	this.setOptions = setOptions;
 
 	if ( style !== 'no' ) {
 
-		that.remove = remove;
-		that.resize = setOverlaySize;
+		this.remove = remove;
+		this.resize = setOverlaySize;
+		this.updateCBs = [];
 
 		style = style || {};
 
-		that.style = {
-			look : style.look ? style.look : 'linear',
-			background : style.background ? style.background : '#ddd',
-			progressContainer : style.progressContainer ? style.progressContainer : '#baa',
-			progressBar : style.progressBar ? style.progressBar : '#756',
-			percentInfo : style.hasOwnProperty( 'percentInfo' ) ? style.percentInfo : false,
-			sizeInfo : style.hasOwnProperty( 'sizeInfo' ) ? style.sizeInfo : false,
-			textInfo: style.text ? style.text : [ 'Loading', 'Processing' ]
+		style = {
+			type: style.type ? style.type : 'bar',
+			size: style.size ? style.size : '100px',
+			background: style.background ? style.background : '#ddd',
+			progressContainer: style.progressContainer ? style.progressContainer : '#baa',
+			progressBar: style.progressBar ? style.progressBar : '#756',
+			percentInfo: style.hasOwnProperty( 'percentInfo' ) ? style.percentInfo : false,
+			sizeInfo: style.hasOwnProperty( 'sizeInfo' ) ? style.sizeInfo : false,
+			textInfo: style.hasOwnProperty( 'textInfo' ) ? style.textInfo : [ 'Loading', 'Processing' ]
 		};
 
 		setLoadScreen();
+
+		setInfos();
 
 	}
 
@@ -118,51 +131,105 @@ function LoadScreen ( renderer, style ) {
 
 		*/
 
+		if ( resources ) that.resources = resources;
+
+		if ( style !== 'no' ) that.domElement.appendChild( that.infoContainer );
+
 	};
 
 	this.setProgress = function ( p ) {
 
 		that.progress = p;
 
-		if ( style !== 'no' ) {
-
-			//update style, text, %
-
-		}
+		if ( style !== 'no' ) update();
 
 		if ( p === 1 ) that.completeCb();
 
 	};
 
-	function setOptions ( o ) {
+	this.setOptions = function ( o ) {
 
 		that.forcedStart = o.hasOwnProperty( 'forcedStart' ) ? o.forcedStart : forcedStart;
 		that.verbose = o.hasOwnProperty( 'verbose' ) ? o.verbose : verbose;
 
 		return that;
 
-	}
-
-	function start ( resources ) {
-
-		if ( resources ) that.resources = resources;
-
-	}
+	};
 
 	function setLoadScreen () {
 		
-		var overlay = document.createElement( 'div' );
+		var overlay = document.createElement( 'div' ),
+			infoContainer = document.createElement( 'div' );
 
 		overlay.style.cssText = ''+
-			'background: ' + that.style.background + ';' +
+			'background: ' + style.background + ';' +
 			'position: relative;'+
 			'overflow: hidden;';
+
+		infoContainer.style.cssText = ''+
+			'width: ' + style.size + '; height: ' + style.size + ';'+
+			'top: 50%; left: 50%;'+
+			'margin: -50px 0 0 -50px;'+
+			'position: relative;';
 
 		setOverlaySize( renderer.domElement.width, renderer.domElement.height );
 
 		renderer.domElement.parentNode.appendChild( overlay );
+		overlay.appendChild( infoContainer );
 
 		that.domElement = overlay;
+		that.infoContainer = infoContainer;
+
+	}
+
+	function setInfos () {
+
+		switch ( style.type ) {
+
+			case 'bar': makeProgressBar(); break;
+			case 'circle': makeProgressCircle(); break;
+			default: makeProgressBar(); 
+
+		}
+
+	}
+
+	function makeProgressBar () {
+
+		var progressBarContainer = document.createElement( 'div' ),
+			progressBar = document.createElement( 'div' );
+
+		progressBarContainer.style.cssText = ''+
+			'background: ' + style.progressBarContainer + ';'+
+			'border: solid 1px ' + style.progressBarContainer + ';'+
+			'width: ' + style.size + '; height: 6px;'+
+			'top: 50%; left: 50%;'+
+			'box-sizing: border-box;'+
+			'margin-left: -50px;'+
+			'position: relative;';
+
+		progressBar.style.cssText = ''+
+			'background: ' + style.progressBar + ';'+
+			'width: 0%; height: 100%;'+
+			'top: 0; left: 0;'+
+			'position: absolute;';
+
+		progressBarContainer.appendChild( progressBar );
+		that.infoContainer.appendChild( progressBarContainer );
+
+		that.updateCBs.push( function () { 
+
+			TweenLite.to( tween, tweenDuration, { progress: that.progress, onUpdate: function () {
+				progressBar.style.width = ( 100 * tween.progress ).toString() + '%';
+			}});
+
+		});
+
+	}
+
+	function makeProgressCircle () {
+
+		//todo
 
 	}
 
@@ -175,6 +242,14 @@ function LoadScreen ( renderer, style ) {
 			that.domElement.style.width = width + 'px';
 
 		}
+
+	}
+
+	function update () {
+
+		for ( var i = 0 ; i < that.updateCBs.length ; i++ ) 
+
+			updateCBs[ i ]( that.progress );
 
 	}
 
