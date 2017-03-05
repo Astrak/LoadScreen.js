@@ -24,6 +24,7 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
     .onProgress( function ( progress ) { console.log( progress ); } )
     .onComplete( function () { ls.remove(); animate(); } )
     .start( resources );
+
 ##Format your resources
     resources = {
         textures: {
@@ -38,13 +39,10 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
             myGeometry1 : {
                 path: 'path/to/geometry.json',
                 size: 9498,//in Ko
-                //next are both optional
-                flatShading: bol,//defaults to false. 
-                //If true, geometry.computeFlatVertexNormals() will be called.
-                bufferGeometry: bol//defaults to false. 
-                //If true, and if the loader's output is not a BufferGeometry, 
-                //new BufferGeometry().fromGeometry( output ) will be called.
-                //other threejs geometries properties can be added, like : 
+                //next three are optional and all default to false
+                flatShading: true,//calls geometry.computeFlatVertexNormals()
+                bufferGeometry: true//forces creation of a BufferGeometry
+                uv1toUv2: true,//duplicates uv1 to uv2 for AO and/or light map(s) use.
             }
         },
         meshes: {
@@ -64,7 +62,7 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
                 }//assigned to mesh.userData
             }
         }
-    }
+    };
 
 #Todo
 * second progress bar at top of screen for assets loading after start
