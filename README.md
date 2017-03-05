@@ -26,9 +26,10 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
     .start( resources );
 
 ##Format your resources
+    //input
     resources = {
         textures: {
-            myTexture1 : { 
+            myTexture1: { 
                 path: 'path/to/pic.jpg',
                 size: 2789,//in Ko
                 //other threejs textures properties can be specified, like :
@@ -36,7 +37,7 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
             }
         },
         geometries: {
-            myGeometry1 : {
+            myGeometry1: {
                 path: 'path/to/geometry.json',
                 size: 9498,//in Ko
                 //next three are optional and all default to false
@@ -48,13 +49,13 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
         meshes: {
             myMesh1: {
                 geometry: 'myGeometry1'
-                material: new THREE.MeshPhongMaterial({//without maps
-                    color : 0xff8899, 
-                    side : THREE.DoubleSide 
+                material: new THREE.MeshStandardMaterial({//without maps
+                    color: 0xff8899, 
+                    side: THREE.DoubleSide 
                 }),
                 //next are optional
                 //specify any other threejs meshes or materials properties 
-                map: 'myTexture1',//assigned to material
+                aoMap: 'myTexture1',//assigned to material
                 castShadow: true,//assigned to the mesh
                 unknownOfThreejsParam : { 
                     title: 'blabla', 
@@ -63,6 +64,11 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
             }
         }
     };
+
+    //output
+    resources.textures.myTexture1;//THREE.Texture
+    resources.geometries.myGeometry1;//THREE.BufferGeometry
+    resources.meshes.myMesh1;//THREE.Mesh
 
 #Todo
 * second progress bar at top of screen for assets loading after start
