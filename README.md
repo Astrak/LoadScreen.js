@@ -29,23 +29,23 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
     .onComplete( function () { ls.remove(); animate(); } )
     .start( resources );
 
-##Style
+##Style parameters
 The load screen is composed of an overlay available at `ls.domElement` and a central box at `ls.infoContainer`. 
 * `type` *(string)* : main look. Can be set to `'bar'`, `'circle'`, `'top-line'`, `'custom'`. Defaults to `'bar'`.
 * `size` *(boolean)* : width and height of the central box container. Defaults to `'100px'`.
 * `background` *(boolean)* : css color of the background div. Defaults to `'#ddd'`.
 * `progressContainer` *(boolean)* : css color of the progressContainer element. Defaults to `'#bbb'`.
-* `progressBar` *(boolean)* : css color of the progress bar/circle portion element. Defaults to `'#666'`.
+* `progressBar` *(boolean)* : css color of the progress bar/circle/line portion element. Defaults to `'#666'`.
 * `percentInfo` *(boolean)* : to display the progression in percent. Defaults to `false`.
 * `sizeInfo` *(boolean)* : to display the progression in MB. Defaults to `false`.
 * `textInfo` *(array or boolean)* : Two messages to display during loading. If `false`, no textual information are displayed. Defaults to `[ 'Loading', 'Creating scene' ]`.
 
-For a 100% custom loader, set `type` to `'custom'`, to get an empty `infoContainer`. Append your element to `ls.infoContainer` to put it in the middle, or simply to `ls.domElement` for a top line for example. Set `background` to `'none'` if you need. You can then update your loader with the `onProgress` callback.
+For a 100% custom loader, `type` can be set to `'custom'`, to get an empty `infoContainer` where anything else can be appended, or simply to `ls.domElement` for a top line for example. `background` can also be set to `'none'`. The `onProgress` callback can be used to update what needs to be.
 
-##Options
-* `forcedStart` *(boolean)* : defines whether the load should start if the canvas is out of sight. Setting it to `true` can lead to page freezes. Defaults to `false`. 
-* `verbose` *(boolean)* : to log load information to the console. Defaults to `false`. 
+##Options parameters
+* `forcedStart` *(boolean)* : defines whether the load should start if the canvas is out of sight. Because of potential page scroll freezes, setting it to `true` can disturb the user who doesn't know that big assets are being loaded elsewhere on the page. Defaults to `false`. 
 * `tweenDuration` *(number)* : duration of progress bar tweening between progress events in seconds. Defaults to `1`. 
+* `verbose` *(boolean)* : to log load information to the console. Defaults to `false`. 
 
 ##Format your resources
     //input
