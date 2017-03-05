@@ -1,26 +1,5 @@
 /*
 	author : @Astrak 
-	license : MIT
-	dependencies : threejs, loaders needed for your files, TweenLite
-	usage : 
-		var ls = new LoadScreen( renderer, { 
-			type: 'circle', 
-			background: 'darkslategrey', 
-			textInfo: [ 'Loading assets', 'Creating objects' ],
-			percentInfo: false 
-		});
-
-		window.addEventListener( 'resize', function () { 
-			renderer.setSize( width, height ); 
-			ls.setSize( width, height ); 
-		});
-
-		ls
-		.onProgress( function ( progress ) { console.log( progress ); } )
-		.onComplete( function () { ls.remove(); animate(); } )
-		.setOptions({ forcedStart: false, verbose: true, tweenDuration: 2 })
-		.start( resources );
-	todo : second progress bar at top of screen for assets loading after start
 */
 
 function LoadScreen ( renderer, style ) {
@@ -31,7 +10,7 @@ function LoadScreen ( renderer, style ) {
 		@style (facultative) 
 		you can write 'no' to avoid inserting anything in the DOM and create a custom loader that you update through
 		the loadScreen.onProgress callback, that receives the progress value (from 0 to 1) as argument.
-		otherwise @style is an object with this structure 
+		Otherwise @style is an object with this structure 
 		{
 			type: string,//'bar' or 'circle', defaults to 'bar'
 			background: string,//'#ddd' as default, css color of background 
@@ -45,24 +24,25 @@ function LoadScreen ( renderer, style ) {
 
 	var that = this;
 
-	var infos = null;
-
-	var verbose = false, forcedStart = false, tweenDuration = 1;
+	var	infos = null,
+		verbose = false, 
+		forcedStart = false, 
+		progress = 0,
+		removed = false,
+		tweenDuration = 1,
+		tween = { progress : 0 }, 
+		updateCBs = [];
 
 	//defs
-	this.progress = 0;
-	this.tween = { progress : 0 };
-	this.forcedStart = false;
 	this.domElement = null;
 	this.infoContainer = null;
-	this.removed = false;
-	this.verbose = false;
 	this.resources = null;
 
 	//methods
 	this.remove = null;
 
 	//callbacks
+	var progressCb, completeCb;
 	this.onProgress = onProgress;
 	this.onComplete = onComplete;
 
@@ -70,7 +50,6 @@ function LoadScreen ( renderer, style ) {
 
 		this.remove = remove;
 		this.resize = setOverlaySize;
-		this.updateCBs = [];
 
 		style = style || {};
 
@@ -139,18 +118,16 @@ function LoadScreen ( renderer, style ) {
 
 	this.setProgress = function ( p ) {
 
-		that.progress = p;
+		progress = p;
 
 		if ( style !== 'no' ) update();
-
-		if ( p === 1 ) that.completeCb();
 
 	};
 
 	this.setOptions = function ( o ) {
 
-		that.forcedStart = o.hasOwnProperty( 'forcedStart' ) ? o.forcedStart : forcedStart;
-		that.verbose = o.hasOwnProperty( 'verbose' ) ? o.verbose : verbose;
+		forcedStart = o.hasOwnProperty( 'forcedStart' ) ? o.forcedStart : forcedStart;
+		verbose = o.hasOwnProperty( 'verbose' ) ? o.verbose : verbose;
 
 		return that;
 
@@ -217,9 +194,9 @@ function LoadScreen ( renderer, style ) {
 		progressBarContainer.appendChild( progressBar );
 		that.infoContainer.appendChild( progressBarContainer );
 
-		that.updateCBs.push( function () { 
+		updateCBs.push( function () { 
 
-			TweenLite.to( tween, tweenDuration, { progress: that.progress, onUpdate: function () {
+			TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: function () {
 				progressBar.style.width = ( 100 * tween.progress ).toString() + '%';
 			}});
 
@@ -235,7 +212,7 @@ function LoadScreen ( renderer, style ) {
 
 	function setOverlaySize ( width, height ) {
 
-		if ( ! that.removed ) {
+		if ( ! removed ) {
 
 			that.domElement.style.marginTop = '-' + height + 'px';
 			that.domElement.style.height = height + 'px';
@@ -247,9 +224,11 @@ function LoadScreen ( renderer, style ) {
 
 	function update () {
 
-		for ( var i = 0 ; i < that.updateCBs.length ; i++ ) 
+		for ( var i = 0 ; i < updateCBs.length ; i++ ) 
 
-			updateCBs[ i ]( that.progress );
+			updateCBs[ i ]( progress );
+
+		progressCb( progress );
 
 	}
 
@@ -257,13 +236,13 @@ function LoadScreen ( renderer, style ) {
 
 		that.domElement.parentNode.removeChild( that.domElement ); 
 
-		that.removed = true;
+		removed = true;
 
 	}
 
 	function onProgress ( cb ) {
 
-		if ( cb && typeof cb === 'function' ) that.progressCb = cb;
+		if ( cb && typeof cb === 'function' ) progressCb = cb;
 
 		return that;
 		
@@ -271,7 +250,7 @@ function LoadScreen ( renderer, style ) {
 
 	function onComplete ( cb ) {
 
-		if ( cb && typeof cb === 'function' ) that.completeCb = cb;
+		if ( cb && typeof cb === 'function' ) completeCb = cb;
 
 		return that;
 		
