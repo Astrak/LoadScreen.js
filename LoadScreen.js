@@ -7,23 +7,28 @@ function LoadScreen ( renderer, style ) {
 	/*
 		@renderer = a threejs webgl renderer
 
-		@style (facultative) 
-		you can write 'no' to avoid inserting anything in the DOM and create a custom loader that you update through
-		the loadScreen.onProgress callback, that receives the progress value (from 0 to 1) as argument.
-		Otherwise @style is an object with this structure 
+		@style (optional) = object with following structure 
 		{
-			type: string,//'bar' or 'circle', defaults to 'bar'
+			type: string,//'bar' or 'circle' or 'custom', defaults to 'bar'
+			size: number,//size of the edges of the infoContainer div
 			background: string,//'#ddd' as default, css color of background 
-			progressContainer: string,//'#baa' as default, css color of progressContainer 
-			progressBar: string,//'#756' as default, css color of progressBar 
+			progressContainer: string,//'#bbb' as default, css color of progressContainer 
+			progressBar: string,//'#666' as default, css color of progressBar 
 			percentInfo: bol,//display progress in %
 			sizeInfo: bol,//display progress ratio in MB
-			textInfo: array//array of messages. Defaults to [ 'Loading', 'Creating scene' ]. If 'no' is specified, textInfo is not displayed.
+			textInfo: - false//No textual information displayed.
+					  - array//Defaults to [ 'Loading', 'Creating scene' ]. 
 		}
+		- type can be set to 'custom' to customize the loader : the background is at 
+		this.domElement, the central infoBox at this.infoContainer, you can append 
+		your custom loader and update it through the onProgress callback function 
+		that will receive the progress as argument. If 
+
 	*/
 
 	var that = this;
 
+	/* Internals */
 	var	infos = null,
 		verbose = false, 
 		forcedStart = false, 
@@ -33,94 +38,53 @@ function LoadScreen ( renderer, style ) {
 		tween = { progress : 0 }, 
 		updateCBs = [];
 
+	var progressCb, completeCb;
+
+	/* API */
 	//defs
 	this.domElement = null;
 	this.infoContainer = null;
 	this.resources = null;
 
-	//methods
+	//optional methods if style !== false
 	this.remove = null;
+	this.resize = null;
 
-	//callbacks
-	var progressCb, completeCb;
-	this.onProgress = onProgress;
-	this.onComplete = onComplete;
+	this.remove = remove;
+	this.resize = setOverlaySize;
 
-	if ( style !== 'no' ) {
+	style = style || {};
 
-		this.remove = remove;
-		this.resize = setOverlaySize;
+	style = {
+		type: style.hasOwnProperty( 'type' ) ? style.type : 'bar',
+		size: style.size ? style.size : '100px',
+		background: style.background ? style.background : '#ddd',
+		progressContainer: style.progressContainer ? style.progressContainer : '#bbb',
+		progressBar: style.progressBar ? style.progressBar : '#666',
+		percentInfo: style.hasOwnProperty( 'percentInfo' ) ? style.percentInfo : false,
+		sizeInfo: style.hasOwnProperty( 'sizeInfo' ) ? style.sizeInfo : false,
+		textInfo: style.hasOwnProperty( 'textInfo' ) ? style.textInfo : [ 'Loading', 'Processing' ]
+	};
 
-		style = style || {};
+	setLoadScreen();
 
-		style = {
-			type: style.type ? style.type : 'bar',
-			size: style.size ? style.size : '100px',
-			background: style.background ? style.background : '#ddd',
-			progressContainer: style.progressContainer ? style.progressContainer : '#baa',
-			progressBar: style.progressBar ? style.progressBar : '#756',
-			percentInfo: style.hasOwnProperty( 'percentInfo' ) ? style.percentInfo : false,
-			sizeInfo: style.hasOwnProperty( 'sizeInfo' ) ? style.sizeInfo : false,
-			textInfo: style.hasOwnProperty( 'textInfo' ) ? style.textInfo : [ 'Loading', 'Processing' ]
-		};
-
-		setLoadScreen();
-
-		setInfos();
-
-	}
+	setInfos();
 
 	this.start = function ( resources ) {
 
-		/*
-
-		@resources (facultative) = {
-			textures: {
-				myTexture1 : { 
-					path: string,
-					size: number,//in Ko
-					//other threejs textures properties can be added, like 
-					//minFilter: THREE.LinearFilter
-				}
-			},
-			geometries: {
-				myGeometry1 : {
-					path: string,
-					size: number,//in Ko
-					//next are facultative :
-					flatShading: bol,//defaults to false. If true, geometry.computeFlatVertexNormals() will be called.
-					bufferGeometry: bol//defaults to false. If true, and if the loader's output is not a BufferGeometry, BufferGeometry.fromGeometry( output ) will be called.
-					//other threejs geometries properties can be added
-				}
-			},
-			meshes: {
-				myMesh1: {
-					geometry: string,//'myGeometry1' for instance
-					material: THREE.Material,//for instance, new THREE.MeshPhongMaterial({ color : 0xff8899, side : THREE.DoubleSide}). Caution : do not indicate textures in the material, they will be added by the script.
-					//next are facultative :
-					//other threejs meshes properties and materials can be added here
-					//if properties are not related to the material or mesh, they are added to mesh.userData.
-					//exemple :
-					map: myTexture1,//assigned to the material once loaded
-					castShadow: true,//assigned to the mesh
-					unknownOfThreejsParam : { title: 'blabla', content: 'blabla' }//assigned to mesh.userData
-				}
-			}
-		}
-
-		*/
-
 		if ( resources ) that.resources = resources;
 
-		if ( style !== 'no' ) that.domElement.appendChild( that.infoContainer );
+		if ( style !== false ) that.domElement.appendChild( that.infoContainer );
 
 	};
+
+	this.remove = 
 
 	this.setProgress = function ( p ) {
 
 		progress = p;
 
-		if ( style !== 'no' ) update();
+		if ( style !== false ) update();
 
 	};
 
@@ -128,6 +92,22 @@ function LoadScreen ( renderer, style ) {
 
 		forcedStart = o.hasOwnProperty( 'forcedStart' ) ? o.forcedStart : forcedStart;
 		verbose = o.hasOwnProperty( 'verbose' ) ? o.verbose : verbose;
+
+		return that;
+
+	};
+
+	this.onProgress = function ( f ) {
+
+		if ( f && typeof f === 'function' ) progressCb = f;
+
+		return that;
+		
+	};
+
+	this.onComplete = function ( cb ) {
+
+		if ( f && typeof f === 'function' ) completeCb = f;
 
 		return that;
 
@@ -238,22 +218,6 @@ function LoadScreen ( renderer, style ) {
 
 		removed = true;
 
-	}
-
-	function onProgress ( cb ) {
-
-		if ( cb && typeof cb === 'function' ) progressCb = cb;
-
-		return that;
-		
-	}
-
-	function onComplete ( cb ) {
-
-		if ( cb && typeof cb === 'function' ) completeCb = cb;
-
-		return that;
-		
 	}
 
 	return this;

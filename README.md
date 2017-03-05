@@ -3,12 +3,20 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
 
 #Usage
 ##Pattern
-    var ls = new LoadScreen( renderer, { 
-    	type: 'circle', 
-    	background: 'darkslategrey', 
-    	textInfo: [ 'Loading assets', 'Creating objects' ],
-    	percentInfo: false 
-    });
+    var style = {
+        type: 'circle', 
+        background: 'darkslategrey', 
+        textInfo: [ 'Loading assets', 'Creating objects' ],
+        percentInfo: false         
+    };
+
+    var options = {
+        forcedStart: false,
+        verbose: true, 
+        tweenDuration: 2        
+    };
+
+    var ls = new LoadScreen( renderer, style );
     
     window.addEventListener( 'resize', function () { 
     	renderer.setSize( width, height ); 
@@ -16,14 +24,27 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
     });
     
     ls
-    .setOptions({ 
-        forcedStart: false, 
-        verbose: true, 
-        tweenDuration: 2 
-    })
+    .setOptions( options )
     .onProgress( function ( progress ) { console.log( progress ); } )
     .onComplete( function () { ls.remove(); animate(); } )
     .start( resources );
+
+##Style
+The load screen is composed of an overlay available at `ls.domElement` and a central box at `ls.infoContainer`. 
+* `type` *(string)* : main look. Can be set to `'bar'`, `'circle'`, `'top-line'`, `'custom'`. Defaults to `'bar'`.
+* `size` *(boolean)* : width and height of the central box container. Defaults to `'100px'`.
+* `background` *(boolean)* : css color of the background div. Defaults to `'#ddd'`.
+* `progressContainer` *(boolean)* : css color of the progressContainer element. Defaults to `'#bbb'`.
+* `progressBar` *(boolean)* : css color of the progress bar/circle portion element. Defaults to `'#666'`.
+* `percentInfo` *(boolean)* : to display the progression in percent. Defaults to `false`.
+* `sizeInfo` *(boolean)* : to display the progression in MB. Defaults to `false`.
+* `textInfo` *(array or boolean)* : Two messages to display during loading. If `false`, no textual information are displayed. Defaults to `[ 'Loading', 'Creating scene' ]`.
+For a custom loader, set `type` to `'custom'`. Append your element to `ls.infoContainer` to put it in the middle, or to `ls.domElement` for a top line for example. Set `background` to `'none'` if you need. You can then update your loader with the `onProgress` callback.
+
+##Options
+* `forcedStart` *(boolean)* : defines whether the load should start if the canvas is out of sight. Setting it to `true` can lead to page freezes. Defaults to `false`. 
+* `verbose` *(boolean)* : to log load information to the console. Defaults to `false`. 
+* `tweenDuration` *(number)* : duration of progress bar tweening between progress events in seconds. Defaults to `1`. 
 
 ##Format your resources
     //input
