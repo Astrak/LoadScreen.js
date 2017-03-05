@@ -25,7 +25,6 @@ A JS library to improve UX with loadscreens when 3D assets are being loaded.
     .onComplete( function () { ls.remove(); animate(); } )
     .start( resources );
 ##Format your resources
-(Threejs only for now)
     resources = {
         textures: {
             myTexture1 : { 
