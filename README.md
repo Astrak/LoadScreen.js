@@ -1,7 +1,9 @@
 # LoadScreen.js
-A JS library to improve UX with loadscreens when 3D assets are being loaded.
+A JS library to handle ThreeJS assets loading and improve UX with a load screen and progress indicator.
 ```js
-var ls = new LoadScreen( renderer, { type: 'circle', percentInfo: true } ).start( resources );
+var ls = new LoadScreen( renderer )
+.onComplete( function () { ls.remove(); } )
+.start( resources );
 ```
 
 #Usage
@@ -22,6 +24,7 @@ var options = {
 
 var ls = new LoadScreen( renderer, style );
 
+//this can be a bit overkill
 window.addEventListener( 'resize', function () { 
 	renderer.setSize( width, height ); 
 	ls.setSize( width, height ); 
@@ -93,12 +96,12 @@ resources = {
         }
     }
 };
-```
 
 //output
 resources.textures.myTexture1;//THREE.Texture
 resources.geometries.myGeometry1;//THREE.BufferGeometry
 resources.objects.myObject1;//THREE.Mesh
+```
 
 #Todo
 * second progress bar at top of screen for assets loading after start
