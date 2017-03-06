@@ -4,6 +4,8 @@
 
 function LoadScreen ( renderer, style ) {
 
+	'use strict';
+
 	var that = this;
 
 	/* Internals */
@@ -14,14 +16,15 @@ function LoadScreen ( renderer, style ) {
 		removed = false,
 		tweenDuration = 1,
 		tween = { progress : 0 }, 
-		updateCBs = [];
-
-	var progressCb, completeCb;
+		updateCBs = [], 
+		completeCBS = [];
 
 	var gLoaders = {},
 		tLoader;
 
 	var ouput = {};
+
+	var textures, geometries, texSum, geoSum;
 
 	/* API */
 	//defs
@@ -29,12 +32,8 @@ function LoadScreen ( renderer, style ) {
 	this.infoContainer = null;
 	this.resources = null;
 
-	//optional methods if style !== false
-	this.remove = null;
-	this.resize = null;
-
-	this.remove = remove;
-	this.resize = setOverlaySize;
+	//methods
+	this.resize = resize;
 
 	style = style || {};
 
@@ -95,7 +94,9 @@ function LoadScreen ( renderer, style ) {
 
 	this.onProgress = function ( f ) {
 
-		if ( f && typeof f === 'function' ) progressCb = f;
+		if ( f && typeof f === 'function' ) 
+
+			updateCBs.push( f );
 
 		return that;
 		
@@ -103,11 +104,25 @@ function LoadScreen ( renderer, style ) {
 
 	this.onComplete = function ( cb ) {
 
-		if ( f && typeof f === 'function' ) completeCb = f;
+		if ( f && typeof f === 'function' ) 
+
+			completeCBS.push( f );
 
 		return that;
 
 	};
+
+	function resize ( width, height ) {
+
+		if ( ! removed ) {
+
+			that.domElement.style.marginTop = '-' + height + 'px';
+			that.domElement.style.height = height + 'px';
+			that.domElement.style.width = width + 'px';
+
+		}
+		
+	}
 
 	function loadResources () {
 
@@ -115,8 +130,7 @@ function LoadScreen ( renderer, style ) {
 		var nFiles = 0;
 		var r = that.resources;
 
-		var textures = {}, geometries = {}, 
-			texSum = 0, geoSum = 0;
+		textures = {}, geometries = {}, texSum = 0, geoSum = 0;
 
 		//1. Count files to load and their total size, create the 'output' mirror of resources
 		if ( r.textures ) {
@@ -175,15 +189,31 @@ function LoadScreen ( renderer, style ) {
 
 			if ( ! gLoaders.json ) gLoaders.json = new THREE.JSONLoader();
 
-			gLoaders.json.load( d.path, function ( g ) {
+			gLoaders.json.load( 
+				d.path, 
+				function ( g ) {
 
-				g.name = p;
+					g.name = p;
 
-				output.geometries[ p ] = g;
+					output.geometries[ p ] = g;
 
-				geometries[ p ].prog = 1;
+					geometries[ p ].prog = 1;
 
-			});
+					update({ geometry: true, name: p, progress: 1 });
+
+				}, 
+				function ( e ) {
+
+					var pr = e.loaded / e.total;
+
+					geometries[ p ].prog = pr;
+
+					if ( pr !== 1 ) //otherwise onLoad will be called anyway
+
+						update({ geometry: true, name: p, progress: pr });	
+
+				}
+			);
 
 		}
 
@@ -195,24 +225,38 @@ function LoadScreen ( renderer, style ) {
 
 		if ( ! tLoader ) tLoader = new THREE.TextureLoader();
 
-		tLoader.load( d.path, function ( t ) {
+		tLoader.load( 
+			d.path, 
+			function ( t ) {
 
-			//assign properties
-			for ( var k in d )
+				//assign properties
+				for ( var k in d )
 
-				if ( k !== 'size' && k !== 'path' && typeof t[ k ] !== 'undefined' ) 
+					if ( k !== 'size' && k !== 'path' && typeof t[ k ] !== 'undefined' ) 
 
-					t[ k ] = d[ k ];
+						t[ k ] = d[ k ];
 
-			t.name = p;
+				t.name = p;
 
-			output.textures[ p ] = t;
+				output.textures[ p ] = t;
 
-			textures[ p ].prog = 1;
+				textures[ p ].prog = 1;
 
-			update();
+				update({ texture: true, name: p, progress: 1 });
 
-		});
+			}, 
+			function ( e ) {
+
+				var pr = e.loaded / e.total;
+
+				textures[ p ].prog = pr;
+
+				if ( pr !== 1 ) //otherwise onLoad will be called anyway
+
+					update({ texture: true, name: p, progress: pr });
+
+			}
+		);
 
 	}
 
@@ -232,13 +276,13 @@ function LoadScreen ( renderer, style ) {
 			'margin: -50px 0 0 -50px;'+
 			'position: relative;';
 
-		setOverlaySize( renderer.domElement.width, renderer.domElement.height );
+		that.domElement = overlay;
+		that.infoContainer = infoContainer;
+
+		that.resize( renderer.domElement.width, renderer.domElement.height );
 
 		renderer.domElement.parentNode.appendChild( overlay );
 		overlay.appendChild( infoContainer );
-
-		that.domElement = overlay;
-		that.infoContainer = infoContainer;
 
 	}
 
@@ -293,25 +337,31 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function setOverlaySize ( width, height ) {
+	function update ( o ) {
 
-		if ( ! removed ) {
+		var texProg = 0, geoProg = 0;
 
-			that.domElement.style.marginTop = '-' + height + 'px';
-			that.domElement.style.height = height + 'px';
-			that.domElement.style.width = width + 'px';
+		for ( var k in textures ) 
+
+			texProg += textures[ k ].prog * textures[ k ].size;
+
+		for ( var k in geometries ) 
+
+			geoProg += geometries[ k ].prog * geometries[ k ].size;
+
+		progress = ( texProg + geoProg ) / ( texSum + geoSum );
+
+		if ( typeof o !== 'undefined' && verbose ) {
+
+			var type = o.texture ? 'Texture' : o.geometry ? 'Geometry' : 'Unknown asset type';
+
+			console.info( type + ' > ' + o.name + ' > ' + Math.round( 100 * o.progress ) + '%' );
 
 		}
-
-	}
-
-	function update () {
 
 		for ( var i = 0 ; i < updateCBs.length ; i++ ) 
 
 			updateCBs[ i ]( progress );
-
-		progressCb( progress );
 
 	}
 

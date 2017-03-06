@@ -91,7 +91,7 @@ For a 100% custom loader, `type` can be set to `'custom'`, to get an empty `info
     //output
     resources.textures.myTexture1;//THREE.Texture
     resources.geometries.myGeometry1;//THREE.BufferGeometry
-    resources.objects.myMesh1;//THREE.Mesh
+    resources.objects.myObject1;//THREE.Mesh
 
 #Todo
 * second progress bar at top of screen for assets loading after start
