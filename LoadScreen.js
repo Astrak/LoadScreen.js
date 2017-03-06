@@ -4,28 +4,6 @@
 
 function LoadScreen ( renderer, style ) {
 
-	/*
-		@renderer = a threejs webgl renderer
-
-		@style (optional) = object with following structure 
-		{
-			type: string,//'bar' or 'circle' or 'custom', defaults to 'bar'
-			size: number,//size of the edges of the infoContainer div
-			background: string,//'#ddd' as default, css color of background 
-			progressContainer: string,//'#bbb' as default, css color of progressContainer 
-			progressBar: string,//'#666' as default, css color of progressBar 
-			percentInfo: bol,//display progress in %
-			sizeInfo: bol,//display progress ratio in MB
-			textInfo: - false//No textual information displayed.
-					  - array//Defaults to [ 'Loading', 'Creating scene' ]. 
-		}
-		- type can be set to 'custom' to customize the loader : the background is at 
-		this.domElement, the central infoBox at this.infoContainer, you can append 
-		your custom loader and update it through the onProgress callback function 
-		that will receive the progress as argument. If 
-
-	*/
-
 	var that = this;
 
 	/* Internals */
@@ -39,6 +17,11 @@ function LoadScreen ( renderer, style ) {
 		updateCBs = [];
 
 	var progressCb, completeCb;
+
+	var gLoaders = {},
+		tLoader;
+
+	var ouput = {};
 
 	/* API */
 	//defs
@@ -56,14 +39,14 @@ function LoadScreen ( renderer, style ) {
 	style = style || {};
 
 	style = {
-		type: style.hasOwnProperty( 'type' ) ? style.type : 'bar',
+		type: typeof style.type !== 'undefined' ? style.type : 'bar',
 		size: style.size ? style.size : '100px',
 		background: style.background ? style.background : '#ddd',
 		progressContainer: style.progressContainer ? style.progressContainer : '#bbb',
 		progressBar: style.progressBar ? style.progressBar : '#666',
-		percentInfo: style.hasOwnProperty( 'percentInfo' ) ? style.percentInfo : false,
-		sizeInfo: style.hasOwnProperty( 'sizeInfo' ) ? style.sizeInfo : false,
-		textInfo: style.hasOwnProperty( 'textInfo' ) ? style.textInfo : [ 'Loading', 'Processing' ]
+		percentInfo: typeof style.percentInfo !== 'undefined' ? style.percentInfo : false,
+		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : false,
+		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing' ]
 	};
 
 	setLoadScreen();
@@ -72,13 +55,25 @@ function LoadScreen ( renderer, style ) {
 
 	this.start = function ( resources ) {
 
-		if ( resources ) that.resources = resources;
-
 		if ( style !== false ) that.domElement.appendChild( that.infoContainer );
+
+		if ( resources ) { 
+
+			that.resources = resources;
+
+			loadResources();
+
+		}
 
 	};
 
-	this.remove = 
+	this.remove = function () {
+
+		that.domElement.parentNode.removeChild( that.domElement ); 
+
+		removed = true;
+
+	};
 
 	this.setProgress = function ( p ) {
 
@@ -90,8 +85,9 @@ function LoadScreen ( renderer, style ) {
 
 	this.setOptions = function ( o ) {
 
-		forcedStart = o.hasOwnProperty( 'forcedStart' ) ? o.forcedStart : forcedStart;
-		verbose = o.hasOwnProperty( 'verbose' ) ? o.verbose : verbose;
+		tweenDuration = typeof o.tweenDuration !== 'undefined' ? o.tweenDuration : tweenDuration;
+		forcedStart = typeof o.forcedStart !== 'undefined' ? o.forcedStart : forcedStart;
+		verbose = typeof o.verbose !== 'undefined' ? o.verbose : verbose;
 
 		return that;
 
@@ -112,6 +108,113 @@ function LoadScreen ( renderer, style ) {
 		return that;
 
 	};
+
+	function loadResources () {
+
+		var counter = 0, tCounter = 0;
+		var nFiles = 0;
+		var r = that.resources;
+
+		var textures = {}, geometries = {}, 
+			texSum = 0, geoSum = 0;
+
+		//1. Count files to load and their total size, create the 'output' mirror of resources
+		if ( r.textures ) {
+
+			nFiles += Object.keys( r.textures ).length;
+
+			output.textures = {};
+
+			for ( var k in r.textures ) {
+
+				output.textures[ k ] = {};
+				textures[ k ] = { prog: 0, size: r.textures[ k ].size };
+				texSum += r.textures[ k ].size;
+
+			}
+
+		}
+
+		if ( r.geometries ) {
+
+			nFiles += Object.keys( r.geometries ).length;
+
+			output.geometries = {};
+
+			for ( var k in r.geometries ) {
+
+				output.geometries[ k ] = {};
+				geometries[ k ] = { prog: 0, size: r.geometries[ k ].size };
+				geoSum += r.geometries[ k ].size;
+
+			}
+
+		}
+
+		//2. Load files
+		if ( r.geometries ) 
+			
+			for ( var k in r.geometries ) 
+
+				loadGeometry( k );
+
+		if ( r.textures ) 
+			
+			for ( var k in r.textures ) 
+
+				loadTexture( k );
+
+	}
+
+	function loadGeometry ( p ) {
+
+		var d = that.resources.geometries[ p ];
+
+		//determine loader (todo, JSONLoader for now)
+		if ( d.path.indexOf( '.json' ) > -1 ) {
+
+			if ( ! gLoaders.json ) gLoaders.json = new THREE.JSONLoader();
+
+			gLoaders.json.load( d.path, function ( g ) {
+
+				g.name = p;
+
+				output.geometries[ p ] = g;
+
+				geometries[ p ].prog = 1;
+
+			});
+
+		}
+
+	}
+
+	function loadTexture ( p ) {
+
+		var d = that.resources.textures[ p ];
+
+		if ( ! tLoader ) tLoader = new THREE.TextureLoader();
+
+		tLoader.load( d.path, function ( t ) {
+
+			//assign properties
+			for ( var k in d )
+
+				if ( k !== 'size' && k !== 'path' && typeof t[ k ] !== 'undefined' ) 
+
+					t[ k ] = d[ k ];
+
+			t.name = p;
+
+			output.textures[ p ] = t;
+
+			textures[ p ].prog = 1;
+
+			update();
+
+		});
+
+	}
 
 	function setLoadScreen () {
 		
@@ -209,14 +312,6 @@ function LoadScreen ( renderer, style ) {
 			updateCBs[ i ]( progress );
 
 		progressCb( progress );
-
-	}
-
-	function remove () { 
-
-		that.domElement.parentNode.removeChild( that.domElement ); 
-
-		removed = true;
 
 	}
 

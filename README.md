@@ -68,14 +68,15 @@ For a 100% custom loader, `type` can be set to `'custom'`, to get an empty `info
                 uv1toUv2: true,//duplicates uv1 to uv2 for AO and/or light map(s) use.
             }
         },
-        meshes: {
-            myMesh1: {
-                geometry: 'myGeometry1'
+        objects: {
+            myObject1: {
+                geometry: 'myGeometry1',
                 material: new THREE.MeshStandardMaterial({//without maps
                     color: 0xff8899, 
                     side: THREE.DoubleSide 
                 }),
-                //next are optional
+                //next is optional
+                type: 'mesh',//or 'points' or 'lines', defaults to 'mesh'
                 //specify any other threejs meshes or materials properties 
                 aoMap: 'myTexture1',//assigned to material
                 castShadow: true,//assigned to the mesh
@@ -90,7 +91,7 @@ For a 100% custom loader, `type` can be set to `'custom'`, to get an empty `info
     //output
     resources.textures.myTexture1;//THREE.Texture
     resources.geometries.myGeometry1;//THREE.BufferGeometry
-    resources.meshes.myMesh1;//THREE.Mesh
+    resources.objects.myMesh1;//THREE.Mesh
 
 #Todo
 * second progress bar at top of screen for assets loading after start
