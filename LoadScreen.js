@@ -41,11 +41,11 @@ function LoadScreen ( renderer, style ) {
 		type: typeof style.type !== 'undefined' ? style.type : 'bar',
 		size: style.size ? style.size : '100px',
 		background: style.background ? style.background : '#ddd',
-		progressContainer: style.progressContainer ? style.progressContainer : '#bbb',
+		progressBarContainer: style.progressBarContainer ? style.progressBarContainer : '#bbb',
 		progressBar: style.progressBar ? style.progressBar : '#666',
 		percentInfo: typeof style.percentInfo !== 'undefined' ? style.percentInfo : false,
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : false,
-		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing' ]
+		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Creating scene' ]
 	};
 
 	setLoadScreen();
@@ -54,15 +54,29 @@ function LoadScreen ( renderer, style ) {
 
 	this.start = function ( resources ) {
 
+		//1. Append info
 		if ( style !== false ) that.domElement.appendChild( that.infoContainer );
 
-		if ( resources ) { 
+		//2. Make info appear
+		TweenLite.to( 
+			that.infoContainer.style, 
+			tweenDuration/3, 
+			{ 
+				opacity: 1, 
+				onComplete: function () {
 
-			that.resources = resources;
+					//3. Once appeared, load
+					if ( resources ) { 
 
-			loadResources();
+						that.resources = resources;
 
-		}
+						loadResources();
+
+					}
+
+				}
+			} 
+		);
 
 	};
 
@@ -274,6 +288,7 @@ function LoadScreen ( renderer, style ) {
 			'width: ' + style.size + '; height: ' + style.size + ';'+
 			'top: 50%; left: 50%;'+
 			'margin: -50px 0 0 -50px;'+
+			'opacity: 0;'+
 			'position: relative;';
 
 		that.domElement = overlay;
