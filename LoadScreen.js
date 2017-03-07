@@ -67,6 +67,16 @@ function LoadScreen ( renderer, style ) {
 
 			loadResources();
 
+			loadComplete = function () {
+
+				//change text message
+
+				TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: function () { 
+					console.log(tween.progress); 
+				}, onComplete: complete });
+
+			};
+
 		}
 
 	};
@@ -208,7 +218,7 @@ function LoadScreen ( renderer, style ) {
 
 					updateProgress({ geometry: true, name: p, progress: 1 });
 
-					update();
+					update( true );
 
 				}, 
 				function ( e ) {
@@ -257,7 +267,7 @@ function LoadScreen ( renderer, style ) {
 
 				updateProgress({ texture: true, name: p, progress: 1 });
 
-				update();
+				update( true );
 
 			}, 
 			function ( e ) {
@@ -346,22 +356,6 @@ function LoadScreen ( renderer, style ) {
 
 		});
 
-		loadComplete = function () {
-
-			//change text message
-
-			TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: updateStyle, onComplete: complete });
-
-		};
-
-	}
-
-	function complete () {
-
-		for ( var i = 0 ; i < completeCBS.length ; i++ )
-
-			completeCBS[ i ]();
-
 	}
 
 	function makeProgressCircle () {
@@ -394,23 +388,30 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
+		//3. call CBs and check completion
+		update();
+
 	}
 
-	function update () {
+	function update ( fromCompleteCb ) {
 
-		//1. progress callbacks
 		for ( var i = 0 ; i < updateCBs.length ; i++ ) 
 
 			updateCBs[ i ]( progress );
 
-		//2. check load completion
-		if ( counter === nFiles ) {
+		if ( tween.progress === 1 && fromCompleteCb ) {
 
-			progress = 1;
-
-			loadComplete();
+			that.resources ? loadComplete() : complete();
 
 		}
+
+	}
+
+	function complete () {
+
+		for ( var i = 0 ; i < completeCBS.length ; i++ ) 
+
+			completeCBS[ i ]();
 
 	}
 
