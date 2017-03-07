@@ -7,7 +7,7 @@ var ls = new LoadScreen( renderer )
 ```
 
 #Usage
-##Pattern
+##Full pattern
 ```js
 var style = {
     type: 'circle', 

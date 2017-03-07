@@ -1,5 +1,8 @@
 /*
 	author : @Astrak 
+	TODO: 
+	- remove TweenLite ?
+	- define custom message/warning/buttons before loading.. ?
 */
 
 function LoadScreen ( renderer, style ) {
@@ -19,12 +22,16 @@ function LoadScreen ( renderer, style ) {
 		updateCBs = [], 
 		completeCBS = [];
 
+	var loadComplete;
+
+	var counter = 0, tCounter = 0, nFiles = 0;
+
 	var gLoaders = {},
 		tLoader;
 
 	var ouput = {};
 
-	var textures, geometries, texSum, geoSum;
+	var	textures = {}, geometries = {}, texSum = 0, geoSum = 0;
 
 	/* API */
 	//defs
@@ -54,29 +61,15 @@ function LoadScreen ( renderer, style ) {
 
 	this.start = function ( resources ) {
 
-		//1. Append info
 		if ( style !== false ) that.domElement.appendChild( that.infoContainer );
+		
+		if ( resources ) { 
 
-		//2. Make info appear
-		TweenLite.to( 
-			that.infoContainer.style, 
-			tweenDuration/3, 
-			{ 
-				opacity: 1, 
-				onComplete: function () {
+			that.resources = resources;
 
-					//3. Once appeared, load
-					if ( resources ) { 
+			loadResources();
 
-						that.resources = resources;
-
-						loadResources();
-
-					}
-
-				}
-			} 
-		);
+		}
 
 	};
 
@@ -106,21 +99,25 @@ function LoadScreen ( renderer, style ) {
 
 	};
 
-	this.onProgress = function ( f ) {
+	this.onProgress = function () {
 
-		if ( f && typeof f === 'function' ) 
+		for ( var i = 0 ; i < arguments.length ; i++ )
 
-			updateCBs.push( f );
+			if ( arguments[ i ] && typeof arguments[ i ] === 'function' ) 
+
+				updateCBs.push( arguments[ i ] );
 
 		return that;
 		
 	};
 
-	this.onComplete = function ( cb ) {
+	this.onComplete = function () {
 
-		if ( f && typeof f === 'function' ) 
+		for ( var i = 0 ; i < arguments.length ; i++ )
 
-			completeCBS.push( f );
+			if ( arguments[ i ] && typeof arguments[ i ] === 'function' ) 
+
+				completeCBS.push( arguments[ i ] );
 
 		return that;
 
@@ -140,11 +137,7 @@ function LoadScreen ( renderer, style ) {
 
 	function loadResources () {
 
-		var counter = 0, tCounter = 0;
-		var nFiles = 0;
 		var r = that.resources;
-
-		textures = {}, geometries = {}, texSum = 0, geoSum = 0;
 
 		//1. Count files to load and their total size, create the 'output' mirror of resources
 		if ( r.textures ) {
@@ -213,6 +206,8 @@ function LoadScreen ( renderer, style ) {
 
 					geometries[ p ].prog = 1;
 
+					counter++;
+
 					update({ geometry: true, name: p, progress: 1 });
 
 				}, 
@@ -256,6 +251,8 @@ function LoadScreen ( renderer, style ) {
 
 				textures[ p ].prog = 1;
 
+				counter++;
+
 				update({ texture: true, name: p, progress: 1 });
 
 			}, 
@@ -288,7 +285,6 @@ function LoadScreen ( renderer, style ) {
 			'width: ' + style.size + '; height: ' + style.size + ';'+
 			'top: 50%; left: 50%;'+
 			'margin: -50px 0 0 -50px;'+
-			'opacity: 0;'+
 			'position: relative;';
 
 		that.domElement = overlay;
@@ -336,13 +332,29 @@ function LoadScreen ( renderer, style ) {
 		progressBarContainer.appendChild( progressBar );
 		that.infoContainer.appendChild( progressBarContainer );
 
+		var updateStyle = function () { progressBar.style.width = ( 100 * tween.progress ).toString() + '%'; };
+
 		updateCBs.push( function () { 
 
-			TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: function () {
-				progressBar.style.width = ( 100 * tween.progress ).toString() + '%';
-			}});
+			TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: updateStyle } );
 
 		});
+
+		loadComplete = function () {
+
+			TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: updateStyle, onComplete: complete });
+
+		};
+
+	}
+
+	function complete () {
+
+		processFiles();
+
+		for ( var i = 0 ; i < completeCBS.length ; i++ )
+
+			completeCBS[ i ]();
 
 	}
 
@@ -354,6 +366,7 @@ function LoadScreen ( renderer, style ) {
 
 	function update ( o ) {
 
+		//1. compute progress value
 		var texProg = 0, geoProg = 0;
 
 		for ( var k in textures ) 
@@ -366,6 +379,7 @@ function LoadScreen ( renderer, style ) {
 
 		progress = ( texProg + geoProg ) / ( texSum + geoSum );
 
+		//2. Logs data
 		if ( typeof o !== 'undefined' && verbose ) {
 
 			var type = o.texture ? 'Texture' : o.geometry ? 'Geometry' : 'Unknown asset type';
@@ -374,9 +388,19 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
+		//3. progress callbacks
 		for ( var i = 0 ; i < updateCBs.length ; i++ ) 
 
 			updateCBs[ i ]( progress );
+
+		//4. check load completion
+		if ( counter === nFiles ) {
+
+			progress = 1;
+
+			loadComplete();
+
+		}
 
 	}
 
