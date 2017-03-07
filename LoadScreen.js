@@ -33,7 +33,7 @@ function LoadScreen ( renderer, style ) {
 	this.infoContainer = null;
 	this.resources = null;
 
-	this.resize = resize;
+	this.setSize = setSize;
 
 	style = style || {};
 
@@ -159,7 +159,7 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function resize ( width, height ) {
+	function setSize ( width, height ) {
 
 		if ( ! removed ) {
 
@@ -464,7 +464,7 @@ function LoadScreen ( renderer, style ) {
 		that.domElement = overlay;
 		that.infoContainer = infoContainer;
 
-		that.resize( renderer.domElement.width, renderer.domElement.height );
+		that.setSize( renderer.domElement.width, renderer.domElement.height );
 
 		renderer.domElement.parentNode.appendChild( overlay );
 
