@@ -19,6 +19,8 @@ function LoadScreen ( renderer, style ) {
 
 	var counter = 0, tCounter = 0, nFiles = 0;
 
+	var textInfo, sizeInfo;
+
 	var gLoaders = {},
 		tLoader;
 
@@ -41,8 +43,9 @@ function LoadScreen ( renderer, style ) {
 		background: style.background ? style.background : '#ddd',
 		progressBarContainer: style.progressBarContainer ? style.progressBarContainer : '#bbb',
 		progressBar: style.progressBar ? style.progressBar : '#666',
-		percentInfo: typeof style.percentInfo !== 'undefined' ? style.percentInfo : false,
-		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : false,
+		infoColor: style.infoColor ? style.infoColor : '#666',
+		percentInfo: typeof style.percentInfo !== 'undefined' ? style.percentInfo : true,
+		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
 		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing' ]
 	};
 
@@ -52,9 +55,21 @@ function LoadScreen ( renderer, style ) {
 
 	this.start = function ( resources ) {
 
-		if ( style !== false ) that.domElement.appendChild( that.infoContainer );
+		if ( style !== false ) {
+
+			that.domElement.appendChild( that.infoContainer );
+
+			var marginTop = - parseInt( getComputedStyle( that.infoContainer, null ).height ) / 2;
+
+			that.infoContainer.style.marginTop = marginTop + 'px';
+
+		}
+
+		if ( verbose ) console.time( 'Total load screen duration' );
 		
 		if ( resources ) { 
+
+			if ( verbose ) console.time( 'Loading duration' );
 
 			that.resources = resources;
 
@@ -66,11 +81,27 @@ function LoadScreen ( renderer, style ) {
 
 	};
 
-	this.remove = function () {
+	this.remove = function ( cb ) {
 
-		that.domElement.parentNode.removeChild( that.domElement ); 
+		if ( style.type !== 'custom' ) {
 
-		removed = true;
+			var disappear = { opacity: 1, };
+
+			TweenLite.to( 
+				disappear, 
+				tweenDuration, 
+				{ 
+					opacity: 0,
+					onUpdate: function () { that.infoContainer.style.opacity = disappear.opacity; }, 
+					onComplete: function () { end( cb ); }
+				}
+			);
+
+		} else {
+
+			end();
+
+		}
 
 	};
 
@@ -115,6 +146,18 @@ function LoadScreen ( renderer, style ) {
 		return that;
 
 	};
+
+	function end ( cb ) {
+
+		if ( verbose ) console.timeEnd( 'Total load screen duration' );
+
+		that.domElement.parentNode.removeChild( that.domElement ); 
+
+		removed = true;
+
+		if ( cb && typeof cb === 'function' ) cb();
+
+	}
 
 	function resize ( width, height ) {
 
@@ -274,6 +317,8 @@ function LoadScreen ( renderer, style ) {
 
 	function processResources () {
 
+		if ( verbose ) console.time( 'Processing duration' );
+
 		//1. replace textures in resources
 		var tA = that.resources.textures,
 			oTA = output.textures;
@@ -392,6 +437,8 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
+		if ( verbose ) console.timeEnd( 'Processing duration' );
+
 	}
 
 	function setLoadScreen () {
@@ -406,13 +453,13 @@ function LoadScreen ( renderer, style ) {
 
 		var half = style.size.indexOf( '%' ) > - 1 ? parseInt( style.size ) / 2 + '%' : parseInt( style.size ) / 2 + 'px';
 
-		console.log(half);
-
 		infoContainer.style.cssText = ''+
-			'width: ' + style.size + '; height: ' + style.size + ';'+
+			'width: ' + style.size + ';'+
 			'top: 50%; left: 50%;'+
-			'margin: -' + half + ' 0 0 -' + half + ';'+
-			'position: relative;';
+			'margin-left: -' + half + ';'+
+			'text-align: center;'+
+			'position: relative;'+
+			'display: inline-block';
 
 		that.domElement = overlay;
 		that.infoContainer = infoContainer;
@@ -424,6 +471,32 @@ function LoadScreen ( renderer, style ) {
 	}
 
 	function setInfos () {
+
+		if ( style.textInfo ) {
+
+			textInfo = document.createElement( 'p' );
+			textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 0 ];
+			textInfo.style.cssText = ''+ 
+				'color: ' + style.infoColor + ';'+
+				'display: inline-block;'+
+				'font-family: monospace;'+
+				'font-size: 12px';
+
+
+		}
+
+		if ( style.sizeInfo ) {
+
+			sizeInfo = document.createElement( 'p' );
+			sizeInfo.textContent = '0.00MB';
+			sizeInfo.style.cssText = ''+ 
+				'color: ' + style.infoColor + ';'+
+				'font-family: monospace;'+
+				'font-size: 12px;'+
+				'display: inline-block;';
+
+
+		}
 
 		switch ( style.type ) {
 
@@ -444,9 +517,7 @@ function LoadScreen ( renderer, style ) {
 			'background: ' + style.progressBarContainer + ';'+
 			'border: solid 1px ' + style.progressBarContainer + ';'+
 			'width: ' + style.size + '; height: 6px;'+
-			'top: 50%; left: 50%;'+
 			'box-sizing: border-box;'+
-			'margin-left: -50%;'+
 			'position: relative;';
 
 		progressBar.style.cssText = ''+
@@ -456,9 +527,20 @@ function LoadScreen ( renderer, style ) {
 			'position: absolute;';
 
 		progressBarContainer.appendChild( progressBar );
+
+		if ( style.textInfo ) that.infoContainer.appendChild( textInfo );
+
 		that.infoContainer.appendChild( progressBarContainer );
 
-		var updateStyle = function () { progressBar.style.width = ( 100 * tween.progress ).toString() + '%'; };
+		if ( style.sizeInfo ) that.infoContainer.appendChild( sizeInfo );
+
+		var updateStyle = function () { 
+
+			progressBar.style.width = ( 100 * tween.progress ).toString() + '%'; 
+
+			if ( style.sizeInfo ) sizeInfo.textContent = ( tween.progress * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
+
+		};
 
 		updateCBs.push( function () { 
 
@@ -511,9 +593,26 @@ function LoadScreen ( renderer, style ) {
 
 		if ( progress === 1 && fromCompleteCb ) {
 
-			//todo: text message change
+			if ( verbose ) console.timeEnd( 'Loading duration' );
 
-			var finish = function () { if ( that.resources ) processResources(); complete(); };
+			var finish = function () { 
+
+				if ( style.textInfo ) {
+
+					textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 1 ];
+
+					//wait next frame to display info before processing
+					if ( that.resources ) setTimeout( function () { processResources(); complete(); }, 20 );
+
+				} else {
+
+					if ( that.resources ) processResources(); 
+
+					complete(); 
+
+				}
+
+			};
 
 			if ( style.type !== 'custom' ) setTimeout( finish, tweenDuration * 1000 );
 			

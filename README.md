@@ -3,14 +3,13 @@ A JS library to handle ThreeJS assets loading and improve UX with a load screen 
 ```js
 //create and insert renderer before
 
-var ls = new LoadScreen( renderer ).onComplete( init, animate ).start( resources );
+var ls = new LoadScreen( renderer ).onComplete( init ).start( resources );
 
 function init () {
     
     ...//regular scene initiation
 
-    //remove the load screen when ready to animate
-    ls.remove();
+    ls.remove( animate );
 
 }
 ```
@@ -21,18 +20,19 @@ Values are default :
 ```js
 var style = {
     type: 'bar',//main look. Also 'circle'. 'custom' empties the info container and lets you fill it
-    size: '100px',//width and height of the central info container
+    size: '100px',//width of the central info container
     background: '#ddd',
     progressBarContainer: '#bbb',
     progressBar: '#666',
-    percentInfo: false,
-    sizeInfo: false,
-    textInfo: [ 'Loading', 'Processing' ]//messages to display during loading. Can be set to false.      
+    infoColor: '#666',
+    percentInfo: true,
+    sizeInfo: true,
+    textInfo: [ 'Loading', 'Processing' ]//Can be set to a single string or to false
 };
 
 var options = {
     forcedStart: false,//start loading even if the canvas is out of sight (usually bad practice)
-    verbose: false,
+    verbose: false,//logs progress, load duration, process duration & total load screen duration
     tweenDuration: .5      
 };
 
@@ -47,7 +47,7 @@ window.addEventListener( 'resize', function () {
 ls
 .setOptions( options )
 .onProgress( function ( progress ) { console.log( progress ); } )
-.onComplete( init, animate );//fired after the progress bar gets tweened to 1
+.onComplete( init );//fired after the progress bar gets tweened to 1
 
 //then
 ls.start( resources );
@@ -58,6 +58,9 @@ ls.start( resources );
 ls.start();
 ls.setProgress( 0.5 );
 //etc.
+
+//finally
+ls.remove( animate );//the removal is tweened for better UX, animate will be fired on completion.
 ```
 
 ##Format your resources
@@ -120,6 +123,7 @@ So much, I just began.
 * remove TweenLite ? depends on loaders animations.
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
 * second progress bar at top of screen for assets loading after start
+* webgl loader instead of html ?
 * extend to BabylonJS
 
 #License
