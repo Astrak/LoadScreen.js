@@ -3,7 +3,7 @@ A JS library to handle ThreeJS assets loading and improve UX with a load screen 
 ```js
 //create and insert renderer before
 
-var ls = new LoadScreen( renderer ).onComplete( init ).start( resources );
+var ls = new LoadScreen( renderer ).onComplete( init, animate ).start( resources );
 
 function init () {
     
@@ -129,9 +129,10 @@ resources.objects.myObject1;//THREE.Mesh
 
 #Roadmap
 So much, I just began.
-* get it fully working with the JSONLoader first and every options
+* code the 'forcedStart' related script
+* handle all style parameters
 * circle type
-* check glTF resources organization
+* check glTF resources organization for possible inspiration
 * handle other loaders
 * add fancy loaders
 * remove TweenLite ? depends on loaders animations.
