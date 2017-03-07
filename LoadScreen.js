@@ -418,7 +418,6 @@ function LoadScreen ( renderer, style ) {
 		that.resize( renderer.domElement.width, renderer.domElement.height );
 
 		renderer.domElement.parentNode.appendChild( overlay );
-		overlay.appendChild( infoContainer );
 
 	}
 
