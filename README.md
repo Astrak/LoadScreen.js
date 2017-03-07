@@ -1,12 +1,15 @@
 # LoadScreen.js
 A JS library to handle ThreeJS assets loading and improve UX with a load screen and progress indicator.
 ```js
+//create and insert renderer before
+
 var ls = new LoadScreen( renderer ).onComplete( init ).start( resources );
 
 function init () {
     
     ...//regular scene initiation
 
+    //remove the load screen when ready to animate
     ls.remove();
 
 }
@@ -14,23 +17,28 @@ function init () {
 
 #Usage
 ##Full pattern
+Values are default :
 ```js
 var style = {
-    type: 'circle', 
-    background: 'darkslategrey', 
-    textInfo: [ 'Loading assets', 'Creating objects' ],
-    percentInfo: false         
+    type: 'bar',
+    size: '100px',
+    background: '#ddd', 
+    progressBarContainer: '#bbb',
+    progressBar: '#666',
+    percentInfo: false,
+    sizeInfo: false,
+    textInfo: [ 'Loading', 'Processing' ]       
 };
 
 var options = {
     forcedStart: false,
-    verbose: true, 
-    tweenDuration: 2        
+    verbose: false, 
+    tweenDuration: 1        
 };
 
 var ls = new LoadScreen( renderer, style );
 
-//this can be a bit overkill
+//can be a bit overkill on smartphones but available
 window.addEventListener( 'resize', function () { 
 	renderer.setSize( width, height ); 
 	ls.setSize( width, height ); 
@@ -39,8 +47,17 @@ window.addEventListener( 'resize', function () {
 ls
 .setOptions( options )
 .onProgress( function ( progress ) { console.log( progress ); } )
-.onComplete( function () { ls.remove(); animate(); } )
-.start( resources );
+.onComplete( init, animate );//fired after the progress bar gets tweened to 1
+
+//then
+ls.start( resources );
+
+//or if you want to handle the progress yourself
+//for any case not handled in the library
+//(custom loader, display progress of a large script, or just for testing)
+ls.start();
+ls.setProgress( 0.5 );
+//etc.
 ```
 
 ##Style parameters
@@ -68,7 +85,7 @@ resources = {
     textures: {
         myTexture1: { 
             path: 'path/to/pic.jpg',
-            size: 2789,//in Ko
+            fileSize: 2789,//in Ko
             //other threejs textures properties can be specified, like :
             minFilter: THREE.LinearFilter
         }
@@ -76,11 +93,12 @@ resources = {
     geometries: {
         myGeometry1: {
             path: 'path/to/geometry.json',
-            size: 9498,//in Ko
-            //next three are optional and all default to false
-            flatShading: true,//calls geometry.computeFlatVertexNormals()
-            bufferGeometry: true//forces creation of a BufferGeometry
-            uv1toUv2: true,//duplicates uv1 to uv2 for AO and/or light map(s) use.
+            fileSize: 9498,//in Ko
+            //next four are optional
+            computeNormals: true,//call geometry.computeVertexNormals()
+            computeFlatNormals: true,//call geometry.computeFlatVertexNormals()
+            toBufferGeometry: true//force creation of a BufferGeometry
+            copyUv1toUv2: true,//for BufferGeometry only, for AO and lightmap use
         }
     },
     objects: {
@@ -91,7 +109,7 @@ resources = {
                 side: THREE.DoubleSide 
             }),
             //next is optional
-            type: 'mesh',//or 'points' or 'lines', defaults to 'mesh'
+            type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
             //specify any other threejs meshes or materials properties 
             aoMap: 'myTexture1',//assigned to material
             castShadow: true,//assigned to the mesh

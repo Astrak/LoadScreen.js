@@ -1,8 +1,3 @@
-/*
-	MIT Licence
-	author : @Astrak
-*/
-
 function LoadScreen ( renderer, style ) {
 
 	'use strict';
@@ -15,7 +10,7 @@ function LoadScreen ( renderer, style ) {
 		forcedStart = false, 
 		progress = 0,
 		removed = false,
-		tweenDuration = 1,
+		tweenDuration = .5,
 		tween = { progress : 0 }, 
 		updateCBs = [], 
 		completeCBS = [];
@@ -32,12 +27,10 @@ function LoadScreen ( renderer, style ) {
 	var	textures = {}, geometries = {}, texSum = 0, geoSum = 0;
 
 	/* API */
-	//defs
 	this.domElement = null;
 	this.infoContainer = null;
 	this.resources = null;
 
-	//methods
 	this.resize = resize;
 
 	style = style || {};
@@ -50,7 +43,7 @@ function LoadScreen ( renderer, style ) {
 		progressBar: style.progressBar ? style.progressBar : '#666',
 		percentInfo: typeof style.percentInfo !== 'undefined' ? style.percentInfo : false,
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : false,
-		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Creating scene' ]
+		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing' ]
 	};
 
 	setLoadScreen();
@@ -67,9 +60,9 @@ function LoadScreen ( renderer, style ) {
 
 			loadResources();
 
-
-
 		}
+
+		return that;
 
 	};
 
@@ -149,8 +142,8 @@ function LoadScreen ( renderer, style ) {
 			for ( var k in r.textures ) {
 
 				output.textures[ k ] = {};
-				textures[ k ] = { prog: 0, size: r.textures[ k ].size };
-				texSum += r.textures[ k ].size;
+				textures[ k ] = { prog: 0, fileSize: r.textures[ k ].fileSize };
+				texSum += r.textures[ k ].fileSize;
 
 			}
 
@@ -165,8 +158,8 @@ function LoadScreen ( renderer, style ) {
 			for ( var k in r.geometries ) {
 
 				output.geometries[ k ] = {};
-				geometries[ k ] = { prog: 0, size: r.geometries[ k ].size };
-				geoSum += r.geometries[ k ].size;
+				geometries[ k ] = { prog: 0, fileSize: r.geometries[ k ].fileSize };
+				geoSum += r.geometries[ k ].fileSize;
 
 			}
 
@@ -245,7 +238,7 @@ function LoadScreen ( renderer, style ) {
 				//assign properties
 				for ( var k in d )
 
-					if ( k !== 'size' && k !== 'path' && typeof t[ k ] !== 'undefined' ) 
+					if ( k !== 'fileSize' && k !== 'path' && typeof t[ k ] !== 'undefined' ) 
 
 						t[ k ] = d[ k ];
 
@@ -281,9 +274,125 @@ function LoadScreen ( renderer, style ) {
 
 	function processResources () {
 
-		//replace textures in resources
-		//process geometries and replace in resources
-		//create objects
+		//1. replace textures in resources
+		var tA = that.resources.textures,
+			oTA = output.textures;
+
+		if ( tA ) {
+
+			for ( var k in oTA ) {
+
+				for ( var p in tA[ k ] ) 
+
+					if ( p !== 'path' && p !== 'fileSize' ) 
+
+						oTA[ k ][ p ] = tA[ k ][ p ];
+
+				tA[ k ] = oTA[ k ];
+
+				delete oTA[ k ];
+
+			}
+
+		}
+	
+		//2. process geometries and replace in resources
+		var gA = that.resources.geometries, 
+			oGA = output.geometries;
+
+		if ( gA ) {
+
+			for ( var k in oGA ) {
+
+				if ( gA[ k ].toBufferGeometry && oGA[ k ].type !== 'BufferGeometry' )
+
+					oGA[ k ] = new THREE.BufferGeometry().fromGeometry( oGA[ k ] );
+
+				if ( gA[ k ].copyUv1ToUv2 && oGA[ k ].type === 'BufferGeometry' ) 
+
+					oGA[ k ].addAttribute( 'uv2', oGA[ k ].attributes.uv );
+
+				if ( gA[ k ].computeNormals ) oGA[ k ].computeVertexNormals();
+
+				if ( gA[ k ].computeFlatNormals ) oGA[ k ].computeFlatVertexNormals();
+
+				gA[ k ] = oGA[ k ];
+
+				delete oGA[ k ];
+
+			}
+
+		}
+
+		//3. create objects
+		var oA = that.resources.objects;
+
+		if ( oA ) {
+
+			for ( var k in oA ) {
+
+				var geometry = that.resources.geometries[ oA[ k ].geometry ], 
+					material = oA[ k ].material;
+
+				delete oA[ k ].geometry;
+				delete oA[ k ].material;
+
+				//1. assign properties to material
+				for ( var p in oA[ k ] ) {
+
+					if ( p !== 'type' && typeof material[ p ] !== 'undefined' ) {
+
+						if ( p.indexOf( 'map' ) > -1 || p.indexOf( 'Map' ) > -1 ) {
+
+							material[ p ] = tA[ oA[ k ][ p ] ];
+
+							console.log(p, material[ p ])
+
+						} else {
+
+							material[ p ] = oA[ k ][ p ];
+
+						}
+
+						delete oA[ k ][ p ];
+
+					}
+
+				}
+
+				//2. create object
+				var object;
+
+				switch ( oA[ k ].type ) {
+
+					case 'mesh': object = new THREE.Mesh( geometry, material ); break;
+
+					case 'points': object = new THREE.Points( geometry, material ); break;
+
+					case 'line': object = new THREE.Line( geometry, material ); break;
+
+					default: object = new THREE.Mesh( geometry, material );
+
+				}
+
+				delete oA[ k ].type;
+
+				//3. assign remaining properties to object or its userData
+				for ( var p in oA[ k ] ) {
+
+					if ( typeof object[ p ] !== 'undefined' ) object[ p ] = oA[ k ][ p ];
+					else object.userData[ p ] = oA[ k ][ p ];
+
+					delete oA[ k ];
+
+				}
+
+				//4. assign object to resources
+				oA[ k ] = object;
+
+			}
+
+		}
 
 	}
 
@@ -371,11 +480,11 @@ function LoadScreen ( renderer, style ) {
 
 		for ( var k in textures ) 
 
-			texProg += textures[ k ].prog * textures[ k ].size;
+			texProg += textures[ k ].prog * textures[ k ].fileSize;
 
 		for ( var k in geometries ) 
 
-			geoProg += geometries[ k ].prog * geometries[ k ].size;
+			geoProg += geometries[ k ].prog * geometries[ k ].fileSize;
 
 		progress = ( texProg + geoProg ) / ( texSum + geoSum );
 
