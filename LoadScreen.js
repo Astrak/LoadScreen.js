@@ -1,8 +1,6 @@
 /*
-	author : @Astrak 
-	TODO: 
-	- remove TweenLite ?
-	- define custom message/warning/buttons before loading.. ?
+	MIT Licence
+	author : @Astrak
 */
 
 function LoadScreen ( renderer, style ) {
@@ -85,7 +83,7 @@ function LoadScreen ( renderer, style ) {
 
 		progress = p;
 
-		if ( style !== false ) update();
+		update();
 
 	};
 
@@ -208,7 +206,9 @@ function LoadScreen ( renderer, style ) {
 
 					counter++;
 
-					update({ geometry: true, name: p, progress: 1 });
+					updateProgress({ geometry: true, name: p, progress: 1 });
+
+					update();
 
 				}, 
 				function ( e ) {
@@ -219,7 +219,9 @@ function LoadScreen ( renderer, style ) {
 
 					if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
-						update({ geometry: true, name: p, progress: pr });	
+						updateProgress({ geometry: true, name: p, progress: pr });
+
+					update();
 
 				}
 			);
@@ -253,7 +255,9 @@ function LoadScreen ( renderer, style ) {
 
 				counter++;
 
-				update({ texture: true, name: p, progress: 1 });
+				updateProgress({ texture: true, name: p, progress: 1 });
+
+				update();
 
 			}, 
 			function ( e ) {
@@ -264,7 +268,9 @@ function LoadScreen ( renderer, style ) {
 
 				if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
-					update({ texture: true, name: p, progress: pr });
+					updateProgress({ texture: true, name: p, progress: pr });
+
+				update();
 
 			}
 		);
@@ -342,6 +348,8 @@ function LoadScreen ( renderer, style ) {
 
 		loadComplete = function () {
 
+			//change text message
+
 			TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: updateStyle, onComplete: complete });
 
 		};
@@ -349,8 +357,6 @@ function LoadScreen ( renderer, style ) {
 	}
 
 	function complete () {
-
-		processFiles();
 
 		for ( var i = 0 ; i < completeCBS.length ; i++ )
 
@@ -364,7 +370,7 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function update ( o ) {
+	function updateProgress ( o ) {
 
 		//1. compute progress value
 		var texProg = 0, geoProg = 0;
@@ -384,16 +390,20 @@ function LoadScreen ( renderer, style ) {
 
 			var type = o.texture ? 'Texture' : o.geometry ? 'Geometry' : 'Unknown asset type';
 
-			console.info( type + ' > ' + o.name + ' > ' + Math.round( 100 * o.progress ) + '%' );
+			console.info( 'Progress = ' + progress + ', ' + type + ' > ' + o.name + ' > ' + Math.round( 100 * o.progress ) + '%' );
 
 		}
 
-		//3. progress callbacks
+	}
+
+	function update () {
+
+		//1. progress callbacks
 		for ( var i = 0 ; i < updateCBs.length ; i++ ) 
 
 			updateCBs[ i ]( progress );
 
-		//4. check load completion
+		//2. check load completion
 		if ( counter === nFiles ) {
 
 			progress = 1;

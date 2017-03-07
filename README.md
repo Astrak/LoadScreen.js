@@ -1,8 +1,8 @@
 # LoadScreen.js
 A JS library to handle ThreeJS assets loading and improve UX with a load screen and progress indicator.
 ```js
-var ls = new LoadScreen( renderer )
-.onComplete( function () { ls.remove(); } )
+var ls = new LoadScreen( renderer );
+ls.onComplete( function () { ls.remove(); setScene(); } )
 .start( resources );
 ```
 
@@ -103,11 +103,17 @@ resources.geometries.myGeometry1;//THREE.BufferGeometry
 resources.objects.myObject1;//THREE.Mesh
 ```
 
-#Todo
-* second progress bar at top of screen for assets loading after start
+#Roadmap
+So much, I just began.
+* get it fully working with the JSONLoader first and every options
 * circle type
-* fancy loaders
-* lots of things, just starting
+* check glTF resources organization
+* handle other loaders
+* add fancy loaders
+* remove TweenLite ? depends on loaders animations.
+* handle custom message/warning/buttons before loading without setting style type to custom.. ?
+* second progress bar at top of screen for assets loading after start
+* extend to BabylonJS
 
 #License
 MIT
