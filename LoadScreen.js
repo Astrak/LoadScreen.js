@@ -163,9 +163,9 @@ function LoadScreen ( renderer, style ) {
 
 		if ( ! removed ) {
 
-			that.domElement.style.marginTop = '-' + height + 'px';
-			that.domElement.style.height = height + 'px';
-			that.domElement.style.width = width + 'px';
+			that.domElement.style.marginTop = '-' + height / devicePixelRatio + 'px';
+			that.domElement.style.height = height / devicePixelRatio + 'px';
+			that.domElement.style.width = width / devicePixelRatio + 'px';
 
 		}
 		

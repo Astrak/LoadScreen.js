@@ -114,7 +114,7 @@ resources.objects.myObject1;//THREE.Mesh
 
 #Roadmap
 So much, I just began.
-* code the 'forcedStart' related script
+* code the 'forcedStart' parameter
 * handle all style parameters
 * circle type
 * check glTF resources organization for possible inspiration
@@ -123,6 +123,7 @@ So much, I just began.
 * remove TweenLite ? depends on loaders animations.
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
 * second progress bar at top of screen for assets loading after start
+* add setStyle method for another style if further calls
 * webgl loader instead of html ?
 * extend to BabylonJS
 
