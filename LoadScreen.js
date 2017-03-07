@@ -55,7 +55,7 @@ function LoadScreen ( renderer, style ) {
 
 	setLoadScreen();
 
-	setInfos();
+	if ( style.type !== 'custom' ) setInfos();
 
 	this.start = function ( resources ) {
 
@@ -67,15 +67,7 @@ function LoadScreen ( renderer, style ) {
 
 			loadResources();
 
-			loadComplete = function () {
 
-				//change text message
-
-				TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: function () { 
-					console.log(tween.progress); 
-				}, onComplete: complete });
-
-			};
 
 		}
 
@@ -287,6 +279,14 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
+	function processResources () {
+
+		//replace textures in resources
+		//process geometries and replace in resources
+		//create objects
+
+	}
+
 	function setLoadScreen () {
 		
 		var overlay = document.createElement( 'div' ),
@@ -399,9 +399,15 @@ function LoadScreen ( renderer, style ) {
 
 			updateCBs[ i ]( progress );
 
-		if ( tween.progress === 1 && fromCompleteCb ) {
+		if ( progress === 1 && fromCompleteCb ) {
 
-			that.resources ? loadComplete() : complete();
+			//todo: text message change
+
+			var finish = function () { if ( that.resources ) processResources(); complete(); };
+
+			if ( style.type !== 'custom' ) setTimeout( finish, tweenDuration * 1000 );
+			
+			else finish();
 
 		}
 

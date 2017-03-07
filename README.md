@@ -1,9 +1,15 @@
 # LoadScreen.js
 A JS library to handle ThreeJS assets loading and improve UX with a load screen and progress indicator.
 ```js
-var ls = new LoadScreen( renderer );
-ls.onComplete( function () { ls.remove(); setScene(); } )
-.start( resources );
+var ls = new LoadScreen( renderer ).onComplete( init ).start( resources );
+
+function init () {
+    
+    ...//regular scene initiation
+
+    ls.remove();
+
+}
 ```
 
 #Usage
