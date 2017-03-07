@@ -78,7 +78,7 @@ function LoadScreen ( renderer, style ) {
 
 		progress = p;
 
-		update();
+		update( true );
 
 	};
 
@@ -346,8 +346,6 @@ function LoadScreen ( renderer, style ) {
 
 							material[ p ] = tA[ oA[ k ][ p ] ];
 
-							console.log(p, material[ p ])
-
 						} else {
 
 							material[ p ] = oA[ k ][ p ];
@@ -406,10 +404,14 @@ function LoadScreen ( renderer, style ) {
 			'position: relative;'+
 			'overflow: hidden;';
 
+		var half = style.size.indexOf( '%' ) > - 1 ? parseInt( style.size ) / 2 + '%' : parseInt( style.size ) / 2 + 'px';
+
+		console.log(half);
+
 		infoContainer.style.cssText = ''+
 			'width: ' + style.size + '; height: ' + style.size + ';'+
 			'top: 50%; left: 50%;'+
-			'margin: -50px 0 0 -50px;'+
+			'margin: -' + half + ' 0 0 -' + half + ';'+
 			'position: relative;';
 
 		that.domElement = overlay;
@@ -444,7 +446,7 @@ function LoadScreen ( renderer, style ) {
 			'width: ' + style.size + '; height: 6px;'+
 			'top: 50%; left: 50%;'+
 			'box-sizing: border-box;'+
-			'margin-left: -50px;'+
+			'margin-left: -50%;'+
 			'position: relative;';
 
 		progressBar.style.cssText = ''+
