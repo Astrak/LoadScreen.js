@@ -1,6 +1,5 @@
 # LoadScreen.js
->Enjoy waiting
-A JS library to handle ThreeJS assets loading and improve UX with a load screen and progress indicator.
+A JS library to handle ThreeJS assets loading and improve UX with a load screen and progress indicator. Enjoy waiting.
 ```js
 //create scene, camera, renderer, and insert renderer before
 
@@ -15,6 +14,9 @@ function init () {
 }
 ```
 
+Example at interascope.com. 
+Visit on PC & mobile to appreciate the difference of compiling times and the UX improvement of displaying states.
+
 #Usage
 ##Full pattern
 Methods are chainable, except `remove` and `setProgress`. Values are default :
@@ -28,7 +30,6 @@ var style = {
     progressBarContainer: '#444',
     progressBar: '#fb0',
     infoColor: '#666',
-    percentInfo: true,
     sizeInfo: true,
     textInfo: [ 'Loading', 'Processing', 'Compiling' ]//Can be set to a single string or to false
 };

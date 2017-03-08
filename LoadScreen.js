@@ -44,7 +44,6 @@ function LoadScreen ( renderer, style ) {
 		progressBarContainer: style.progressBarContainer ? style.progressBarContainer : '#444',
 		progressBar: style.progressBar ? style.progressBar : '#fb0',
 		infoColor: style.infoColor ? style.infoColor : '#666',
-		percentInfo: typeof style.percentInfo !== 'undefined' ? style.percentInfo : true,
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
 		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing', 'Compiling' ]
 	};
@@ -553,7 +552,60 @@ function LoadScreen ( renderer, style ) {
 
 	function makeCircularProgress () {
 
-		//todo
+		var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' ),
+			circleBg = document.createElement( 'circle' ),
+			circleFront = document.createElement( 'circle' ),
+			circleProgress = document.createElement( 'circle' );
+
+		svg.setAttributeNS( 'http://www.w3.org/2000/svg', 'viewBox', '0 0 200 200' );
+		svg.setAttribute( 'width', '100' );
+		svg.setAttribute( 'height', '100' );
+		svg.style.width = style.size;
+		svg.style.height = style.size;
+		svg.style.position = 'absolute';
+
+		circleBg.setAttribute( 'cx', '0' );
+		circleBg.setAttribute( 'cy', '0' );
+		circleBg.setAttribute( 'r', '90' );
+		circleBg.setAttribute( 'transform', 'translate( 100, 100 )' );
+		circleBg.setAttribute( 'fill', style.progressBarContainer );
+		svg.appendChild( circleBg );
+
+		circleFront.setAttribute( 'cx', '0' );
+		circleFront.setAttribute( 'cy', '0' );
+		circleFront.setAttribute( 'r', '70' );
+		circleFront.setAttribute( 'transform', 'translate( 100, 100 )' );
+		circleFront.setAttribute( 'fill', style.background );
+		svg.appendChild( circleFront );
+
+		circleProgress.setAttribute( 'cx', '0' );
+		circleProgress.setAttribute( 'cy', '0' );
+		circleProgress.setAttribute( 'r', '80' );
+		circleProgress.setAttribute( 'transform', 'translate( 100, 100 ) rotate( 90 )' );
+		circleProgress.setAttribute( 'stroke-dashoffset', '953' );
+		circleProgress.setAttribute( 'fill', 'none' );
+		circleProgress.style.stroke = style.progressBar;
+		svg.appendChild( circleProgress );
+
+		that.infoContainer.appendChild( svg );
+
+		if ( style.textInfo ) that.infoContainer.appendChild( textInfo );
+
+		if ( style.sizeInfo ) that.infoContainer.appendChild( sizeInfo );
+
+		var updateStyle = function () { 
+
+			circleProgress.setAttribute( 'stroke-dashoffset', ( ( tween.progress + 1 ) * 502 ).toString() );
+
+			if ( style.sizeInfo ) sizeInfo.textContent = ( tween.progress * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
+
+		};
+
+		updateCBs.push( function () { 
+
+			TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: updateStyle } );
+
+		});
 
 	}
 
