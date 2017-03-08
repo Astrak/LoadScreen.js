@@ -36,8 +36,8 @@ var style = {
 
 var options = {
     forcedStart: false,//start loading even if the canvas is out of sight (usually bad practice)
-    verbose: false,//logs progress, load duration, process duration & total load screen duration
-    tweenDuration: .5      
+    verbose: false,//logs progress, process and compile duration + total load screen duration
+    tweenDuration: .5
 };
 
 var ls = new LoadScreen( renderer, style );
@@ -86,9 +86,9 @@ resources = {
             fileSize: 9498,//in Ko
             //next four are optional
             computeNormals: false,//call geometry.computeVertexNormals()
-            computeFlatNormals: false,//call geometry.computeFlatVertexNormals()
+            computeFlatNormals: false,//call geometry.computeFlatVertexNormals() (THREE.Geometry only)
             toBufferGeometry: false//force creation of a BufferGeometry
-            copyUv1toUv2: false,//for BufferGeometry only, for AO and lightmap use
+            copyUv1toUv2: false,//for AO and lightmap use (handled for THREE.BufferGeometry only)
         }
     },
     objects: {

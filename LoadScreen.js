@@ -10,7 +10,7 @@ function LoadScreen ( renderer, style ) {
 		forcedStart = false, 
 		progress = 0,
 		removed = false,
-		tweenDuration = 1,
+		tweenDuration = .5,
 		tween = { progress : 0 }, 
 		updateCBs = [], 
 		compileCBs = [],
