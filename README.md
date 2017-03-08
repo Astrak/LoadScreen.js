@@ -18,7 +18,7 @@ function init () {
 ##Full pattern
 Values are default :
 ```js
-//1. First call : this appends an overlay on top of the canvas.
+//First call : this appends an overlay on top of the canvas.
 //complete style optional argument, values are default.
 var style = {
     type: 'bar',//main look. Also 'circular'. 'custom' empties the info container and lets you fill it
@@ -33,13 +33,13 @@ var style = {
 };
 var ls = new LoadScreen( renderer, style );
 
-//2. Resize is available. Can be a bit overkill on smartphones for loads < 5-6 seconds.
+//Resize is available. Can be a bit overkill on smartphones for loads < 5-6 seconds.
 window.addEventListener( 'resize', function () { 
 	renderer.setSize( width, height ); 
 	ls.setSize( width, height ); 
 });
 
-//3. Options can be passed.
+//Options can be passed.
 var options = {
     forcedStart: false,//start loading even if the canvas is out of sight (usually bad practice)
     verbose: false,//logs progress, process and compile duration + total load screen duration
@@ -47,23 +47,22 @@ var options = {
 };
 ls.setOptions( options );
 
-//4. Do things on progress events.
+//Do things on progress events.
 ls.onProgress( function ( progress ) { ... } );
 
-//5. Define what you want to do when loading, processing and compiling are complete.
-ls.onComplete( init )//init after the progress bar gets tweened to 1 and after processing and compiling.
+//Define callbacks to fire after loading, processing and compiling.
+ls.onComplete( init );
 
-//6. Starts loading data in a resources object (see next for formatting), and append info to overlay.
+//Ready ! Usually needs a resources object (see next for formatting). Appends infos to overlay.
 ls.start( resources );
 
 //or if you want to handle the progress yourself, for any case not handled in the library
 //(custom loader, display progress of a large script, or just for testing).
 ls.start();
-ls.setProgress( 0.5 );
-//etc.
+ls.setProgress( 0.5 );//etc.
 
-//7. Remove the load screen !
-ls.remove( animate );//the removal is tweened for better UX, animate will be fired on completion.
+//Remove the load screen ! Removal is tween so we define a callback
+ls.remove( animate );
 ```
 
 ##Format your resources
