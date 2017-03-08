@@ -10,10 +10,11 @@ function LoadScreen ( renderer, style ) {
 		forcedStart = false, 
 		progress = 0,
 		removed = false,
-		tweenDuration = .5,
+		tweenDuration = 1,
 		tween = { progress : 0 }, 
 		updateCBs = [], 
-		completeCBS = [];
+		compileCBs = [],
+		completeCBs = [];
 
 	var loadComplete;
 
@@ -46,7 +47,7 @@ function LoadScreen ( renderer, style ) {
 		infoColor: style.infoColor ? style.infoColor : '#666',
 		percentInfo: typeof style.percentInfo !== 'undefined' ? style.percentInfo : true,
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
-		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing' ]
+		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing', 'Compiling' ]
 	};
 
 	setLoadScreen();
@@ -80,6 +81,18 @@ function LoadScreen ( renderer, style ) {
 		return that;
 
 	};
+
+	this.compile = function () {
+
+		for ( var i = 0 ; i < arguments.length ; i++ )
+
+			if ( arguments[ i ] && typeof arguments[ i ] === 'function' ) 
+
+				compileCBs.push( arguments[ i ] );
+
+		return that;
+
+	}
 
 	this.remove = function ( cb ) {
 
@@ -141,7 +154,7 @@ function LoadScreen ( renderer, style ) {
 
 			if ( arguments[ i ] && typeof arguments[ i ] === 'function' ) 
 
-				completeCBS.push( arguments[ i ] );
+				completeCBs.push( arguments[ i ] );
 
 		return that;
 
@@ -600,16 +613,26 @@ function LoadScreen ( renderer, style ) {
 
 				if ( style.textInfo ) {
 
-					textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 1 ];
-
 					//wait next frame to display info before processing
-					if ( that.resources ) setTimeout( function () { processResources(); complete(); }, 20 );
+					if ( that.resources ) {
+
+						textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 1 ];
+
+						setTimeout( function () { 
+
+							processResources(); 
+
+							compile();
+
+						}, 20 );
+
+					}
 
 				} else {
 
 					if ( that.resources ) processResources(); 
 
-					complete(); 
+					compile(); 
 
 				}
 
@@ -623,11 +646,39 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
+	function compile () {
+
+		if ( compileCBs.length ) {
+
+			textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 2 ];
+
+			setTimeout( function () { 
+
+				console.time( 'Compiling duration' );
+
+				for ( var i = 0 ; i < completeCBs.length ; i++ ) 
+
+					compileCBs[ i ]();
+
+				console.timeEnd( 'Compiling duration' );
+
+				complete();
+
+			}, 20 );
+
+		} else {
+
+			complete();
+
+		}
+
+	}
+
 	function complete () {
 
-		for ( var i = 0 ; i < completeCBS.length ; i++ ) 
+		for ( var i = 0 ; i < completeCBs.length ; i++ ) 
 
-			completeCBS[ i ]();
+			completeCBs[ i ]();
 
 	}
 

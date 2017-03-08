@@ -31,7 +31,7 @@ var style = {
     infoColor: '#666',
     percentInfo: true,
     sizeInfo: true,
-    textInfo: [ 'Loading', 'Processing' ]//Can be set to a single string or to false
+    textInfo: [ 'Loading', 'Processing', 'Compiling' ]//Can be set to a single string or to false
 };
 
 var options = {
@@ -51,7 +51,8 @@ window.addEventListener( 'resize', function () {
 ls
 .setOptions( options )
 .onProgress( function ( progress ) { console.log( progress ); } )
-.onComplete( init );//fired after the progress bar gets tweened to 1
+.compile( function () { renderer.render( scene, camera ); } )//GPU compilation callback in threejs
+.onComplete( init );//fired after the progress bar gets tweened to 1 and after processing and compiling
 
 //then
 ls.start( resources );
