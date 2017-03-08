@@ -1,4 +1,5 @@
 # LoadScreen.js
+>Enjoy waiting
 A JS library to handle ThreeJS assets loading and improve UX with a load screen and progress indicator.
 ```js
 //create scene, camera, renderer, and insert renderer before
@@ -16,7 +17,7 @@ function init () {
 
 #Usage
 ##Full pattern
-Values are default :
+Methods are chainable, except `remove` and `setProgress`. Values are default :
 ```js
 //First call : this appends an overlay on top of the canvas.
 //complete style optional argument, values are default.
@@ -61,7 +62,7 @@ ls.start( resources );
 ls.start();
 ls.setProgress( 0.5 );//etc.
 
-//Remove the load screen ! Removal is tween so we define a callback
+//Remove the load screen ! Removal is tweened so we define a callback
 ls.remove( animate );
 ```
 

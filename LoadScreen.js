@@ -658,6 +658,8 @@ function LoadScreen ( renderer, style ) {
 
 		if ( verbose ) console.timeEnd( 'Compiling duration' );
 
+		LSRT.dispose();
+
 		complete();
 
 	}
