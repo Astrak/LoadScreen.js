@@ -40,10 +40,10 @@ function LoadScreen ( renderer, style ) {
 
 	style = {
 		type: typeof style.type !== 'undefined' ? style.type : 'bar',
-		size: style.size ? style.size : '100px',
-		background: style.background ? style.background : '#ddd',
-		progressBarContainer: style.progressBarContainer ? style.progressBarContainer : '#bbb',
-		progressBar: style.progressBar ? style.progressBar : '#666',
+		size: style.size ? style.size : '30%',
+		background: style.background ? style.background : '#333',
+		progressBarContainer: style.progressBarContainer ? style.progressBarContainer : '#444',
+		progressBar: style.progressBar ? style.progressBar : '#fb0',
 		infoColor: style.infoColor ? style.infoColor : '#666',
 		percentInfo: typeof style.percentInfo !== 'undefined' ? style.percentInfo : true,
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
@@ -514,15 +514,15 @@ function LoadScreen ( renderer, style ) {
 
 		switch ( style.type ) {
 
-			case 'bar': makeProgressBar(); break;
-			case 'circle': makeProgressCircle(); break;
-			default: makeProgressBar(); 
+			case 'bar': makeBarProgress(); break;
+			case 'circular': makeCircularProgress(); break;
+			default: makeBarProgress(); 
 
 		}
 
 	}
 
-	function makeProgressBar () {
+	function makeBarProgress () {
 
 		var progressBarContainer = document.createElement( 'div' ),
 			progressBar = document.createElement( 'div' );
@@ -564,7 +564,7 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function makeProgressCircle () {
+	function makeCircularProgress () {
 
 		//todo
 
