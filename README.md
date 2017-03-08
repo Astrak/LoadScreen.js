@@ -29,6 +29,7 @@ var style = {
     background: '#333',
     progressBarContainer: '#444',
     progressBar: '#fb0',
+    weight: '6px',//weight of the progress element in pixels
     infoColor: '#666',
     sizeInfo: true,
     textInfo: [ 'Loading', 'Processing', 'Compiling' ]//Can be set to a single string or to false

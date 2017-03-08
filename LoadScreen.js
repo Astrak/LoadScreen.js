@@ -43,6 +43,7 @@ function LoadScreen ( renderer, style ) {
 		background: style.background ? style.background : '#333',
 		progressBarContainer: style.progressBarContainer ? style.progressBarContainer : '#444',
 		progressBar: style.progressBar ? style.progressBar : '#fb0',
+		weight: style.weight ? style.weight : '6px',
 		infoColor: style.infoColor ? style.infoColor : '#666',
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
 		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing', 'Compiling' ]
@@ -61,6 +62,14 @@ function LoadScreen ( renderer, style ) {
 			var marginTop = - parseInt( getComputedStyle( that.infoContainer, null ).height ) / 2;
 
 			that.infoContainer.style.marginTop = marginTop + 'px';
+
+			if ( style.type === 'circular' ) {
+
+				var mTop = - parseInt( getComputedStyle( that.infoContainer.lastElementChild, null ).height ) / 2;
+
+				that.infoContainer.lastElementChild.style.marginTop = marginTop + 'px';
+
+			}
 
 		}
 
@@ -516,7 +525,7 @@ function LoadScreen ( renderer, style ) {
 		progressBarContainer.style.cssText = ''+
 			'background: ' + style.progressBarContainer + ';'+
 			'border: solid 1px ' + style.progressBarContainer + ';'+
-			'width: 100%; height: 6px;'+
+			'width: 100%; height: ' + style.weight + ';'+
 			'box-sizing: border-box;'+
 			'position: relative;';
 
@@ -552,46 +561,40 @@ function LoadScreen ( renderer, style ) {
 
 	function makeCircularProgress () {
 
-		var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' ),
-			circleBg = document.createElement( 'circle' ),
-			circleFront = document.createElement( 'circle' ),
-			circleProgress = document.createElement( 'circle' );
+		var svg = ""+
+			"<svg style='width:" + style.width + ";' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
+			"	<circle fill=" + style.progressBarContainer + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 + parseInt( style.weight ) / 2 + 2 ).toString()+ "'/>"+
+			"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
+			"	<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(90)' r='80' stroke-dashoffset='953'/>"+
+			"</svg>";
 
-		svg.setAttributeNS( 'http://www.w3.org/2000/svg', 'viewBox', '0 0 200 200' );
-		svg.setAttribute( 'width', '100' );
-		svg.setAttribute( 'height', '100' );
-		svg.style.width = style.size;
-		svg.style.height = style.size;
-		svg.style.position = 'absolute';
+		that.infoContainer.innerHTML = svg;
 
-		circleBg.setAttribute( 'cx', '0' );
-		circleBg.setAttribute( 'cy', '0' );
-		circleBg.setAttribute( 'r', '90' );
-		circleBg.setAttribute( 'transform', 'translate( 100, 100 )' );
-		circleBg.setAttribute( 'fill', style.progressBarContainer );
-		svg.appendChild( circleBg );
+		var circleProgress = that.infoContainer.firstElementChild.lastElementChild;
 
-		circleFront.setAttribute( 'cx', '0' );
-		circleFront.setAttribute( 'cy', '0' );
-		circleFront.setAttribute( 'r', '70' );
-		circleFront.setAttribute( 'transform', 'translate( 100, 100 )' );
-		circleFront.setAttribute( 'fill', style.background );
-		svg.appendChild( circleFront );
+		circleProgress.style.cssText = ''+
+			'stroke:' + style.progressBar + ';'+
+			'stroke-width:' + parseInt( style.weight )+ ';'+
+			'stroke-dasharray:502;';
 
-		circleProgress.setAttribute( 'cx', '0' );
-		circleProgress.setAttribute( 'cy', '0' );
-		circleProgress.setAttribute( 'r', '80' );
-		circleProgress.setAttribute( 'transform', 'translate( 100, 100 ) rotate( 90 )' );
-		circleProgress.setAttribute( 'stroke-dashoffset', '953' );
-		circleProgress.setAttribute( 'fill', 'none' );
-		circleProgress.style.stroke = style.progressBar;
-		svg.appendChild( circleProgress );
+		if ( style.textInfo || style.sizeInfo ) {
 
-		that.infoContainer.appendChild( svg );
+			var textContainer = document.createElement( 'div' );
 
-		if ( style.textInfo ) that.infoContainer.appendChild( textInfo );
+			textContainer.style.cssText = ''+
+				'width: 100%; left: 50%;'+
+				'margin-left: -50%;'+
+				'position: absolute;';
 
-		if ( style.sizeInfo ) that.infoContainer.appendChild( sizeInfo );
+			that.infoContainer.appendChild( textContainer );
+
+			if ( style.textInfo ) textContainer.appendChild( textInfo );
+
+			if ( style.sizeInfo ) textContainer.appendChild( sizeInfo );
+
+			textInfo.style.display = sizeInfo.style.display = 'block';
+			
+		}
 
 		var updateStyle = function () { 
 
