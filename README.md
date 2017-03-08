@@ -19,7 +19,7 @@ function init () {
 Values are default :
 ```js
 //1. First call : this appends an overlay on top of the canvas.
-//complete style optional argument, values are default
+//complete style optional argument, values are default.
 var style = {
     type: 'bar',//main look. Also 'circular'. 'custom' empties the info container and lets you fill it
     size: '30%',//width of the central info container, in px or in %
@@ -33,13 +33,13 @@ var style = {
 };
 var ls = new LoadScreen( renderer, style );
 
-//2. Resize is available. Can be a bit overkill on smartphones for loads < 5-6 seconds
+//2. Resize is available. Can be a bit overkill on smartphones for loads < 5-6 seconds.
 window.addEventListener( 'resize', function () { 
 	renderer.setSize( width, height ); 
 	ls.setSize( width, height ); 
 });
 
-//3. Options can be passed
+//3. Options can be passed.
 var options = {
     forcedStart: false,//start loading even if the canvas is out of sight (usually bad practice)
     verbose: false,//logs progress, process and compile duration + total load screen duration
@@ -47,18 +47,17 @@ var options = {
 };
 ls.setOptions( options );
 
-//4. Do things on progress events
+//4. Do things on progress events.
 ls.onProgress( function ( progress ) { ... } );
 
-//5. Define what you want to do when your previous work is done.
-ls.onComplete( init )//fired after the progress bar gets tweened to 1 and after processing and compiling
+//5. Define what you want to do when loading, processing and compiling are complete.
+ls.onComplete( init )//init after the progress bar gets tweened to 1 and after processing and compiling.
 
-//6. Let's go with a resources object (see next for its formatting)
+//6. Starts loading data in a resources object (see next for formatting), and append info to overlay.
 ls.start( resources );
 
-//or if you want to handle the progress yourself
-//for any case not handled in the library
-//(custom loader, display progress of a large script, or just for testing)
+//or if you want to handle the progress yourself, for any case not handled in the library
+//(custom loader, display progress of a large script, or just for testing).
 ls.start();
 ls.setProgress( 0.5 );
 //etc.
