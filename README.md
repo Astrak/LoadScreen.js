@@ -14,7 +14,7 @@ function init () {
 }
 ```
 
-Example at interascope.com. 
+Example at [interascope.com](https://www.interascope.com). 
 Visit on PC & mobile to appreciate the difference of compiling times and the UX improvement of displaying states.
 
 #Usage
