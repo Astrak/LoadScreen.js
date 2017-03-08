@@ -451,7 +451,8 @@ function LoadScreen ( renderer, style ) {
 			'position: relative;'+
 			'overflow: hidden;';
 
-		var half = style.size.indexOf( '%' ) > - 1 ? parseInt( style.size ) / 2 + '%' : parseInt( style.size ) / 2 + 'px';
+		var unit = style.size.indexOf( '%' ) > - 1 ? '%' : 'px', 
+			half = parseInt( style.size ) / 2 + unit;
 
 		infoContainer.style.cssText = ''+
 			'width: ' + style.size + ';'+
@@ -516,7 +517,7 @@ function LoadScreen ( renderer, style ) {
 		progressBarContainer.style.cssText = ''+
 			'background: ' + style.progressBarContainer + ';'+
 			'border: solid 1px ' + style.progressBarContainer + ';'+
-			'width: ' + style.size + '; height: 6px;'+
+			'width: 100%; height: 6px;'+
 			'box-sizing: border-box;'+
 			'position: relative;';
 

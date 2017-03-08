@@ -9,6 +9,10 @@ function init () {
     
     ...//regular scene initiation
 
+    //render the scene once to compile everything on the GPU (important for mobile)
+    renderer.render( scene, camera );
+
+    //then remove the load screen
     ls.remove( animate );
 
 }
@@ -20,7 +24,7 @@ Values are default :
 ```js
 var style = {
     type: 'bar',//main look. Also 'circle'. 'custom' empties the info container and lets you fill it
-    size: '100px',//width of the central info container
+    size: '100px',//width of the central info container, in px or in %
     background: '#ddd',
     progressBarContainer: '#bbb',
     progressBar: '#666',
@@ -80,10 +84,10 @@ resources = {
             path: 'path/to/geometry.json',
             fileSize: 9498,//in Ko
             //next four are optional
-            computeNormals: true,//call geometry.computeVertexNormals()
-            computeFlatNormals: true,//call geometry.computeFlatVertexNormals()
-            toBufferGeometry: true//force creation of a BufferGeometry
-            copyUv1toUv2: true,//for BufferGeometry only, for AO and lightmap use
+            computeNormals: false,//call geometry.computeVertexNormals()
+            computeFlatNormals: false,//call geometry.computeFlatVertexNormals()
+            toBufferGeometry: false//force creation of a BufferGeometry
+            copyUv1toUv2: false,//for BufferGeometry only, for AO and lightmap use
         }
     },
     objects: {
@@ -97,7 +101,7 @@ resources = {
             type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
             //specify any other threejs meshes or materials properties 
             aoMap: 'myTexture1',//assigned to material
-            castShadow: true,//assigned to the mesh
+            castShadow: false,//assigned to the mesh
             unknownOfThreejsParam : { 
                 title: 'blabla', 
                 content: 'blabla' 
@@ -108,7 +112,7 @@ resources = {
 
 //output
 resources.textures.myTexture1;//THREE.Texture
-resources.geometries.myGeometry1;//THREE.BufferGeometry
+resources.geometries.myGeometry1;//THREE.Geometry (some loaders can output a THREE.BufferGeometry)
 resources.objects.myObject1;//THREE.Mesh
 ```
 
