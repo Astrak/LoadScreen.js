@@ -12,8 +12,7 @@ function LoadScreen ( renderer, style ) {
 		removed = false,
 		tweenDuration = .5,
 		tween = { progress : 0 }, 
-		updateCBs = [], 
-		compileCBs = [],
+		updateCBs = [],
 		completeCBs = [];
 
 	var loadComplete;
@@ -81,18 +80,6 @@ function LoadScreen ( renderer, style ) {
 		return that;
 
 	};
-
-	this.compile = function () {
-
-		for ( var i = 0 ; i < arguments.length ; i++ )
-
-			if ( arguments[ i ] && typeof arguments[ i ] === 'function' ) 
-
-				compileCBs.push( arguments[ i ] );
-
-		return that;
-
-	}
 
 	this.remove = function ( cb ) {
 
@@ -611,10 +598,9 @@ function LoadScreen ( renderer, style ) {
 
 			var finish = function () { 
 
-				if ( style.textInfo ) {
+				if ( that.resources ) {
 
-					//wait next frame to display info before processing
-					if ( that.resources ) {
+					if ( style.textInfo ) {
 
 						textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 1 ];
 
@@ -622,17 +608,23 @@ function LoadScreen ( renderer, style ) {
 
 							processResources(); 
 
-							compile();
+							textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 2 ];
+
+							setTimeout( compile, 20 );
 
 						}, 20 );
+
+					} else {
+
+						processResources(); 
+
+						compile(); 
 
 					}
 
 				} else {
 
-					if ( that.resources ) processResources(); 
-
-					compile(); 
+					complete();
 
 				}
 
@@ -648,29 +640,25 @@ function LoadScreen ( renderer, style ) {
 
 	function compile () {
 
-		if ( compileCBs.length ) {
+		var LSScene = new THREE.Scene(), 
+			LSCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 2 ),
+			LSRT = new THREE.WebGLRenderTarget( 10, 10, { generateMipmaps: true } );
 
-			textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 2 ];
+		for ( var k in that.resources.objects )
 
-			setTimeout( function () { 
+			LSScene.add( that.resources.objects[ k ] );
 
-				console.time( 'Compiling duration' );
+		if ( verbose ) console.time( 'Compiling duration' );
 
-				for ( var i = 0 ; i < completeCBs.length ; i++ ) 
+		renderer.render( LSScene, LSCamera, LSRT );
 
-					compileCBs[ i ]();
+		for ( var k in that.resources.objects )
 
-				console.timeEnd( 'Compiling duration' );
+			LSScene.remove( that.resources.objects[ k ] );
 
-				complete();
+		if ( verbose ) console.timeEnd( 'Compiling duration' );
 
-			}, 20 );
-
-		} else {
-
-			complete();
-
-		}
+		complete();
 
 	}
 

@@ -3,7 +3,7 @@ A JS library to handle ThreeJS assets loading and improve UX with a load screen 
 ```js
 //create scene, camera, renderer, and insert renderer before
 
-var ls = new LoadScreen( renderer ).compile( render ).onComplete( init ).start( resources );
+var ls = new LoadScreen( renderer ).onComplete( init ).start( resources );
 
 function init () {
     
@@ -12,10 +12,6 @@ function init () {
     ls.remove( animate );
 
 }
-
-function render () { renderer.render( scene, camera ); }
-
-function animate () { requestAnimationFrame( animate ); render(); }
 ```
 
 #Usage
@@ -54,13 +50,10 @@ ls.setOptions( options );
 //4. Do things on progress events
 ls.onProgress( function ( progress ) { ... } );
 
-//5. Compile shaders. Compilation can take few seconds on mobile, so this can be important for UX
-ls.compile( function () { renderer.render( scene, camera ); } )//in threejs materials compile in the render queue
-
-//6. Define what you want to do when your previous work is done.
+//5. Define what you want to do when your previous work is done.
 ls.onComplete( init )//fired after the progress bar gets tweened to 1 and after processing and compiling
 
-//7. Let's go with a resources object (see next for its formatting)
+//6. Let's go with a resources object (see next for its formatting)
 ls.start( resources );
 
 //or if you want to handle the progress yourself
@@ -70,7 +63,7 @@ ls.start();
 ls.setProgress( 0.5 );
 //etc.
 
-//8. Remove the load screen !
+//7. Remove the load screen !
 ls.remove( animate );//the removal is tweened for better UX, animate will be fired on completion.
 ```
 
