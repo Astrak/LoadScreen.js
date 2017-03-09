@@ -565,7 +565,7 @@ function LoadScreen ( renderer, style ) {
 			"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
 			"	<circle fill=" + style.progressBarContainer + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 + parseInt( style.weight ) / 2 + 2 ).toString()+ "'/>"+
 			"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
-			"	<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(90)' r='80' stroke-dashoffset='501'/>"+
+			"	<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='80' stroke-dashoffset='1503'/>"+
 			"</svg>";
 
 		that.infoContainer.innerHTML = svg;
@@ -598,7 +598,7 @@ function LoadScreen ( renderer, style ) {
 
 		var updateStyle = function () { 
 
-			circleProgress.setAttribute( 'stroke-dashoffset', ( ( tween.progress + 1 ) * 502 ).toString() );
+			circleProgress.setAttribute( 'stroke-dashoffset', ( ( 1 - tween.progress ) * 502 ).toString() );
 
 			if ( style.sizeInfo ) sizeInfo.textContent = ( tween.progress * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
 
