@@ -107,7 +107,7 @@ function LoadScreen ( renderer, style ) {
 
 		} else {
 
-			end();
+			end( cb );
 
 		}
 
@@ -655,7 +655,7 @@ function LoadScreen ( renderer, style ) {
 
 				if ( that.resources ) {
 
-					if ( style.textInfo ) {
+					if ( style.type !== 'custom' && style.textInfo ) {
 
 						textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 1 ];
 
