@@ -685,7 +685,8 @@ function LoadScreen ( renderer, style ) {
 
 			};
 
-			if ( style.type !== 'custom' ) setTimeout( finish, tweenDuration * 1000 );
+			//wait for last tween end + frame interval for low mobiles
+			if ( style.type !== 'custom' ) setTimeout( finish, tweenDuration * 1000 + 50 );
 			
 			else finish();
 
