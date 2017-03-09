@@ -119,13 +119,10 @@ resources.objects.myObject1;//THREE.Mesh
 ```
 
 #Roadmap
-So much, I just began.
+* Support other geometries formats than threejs .json
 * code the 'forcedStart' parameter
-* handle all style parameters
-* circle type
 * check glTF resources organization for possible inspiration
-* handle other loaders
-* add fancy loaders
+* add fancy loader types
 * remove TweenLite ? depends on loaders animations.
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
 * second progress bar at top of screen for assets loading after start
