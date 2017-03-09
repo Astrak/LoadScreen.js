@@ -30,10 +30,10 @@ var style = {
     background: '#333',
     progressBarContainer: '#444',
     progressBar: '#fb0',
-    weight: '6px',//weight of the progress element in pixels
+    weight: '6px',//weight of the progress element, in px ('bar' type) or svg units ('circular')
     infoColor: '#666',
     sizeInfo: true,
-    textInfo: [ 'Loading', 'Processing', 'Compiling' ]//Can be set to a single string or to false
+    textInfo: [ 'Loading', 'Processing', 'Compiling' ]//Can also be set to a single string or to false
 };
 var ls = new LoadScreen( renderer, style );
 
