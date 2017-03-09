@@ -15,6 +15,7 @@ function init () {
 }
 ```
 With those 2 lines you get the following :
+
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
 #Usage
