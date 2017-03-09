@@ -39,7 +39,7 @@ function LoadScreen ( renderer, style ) {
 
 	style = {
 		type: typeof style.type !== 'undefined' ? style.type : 'bar',
-		size: style.size ? style.size : '20%',
+		size: style.size ? style.size : '30%',
 		background: style.background ? style.background : '#333',
 		progressBarContainer: style.progressBarContainer ? style.progressBarContainer : '#444',
 		progressBar: style.progressBar ? style.progressBar : '#fb0',
@@ -695,9 +695,11 @@ function LoadScreen ( renderer, style ) {
 
 	function compile () {
 
+		//use renderer.compileMaterials( scene, camera ) in next threejs release
+
 		var LSScene = new THREE.Scene(), 
 			LSCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 2 ),
-			LSRT = new THREE.WebGLRenderTarget( 10, 10, { generateMipmaps: true } );
+			LSRT = new THREE.WebGLRenderTarget( 10, 10, { generateMipmaps: true } );//remove
 
 		for ( var k in that.resources.objects )
 
@@ -705,7 +707,7 @@ function LoadScreen ( renderer, style ) {
 
 		if ( verbose ) console.time( 'Compiling duration' );
 
-		renderer.render( LSScene, LSCamera, LSRT );
+		renderer.render( LSScene, LSCamera, LSRT );//replace here
 
 		for ( var k in that.resources.objects )
 
@@ -713,7 +715,7 @@ function LoadScreen ( renderer, style ) {
 
 		if ( verbose ) console.timeEnd( 'Compiling duration' );
 
-		LSRT.dispose();
+		LSRT.dispose();//remove
 
 		complete();
 
