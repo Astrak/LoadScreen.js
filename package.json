@@ -1,6 +1,6 @@
 {
   "name": "LoadScreen.js",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-concat": "^1.0.1",
