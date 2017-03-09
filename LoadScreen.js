@@ -39,7 +39,7 @@ function LoadScreen ( renderer, style ) {
 
 	style = {
 		type: typeof style.type !== 'undefined' ? style.type : 'bar',
-		size: style.size ? style.size : '30%',
+		size: style.size ? style.size : '20%',
 		background: style.background ? style.background : '#333',
 		progressBarContainer: style.progressBarContainer ? style.progressBarContainer : '#444',
 		progressBar: style.progressBar ? style.progressBar : '#fb0',
@@ -67,7 +67,7 @@ function LoadScreen ( renderer, style ) {
 
 				var mTop = - parseInt( getComputedStyle( that.infoContainer.lastElementChild, null ).height ) / 2;
 
-				that.infoContainer.lastElementChild.style.marginTop = marginTop + 'px';
+				that.infoContainer.lastElementChild.style.marginTop = mTop + 'px';
 
 			}
 
@@ -562,10 +562,10 @@ function LoadScreen ( renderer, style ) {
 	function makeCircularProgress () {
 
 		var svg = ""+
-			"<svg style='width:" + style.width + ";' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
+			"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
 			"	<circle fill=" + style.progressBarContainer + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 + parseInt( style.weight ) / 2 + 2 ).toString()+ "'/>"+
 			"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
-			"	<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(90)' r='80' stroke-dashoffset='953'/>"+
+			"	<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(90)' r='80' stroke-dashoffset='501'/>"+
 			"</svg>";
 
 		that.infoContainer.innerHTML = svg;
@@ -582,7 +582,7 @@ function LoadScreen ( renderer, style ) {
 			var textContainer = document.createElement( 'div' );
 
 			textContainer.style.cssText = ''+
-				'width: 100%; left: 50%;'+
+				'width: 100%; left: 50%; top: 50%;'+
 				'margin-left: -50%;'+
 				'position: absolute;';
 
