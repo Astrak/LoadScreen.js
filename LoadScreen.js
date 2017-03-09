@@ -39,7 +39,7 @@ function LoadScreen ( renderer, style ) {
 
 	style = {
 		type: typeof style.type !== 'undefined' ? style.type : 'bar',
-		size: style.size ? style.size : '200px',
+		size: style.size ? style.size : '150px',
 		background: style.background ? style.background : '#333',
 		progressBarContainer: style.progressBarContainer ? style.progressBarContainer : '#444',
 		progressBar: style.progressBar ? style.progressBar : '#fb0',

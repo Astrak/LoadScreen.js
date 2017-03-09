@@ -26,7 +26,7 @@ Methods are chainable, except `remove` and `setProgress`. Values are default :
 //complete style optional argument, values are default.
 var style = {
     type: 'bar',//main look. Also 'circular'. 'custom' empties the info container and lets you fill it
-    size: '200px',//width of the central info container, in px or in %
+    size: '150px',//width of the central info container, in px or in %
     background: '#333',
     progressBarContainer: '#444',
     progressBar: '#fb0',
