@@ -1,5 +1,6 @@
 # LoadScreen.js
-A JS library to handle ThreeJS assets loading and improve UX with a load screen and progress indicator. Enjoy waiting.
+A JS library to handle ThreeJS assets loading and improve UX with a load screen and progress indicator. 
+Enjoy waiting.
 ```js
 //create scene, camera, renderer, and insert renderer before
 
@@ -12,6 +13,8 @@ function init () {
     ls.remove( animate );
 
 }
+With those 2 lines you get the following :
+![Default result](https://github.com/Astrak/LoadScreen.js/blob/master/default_result.gif)
 ```
 
 Example at [interascope.com](https://www.interascope.com). 
