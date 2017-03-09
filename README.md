@@ -13,12 +13,9 @@ function init () {
     ls.remove( animate );
 
 }
+```
 With those 2 lines you get the following :
 ![Default result](https://github.com/Astrak/LoadScreen.js/blob/master/default_result.gif)
-```
-
-Example at [interascope.com](https://www.interascope.com). 
-Visit on PC & mobile to appreciate the difference of compiling times and the UX improvement of displaying states.
 
 #Usage
 ##Full pattern
