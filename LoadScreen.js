@@ -26,7 +26,7 @@ function LoadScreen ( renderer, style ) {
 	var gLoaders = {},
 		tLoaders = {};
 
-	var ouput = {};
+	var output = {};
 
 	var	textures = {}, geometries = {}, texSum = 0, geoSum = 0;
 
@@ -270,7 +270,7 @@ function LoadScreen ( renderer, style ) {
 
 	function loadGeometry ( p ) {
 
-		var d = that.resources.textures[ p ],
+		var d = that.resources.geometries[ p ],
 			arr = d.path.split( '.' ),
 			ext = arr[ arr.length - 1 ];
 
