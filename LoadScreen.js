@@ -11,8 +11,7 @@ function LoadScreen ( renderer, style ) {
 		progress = 0,
 		removed = false,
 		tweenDuration = .5,
-		tween = { progress : 0, opacity: 1 }, 
-		tweens = [],
+		tweens = {},
 		updateCBs = [],
 		completeCBs = [];
 
@@ -98,14 +97,17 @@ function LoadScreen ( renderer, style ) {
 
 		if ( style.type !== 'custom' ) {
 
-			tweens.push( { 
+			animate();
+
+			tweens.disappear = { 
 				key: 'opacity', 
 				duration: tweenDuration, 
 				targetValue: 0, 
-				initialValue: 1, 
-				onUpdate: function () { that.infoContainer.style.opacity = tween.opacity; },
+				initialValue: 1,
+				value: 1, 
+				onUpdate: function () { that.infoContainer.style.opacity = tweens.disappear.value; },
 				onComplete: function () { cancelAnimationFrame( rAFID ); end( cb ); }
-			} );
+			};
 
 		} else {
 
@@ -161,22 +163,28 @@ function LoadScreen ( renderer, style ) {
 
 		rAFID = requestAnimationFrame( animate );
 
-		for ( var i = 0 ; i < tweens.length ; i ++ ) {
+		for ( k in tweens ) {
 
-			var t = tweens[ i ];
+			var t = tweens[ k ];
 
 			//increment for linear tweening
 			var incr = ( t.targetValue - t.initialValue ) / tweenDuration / 60;
 
-			tween[ t.key ] = t.targetValue >= t.initialValue ? Math.min( t.targetValue, tween[ t.key ] + incr ) : Math.max( t.targetValue, tween[ t.key ] + incr );
+			t.value = t.targetValue >= t.initialValue ? Math.min( t.targetValue, t.value + incr ) : Math.max( t.targetValue, t.value + incr );
 
 			if ( typeof t.onUpdate === 'function' ) t.onUpdate();
 
-			if ( tween[ t.key ] === t.targetValue ) {
+			if ( t.value === t.targetValue ) {
 
 				if ( typeof t.onComplete === 'function' ) t.onComplete();
 
-				if ( t.key !== 'progress' ) tweens.pop( i );
+				if ( k === 'progress' && t.value === 1 ) {
+
+					delete tweens.progress;
+
+					cancelAnimationFrame( rAFID );
+
+				}
 
 			}
 
@@ -460,6 +468,8 @@ function LoadScreen ( renderer, style ) {
 				//3. assign remaining properties to object or its userData
 				for ( var p in oA[ k ] ) {
 
+					console.log( p, k );
+
 					if ( typeof object[ p ] !== 'undefined' ) object[ p ] = oA[ k ][ p ];
 					else object.userData[ p ] = oA[ k ][ p ];
 
@@ -574,25 +584,26 @@ function LoadScreen ( renderer, style ) {
 
 		var updateStyle = function () { 
 
-			progressBar.style.width = ( 100 * tween.progress ).toString() + '%'; 
+			progressBar.style.width = ( 100 * tweens.progress.value ).toString() + '%'; 
 
-			if ( style.sizeInfo ) sizeInfo.textContent = ( tween.progress * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
+			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
 
 		};
 
-		var l = tweens.push( { 
+		tweens.progress = { 
 			key: 'progress', 
 			duration: tweenDuration, 
 			targetValue: progress, 
 			initialValue: 0, 
+			value: 0,
 			onUpdate: updateStyle
-		} );
+		};
 
 		updateCBs.push( function () { 
 
-			tweens[ l - 1 ].initialValue = tween.progress;
-			tweens[ l - 1 ].targetValue = progress;
-			tweens[ l - 1 ].duration += tweenDuration;
+			tweens.progress.initialValue = tweens.progress.value;
+			tweens.progress.targetValue = progress;
+			tweens.progress.duration += tweenDuration;
 
 		});
 
@@ -638,25 +649,26 @@ function LoadScreen ( renderer, style ) {
 
 		var updateStyle = function () { 
 
-			circleProgress.setAttribute( 'stroke-dashoffset', ( ( 1 - tween.progress ) * 502 ).toString() );
+			circleProgress.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
 
-			if ( style.sizeInfo ) sizeInfo.textContent = ( tween.progress * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
+			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
 
 		};
 
-		var l = tweens.push( { 
+		tweens.progress = { 
 			key: 'progress', 
 			duration: tweenDuration, 
 			targetValue: progress, 
 			initialValue: 0, 
+			value: 0,
 			onUpdate: updateStyle
-		} );
+		};
 
 		updateCBs.push( function () { 
 
-			tweens[ l - 1 ].initialValue = tween.progress;
-			tweens[ l - 1 ].targetValue = progress;
-			tweens[ l - 1 ].duration += tweenDuration;
+			tweens.progress.initialValue = tweens.progress.value;
+			tweens.progress.targetValue = progress;
+			tweens.progress.duration += tweenDuration;
 
 		});
 
@@ -735,8 +747,9 @@ function LoadScreen ( renderer, style ) {
 
 			};
 
-			//wait for last tween end + frame interval for low mobiles
-			if ( style.type !== 'custom' ) setTimeout( finish, tweenDuration * 1000 + 50 );
+			if ( style.type !== 'custom' ) 
+
+				tweens.progress.onComplete = function () { if ( tweens.progress.value === 1 ) finish(); };
 			
 			else finish();
 
