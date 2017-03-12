@@ -123,12 +123,13 @@ resources.objects.myObject1;//THREE.Mesh
 * code the 'forcedStart' parameter
 * check glTF resources organization for possible inspiration
 * add fancy loader types
-* remove TweenLite ? depends on loaders animations.
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
 * second progress bar at top of screen for assets loading after start
 * add setStyle method for another style if further calls
 * webgl loader instead of html ?
 * extend to BabylonJS
+* npm package
+* react component
 
 #License
 MIT
@@ -136,4 +137,3 @@ MIT
 #Dependencies : 
 * Threejs
 * Threejs loaders needed for your files
-* TweenLite

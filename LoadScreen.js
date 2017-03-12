@@ -11,9 +11,12 @@ function LoadScreen ( renderer, style ) {
 		progress = 0,
 		removed = false,
 		tweenDuration = .5,
-		tween = { progress : 0 }, 
+		tween = { progress : 0, opacity: 1 }, 
+		tweens = [],
 		updateCBs = [],
 		completeCBs = [];
+
+	var rAFID;
 
 	var loadComplete;
 
@@ -55,7 +58,7 @@ function LoadScreen ( renderer, style ) {
 
 	this.start = function ( resources ) {
 
-		if ( style !== false ) {
+		if ( style !== 'custom' ) {
 
 			that.domElement.appendChild( that.infoContainer );
 
@@ -70,6 +73,8 @@ function LoadScreen ( renderer, style ) {
 				that.infoContainer.lastElementChild.style.marginTop = mTop + 'px';
 
 			}
+
+			animate();
 
 		}
 
@@ -93,17 +98,14 @@ function LoadScreen ( renderer, style ) {
 
 		if ( style.type !== 'custom' ) {
 
-			var disappear = { opacity: 1, };
-
-			TweenLite.to( 
-				disappear, 
-				tweenDuration, 
-				{ 
-					opacity: 0,
-					onUpdate: function () { that.infoContainer.style.opacity = disappear.opacity; }, 
-					onComplete: function () { end( cb ); }
-				}
-			);
+			tweens.push( { 
+				key: 'opacity', 
+				duration: tweenDuration, 
+				targetValue: 0, 
+				initialValue: 1, 
+				onUpdate: function () { that.infoContainer.style.opacity = tween.opacity; },
+				onComplete: function () { cancelAnimationFrame( rAFID ); end( cb ); }
+			} );
 
 		} else {
 
@@ -154,6 +156,33 @@ function LoadScreen ( renderer, style ) {
 		return that;
 
 	};
+
+	function animate () {
+
+		rAFID = requestAnimationFrame( animate );
+
+		for ( var i = 0 ; i < tweens.length ; i ++ ) {
+
+			var t = tweens[ i ];
+
+			//increment for linear tweening
+			var incr = ( t.targetValue - t.initialValue ) / tweenDuration / 60;
+
+			tween[ t.key ] = t.targetValue >= t.initialValue ? Math.min( t.targetValue, tween[ t.key ] + incr ) : Math.max( t.targetValue, tween[ t.key ] + incr );
+
+			if ( typeof t.onUpdate === 'function' ) t.onUpdate();
+
+			if ( tween[ t.key ] === t.targetValue ) {
+
+				if ( typeof t.onComplete === 'function' ) t.onComplete();
+
+				if ( t.key !== 'progress' ) tweens.pop( i );
+
+			}
+
+		}
+
+	}
 
 	function end ( cb ) {
 
@@ -551,9 +580,19 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
+		var l = tweens.push( { 
+			key: 'progress', 
+			duration: tweenDuration, 
+			targetValue: progress, 
+			initialValue: 0, 
+			onUpdate: updateStyle
+		} );
+
 		updateCBs.push( function () { 
 
-			TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: updateStyle } );
+			tweens[ l - 1 ].initialValue = tween.progress;
+			tweens[ l - 1 ].targetValue = progress;
+			tweens[ l - 1 ].duration += tweenDuration;
 
 		});
 
@@ -561,6 +600,7 @@ function LoadScreen ( renderer, style ) {
 
 	function makeCircularProgress () {
 
+		//shorter than using the namespace elements creation API.
 		var svg = ""+
 			"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
 			"	<circle fill=" + style.progressBarContainer + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 + parseInt( style.weight ) / 2 + 2 ).toString()+ "'/>"+
@@ -604,9 +644,19 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
+		var l = tweens.push( { 
+			key: 'progress', 
+			duration: tweenDuration, 
+			targetValue: progress, 
+			initialValue: 0, 
+			onUpdate: updateStyle
+		} );
+
 		updateCBs.push( function () { 
 
-			TweenLite.to( tween, tweenDuration, { progress: progress, onUpdate: updateStyle } );
+			tweens[ l - 1 ].initialValue = tween.progress;
+			tweens[ l - 1 ].targetValue = progress;
+			tweens[ l - 1 ].duration += tweenDuration;
 
 		});
 
