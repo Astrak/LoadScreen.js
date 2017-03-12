@@ -24,7 +24,7 @@ function LoadScreen ( renderer, style ) {
 	var textInfo, sizeInfo;
 
 	var gLoaders = {},
-		tLoader;
+		tLoaders = {};
 
 	var ouput = {};
 
@@ -270,56 +270,51 @@ function LoadScreen ( renderer, style ) {
 
 	function loadGeometry ( p ) {
 
-		var d = that.resources.geometries[ p ];
+		var d = that.resources.textures[ p ],
+			arr = d.path.split( '.' ),
+			ext = arr[ arr.length - 1 ];
 
-		//determine loader (todo, JSONLoader for now)
-		if ( d.path.indexOf( '.json' ) > -1 ) {
+		getGeometryLoader( ext ).load( 
+			d.path, 
+			function ( g ) {
 
-			if ( ! gLoaders.json ) gLoaders.json = new THREE.JSONLoader();
+				g.name = p;
 
-			gLoaders.json.load( 
-				d.path, 
-				function ( g ) {
+				output.geometries[ p ] = g;
 
-					g.name = p;
+				geometries[ p ].prog = 1;
 
-					output.geometries[ p ] = g;
+				counter++;
 
-					geometries[ p ].prog = 1;
+				updateProgress({ geometry: true, name: p, progress: 1 });
 
-					counter++;
+				update( true );
 
-					updateProgress({ geometry: true, name: p, progress: 1 });
+			}, 
+			function ( e ) {
 
-					update( true );
+				var pr = e.loaded / e.total;
 
-				}, 
-				function ( e ) {
+				geometries[ p ].prog = pr;
 
-					var pr = e.loaded / e.total;
+				if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
-					geometries[ p ].prog = pr;
+					updateProgress({ geometry: true, name: p, progress: pr });
 
-					if ( pr !== 1 ) //otherwise onLoad will be called anyway
+				update();
 
-						updateProgress({ geometry: true, name: p, progress: pr });
-
-					update();
-
-				}
-			);
-
-		}
+			}
+		);
 
 	}
 
 	function loadTexture ( p ) {
 
-		var d = that.resources.textures[ p ];
+		var d = that.resources.textures[ p ],
+			arr = d.path.split( '.' ),
+			ext = arr[ arr.length - 1 ];
 
-		if ( ! tLoader ) tLoader = new THREE.TextureLoader();
-
-		tLoader.load( 
+		getTextureLoader( ext ).load( 
 			d.path, 
 			function ( t ) {
 
@@ -357,6 +352,27 @@ function LoadScreen ( renderer, style ) {
 
 			}
 		);
+
+	}
+
+	function getTextureLoader ( ext ) {
+
+		switch ( ext ) {
+			case 'jpg': 
+			case 'png': 
+				if ( ! tLoaders.main ) tLoaders.main = new THREE.TextureLoader();
+				return tLoaders.main;
+		}
+
+	}
+
+	function getGeometryLoader ( ext ) {
+
+		switch ( ext ) {
+			case 'json': 
+				if ( ! gLoaders.json ) gLoaders.json = new THREE.JSONLoader();
+				return gLoaders.json;
+		}
 
 	}
 

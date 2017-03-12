@@ -120,6 +120,8 @@ resources.objects.myObject1;//THREE.Mesh
 
 #Roadmap
 * Support other geometries formats than threejs .json
+* Support other texture loaders like HDR
+* Support cubemaps and pmrem
 * code the 'forcedStart' parameter
 * check glTF resources organization for possible inspiration
 * add fancy loader types
