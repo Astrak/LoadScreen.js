@@ -68,6 +68,19 @@ ls.setProgress( 0.5 );//etc.
 //Remove the load screen ! Removal is tweened so we define a callback
 ls.remove( animate );
 ```
+##Support
+###Texture loaders
+* THREE.TextureLoader
+###Geometry loaders
+* THREE.JSONLoader (blender exporter)
+* THREE.PLYLoader
+* THREE.CTMLoader
+* THREE.VTKLoader
+* THREE.STLLoader
+###Object loaders
+todo
+###Scene loaders
+todo
 
 ##Format your resources
 ```js
@@ -99,7 +112,7 @@ resources = {
                 color: 0xff8899, 
                 side: THREE.DoubleSide 
             }),
-            //next is optional
+            //next are optional
             type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
             //specify any other threejs meshes or materials properties 
             aoMap: 'myTexture1',//assigned to material
@@ -119,8 +132,7 @@ resources.objects.myObject1;//THREE.Mesh
 ```
 
 #Roadmap
-* Support other geometries formats than threejs .json
-* Support other texture loaders like HDR
+* Support more formats
 * Support cubemaps and pmrem
 * code the 'forcedStart' parameter
 * check glTF resources organization for possible inspiration

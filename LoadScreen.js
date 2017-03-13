@@ -370,8 +370,20 @@ function LoadScreen ( renderer, style ) {
 
 		switch ( ext ) {
 			case 'json': 
-				if ( ! gLoaders.json ) gLoaders.json = new THREE.JSONLoader();
+				gLoaders.json = gLoaders.json || new THREE.JSONLoader();
 				return gLoaders.json;
+			case 'ply': 
+				gLoaders.ply = gLoaders.ply || new THREE.PLYLoader();
+				return gLoaders.ply;
+			case 'stl': 
+				gLoaders.stl = gLoaders.stl || new THREE.STLLoader();
+				return gLoaders.stl;
+			case 'ctm': 
+				gLoaders.ctm = gLoaders.ctm || new THREE.CTMLoader();
+				return gLoaders.ctm;
+			case 'vtk': 
+				gLoaders.vtk = gLoaders.vtk || new THREE.VTKLoader();
+				return gLoaders.vtk;
 		}
 
 	}
