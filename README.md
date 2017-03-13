@@ -68,25 +68,6 @@ ls.setProgress( 0.5 );//etc.
 //Remove the load screen ! Removal is tweened so we define a callback
 ls.remove( animate );
 ```
-##Support
-###Texture loaders
-* THREE.TextureLoader
-
-###Geometry loaders
-* THREE.JSONLoader (blender exporter)
-* THREE.PLYLoader
-* THREE.CTMLoader
-* THREE.VTKLoader
-* THREE.STLLoader
-
-###Object loaders
-todo
-
-###Scene loaders
-todo
-
-###Cubemap loaders
-todo
 
 ##Format your resources
 ```js
@@ -136,6 +117,47 @@ resources.textures.myTexture1;//THREE.Texture
 resources.geometries.myGeometry1;//THREE.Geometry (some loaders can output a THREE.BufferGeometry)
 resources.objects.myObject1;//THREE.Mesh
 ```
+
+##Support
+###Texture loaders
+- [x] THREE.TextureLoader
+
+###Material loaders
+- [ ] THREE.MaterialLoader
+
+###Geometry loaders
+- [x] THREE.JSONLoader (threejs blender exporter)
+- [x] THREE.PLYLoader
+- [x] THREE.CTMLoader
+- [x] THREE.VTKLoader
+- [x] THREE.STLLoader
+- [ ] THREE.BufferGeometryLoader
+
+###Object loaders
+- [ ] THREE.ThreeMFLoader
+- [ ] THREE.AMFLoader
+- [ ] THREE.AssimpLoader
+- [ ] THREE.AssimpJSONLoader
+- [ ] THREE.AWDLoader
+- [ ] THREE.MMDLoader
+- [ ] THREE.PlayCanvasLoader
+- [ ] THREE.VRMLLoader
+- [ ] THREE.UTF8Loader
+- [ ] THREE.ObjectLoader
+
+###Scene loaders
+- [ ] THREE.OBJLoader
+- [ ] THREE.FBXLoader
+- [ ] THREE.ColladaLoader
+- [ ] THREE.ColladaLoader (2)
+- [ ] THREE.BabylonLoader
+
+###Cubemap loaders
+- [ ] THREE.CubeTextureLoader
+- [ ] THREE.HDRCubeTextureLoader
+
+###Animation loaders
+- [ ] THREE.BVHLoader
 
 #Roadmap
 * Support more formats
