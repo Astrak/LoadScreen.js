@@ -71,15 +71,21 @@ ls.remove( animate );
 ##Support
 ###Texture loaders
 * THREE.TextureLoader
+
 ###Geometry loaders
 * THREE.JSONLoader (blender exporter)
 * THREE.PLYLoader
 * THREE.CTMLoader
 * THREE.VTKLoader
 * THREE.STLLoader
+
 ###Object loaders
 todo
+
 ###Scene loaders
+todo
+
+###Cubemap loaders
 todo
 
 ##Format your resources
