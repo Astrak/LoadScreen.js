@@ -24,8 +24,6 @@ This creates the following default :
 ## Full pattern
 Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
-//Load screen creation
-//style optional argument, values are default.
 var style = {
     type: 'bar',//main look. Also 'circular'. 'custom' empties the info container
     size: '150px',//width of the central info container, in px or in %
@@ -38,31 +36,36 @@ var style = {
     textInfo: [ 'Loading', 'Processing', 'Compiling' ]//Can also be set to a single string or to false
 };
 
-var ls = new LoadScreen( renderer, style );//style is an optional argument
-
-//Resize is available. Can be a bit overkill on smartphones for loads < 5-6 seconds.
-window.addEventListener( 'resize', function () { 
-	renderer.setSize( width, height ); 
-	ls.setSize( width, height ); 
-});
-
 var options = {
     forcedStart: false,//start loading even if the canvas is out of sight (usually bad practice)
     verbose: false,//logs progress, process and compile duration + total load screen duration
     tweenDuration: .5//progress and removal tweens durations
 };
-ls.setOptions( options );
 
-ls.onProgress( function ( progress ) { ... } );//can be used to update a custom UI
+var ls = new LoadScreen( renderer, style );//style is optional
 
-ls.onComplete( init );//fired after processing and compiling
+//Resize is available. Can be a bit overkill on smartphones for loads < 5-6 seconds.
+window.addEventListener( 'resize', function () { 
+    renderer.setSize( width, height ); 
+    ls.setSize( width, height ); 
+});
 
-ls.start( assets );//loads > processes > compiles assets
-ls.start();//just add the info UI
-ls.setProgress( 0.5 );//for big script progress or just testing
+ls.setOptions( options )
 
-//when ready
-ls.remove( animate );//Removal is tweened so next action is defined in a callback
+.onProgress( function ( progress ) { ... } )//can be used to update a custom UI
+
+.onComplete( init )//after processing and compiling
+
+.start( assets );//load > process > compile assets
+
+//or
+.start();//just add the info UI
+
+//then for big script progress or just testing
+ls.setProgress( 0.5 );
+
+//finally at the end of the onComplete callback
+ls.remove( animate );//Removal is tweened so next action is a callback
 ```
 
 ## Assets declaration
