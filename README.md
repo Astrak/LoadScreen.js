@@ -21,6 +21,7 @@ This creates the following default :
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
 #Usage
+
 ##Full pattern
 Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
@@ -72,6 +73,7 @@ ls.remove( animate );
 ```
 
 ##Assets declaration
+
 ```js
 //input
 assets = {};
