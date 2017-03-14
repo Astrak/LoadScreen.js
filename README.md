@@ -20,6 +20,7 @@ This creates the following default :
 
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
+
 #Usage
 
 ##Full pattern
