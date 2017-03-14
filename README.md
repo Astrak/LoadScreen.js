@@ -1,6 +1,5 @@
 # LoadScreen.js
-A JS library to handle ThreeJS assets loading.
-Changes the callback hell to a declarative style, and improves UX with a load screen and progress indicator.
+A JS library to reduce ThreeJS assets coding and provide different load screens.
 
 ```js
 //create and insert renderer before
@@ -9,7 +8,7 @@ var ls = new LoadScreen( renderer ).onComplete( init ).start( assets );
 
 function init () {
     
-    ...//regular scene initiation
+    ...//scene initiation
 
     ls.remove( animate );
 
@@ -88,12 +87,13 @@ assets.textures = {
         tryKTX: false//Khronos spec.
     }
 };
+
 //after loading :
 assets.textures.myTexture1;//THREE.Texture
 ```
 
 ### Geometries
-Specify geometry files for geometry loaders. They will be loaded second. A THREE.Geometry can also be declared and won't be processed.
+Specify geometry files for geometry loaders. They will be loaded second.
 ```js
 assets.geometries = {
     myGeometry1: {
@@ -106,39 +106,44 @@ assets.geometries = {
         }
     }
 };
+
 //after loading :
 assets.geometries.myGeometry1;//THREE.Geometry
+
+//also simply
+assets.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//won't be processed
 ```
 
 ### Objects
+Specify object to load or to create from assets. Loaded in third place.
 ```js
-assets.objects = {};
-```
-Specify meshes to create if any. Two possibilities.
+assets.objects = {
+    myObject1: {//1. load from file
+        path: 'path/to/object.wrl',
+        fileSize: 3846//Ko
+    },
+    myObject2: {//2. create from asset
+        geometry: 'myGeometry1',//use geometry asset 'myGeometry1'
+        material: new THREE.MeshPhongMaterial()
+    },
+    myObject3: {//3. or create from scratch
+        geometry: new THREE.PlaneBufferGeometry( 5, 3, 9 ),
+        material: new THREE.MeshBasicMaterial()
+    }
+    myObject4: new THREE.Mesh(...);//won't be processed
+};
 
-#### Object from file
-Load files with object loaders, as for geometries and textures
-```js
-assets.objects.myObject1 = {
-    path: 'path/to/object.wrl',
-    fileSize: 3846//Ko
+//other parameters
+assets.objects.myObject5 = {
+    path: 'path/to/object.amf'
+    color: 0x33ff89,//assigned to material
+    map: 'myTexture1',//assigned to material
+    castShadow: true,//assigned to mesh
+    info: 'This is my object',//unknown > assigned to mesh.userData
+    onComplete: function ( object ) {//onComplete available for any further change
+        object.geometry.computeBoundingBox();
+    }
 };
-```
-
-#### Or object from assets
-From an existing geometry
-```js
-assets.objects.myObject2 = {
-    geometry: 'myGeometry1',//assets.geometry.myGeometry1 will be used for object creation
-    material: new THREE.MeshPhongMaterial()
-};
-//A geometry instance can simply be passed too.
-assets.objects.myObject2 = {
-    geometry: new THREE.BoxGeometry( 5, 5, 5 ),
-    material: new THREE.MeshPhongMaterial()
-};
-//Or even
-assets.objects.myObject2 = new THREE.Mesh(...);//nothing will happen
 ```
 
 #### Options
@@ -162,16 +167,6 @@ onComplete: function ( object ) {
 
 #### Example
 ```js
-assets.objects.myObject1 = {
-    path: 'path/to/object.amf'
-    roughness: 1,
-    roughnessMap: 'myTexture1',
-    castShadow: true,
-    info: 'This is my object',
-    onComplete: function ( object ) {
-        object.geometry.computeBoundingBox();
-    }
-};
 ```
 
 ### Scene
