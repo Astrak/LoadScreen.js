@@ -29,6 +29,8 @@ function LoadScreen ( renderer, style ) {
 
 	var output = {};
 
+	var extensions, support = {};
+
 	var	textures = {}, geometries = {}, objects = {}, texSum = 0, geoSum = 0, objSum = 0;
 
 	/* API */
@@ -246,9 +248,13 @@ function LoadScreen ( renderer, style ) {
 
 			for ( var k in r.geometries ) {
 
-				output.geometries[ k ] = {};
-				geometries[ k ] = { prog: 0, fileSize: r.geometries[ k ].fileSize };
-				geoSum += r.geometries[ k ].fileSize;
+				if ( r.geometries[ k ].path && r.geometries[ k ].fileSize ) {//avoids real geometries & force passing fileSize
+
+					output.geometries[ k ] = {};
+					geometries[ k ] = { prog: 0, fileSize: r.geometries[ k ].fileSize };
+					geoSum += r.geometries[ k ].fileSize;
+
+				}
 
 			}
 
@@ -260,7 +266,7 @@ function LoadScreen ( renderer, style ) {
 
 			for ( var k in r.objects ) {
 
-				if ( r.objects[ k ].path ) {
+				if ( r.objects[ k ].path && r.objects[ k ].fileSize ) {//avoids objects to build & force passing fileSize
 
 					output.objects[ k ] = {};
 					objects[ k ] = { prog: 0, fileSize: r.objects[ k ].fileSize };
@@ -274,11 +280,6 @@ function LoadScreen ( renderer, style ) {
 		}
 
 		//2. Load files
-		if ( r.geometries ) 
-			
-			for ( var k in r.geometries ) 
-
-				loadGeometry( k );
 
 		if ( r.textures ) 
 			
@@ -286,11 +287,19 @@ function LoadScreen ( renderer, style ) {
 
 				loadTexture( k );
 
+		if ( r.geometries ) 
+			
+			for ( var k in r.geometries ) 
+
+				if ( r.geometries[ k ].path && r.geometries[ k ].fileSize )
+
+					loadGeometry( k );
+
 		if ( r.objects ) 
 			
 			for ( var k in r.objects ) 
 
-				if ( r.objects[ k ].path ) 
+				if ( r.objects[ k ].path && r.objects[ k ].fileSize ) 
 
 					loadObject( k );
 
@@ -338,11 +347,9 @@ function LoadScreen ( renderer, style ) {
 
 	function loadTexture ( p ) {
 
-		var d = that.resources.textures[ p ],
-			arr = d.path.split( '.' ),
-			ext = arr[ arr.length - 1 ];
+		var d = that.resources.textures[ p ];
 
-		getTextureLoader( ext ).load( 
+		getTextureLoader( d ).load( 
 			d.path, 
 			function ( t ) {
 
@@ -388,9 +395,9 @@ function LoadScreen ( renderer, style ) {
 		/* TODO : handle animation & find how to transmit mixers */
 
 		var d = that.resources.objects[ p ],
-			arr = d.path.split( '.' ),
-			l = arr.length,
-			ext = arr[ l - 2 ] === 'assimp' ? arr[ l - 2 ] : arr[ l - 1 ];
+			a = d.path.split( '.' ),
+			l = a.length,
+			ext = a[ l - 2 ] === 'assimp' ? 'assimp.json' : a[ l - 1 ];
 
 		getObjectLoader( ext ).load( 
 			d.path, 
@@ -447,12 +454,6 @@ function LoadScreen ( renderer, style ) {
 			case 'assimp': 
 				if ( ! oLoaders.assimp ) oLoaders.assimp = new THREE.AssimpLoader();
 				return oLoaders.assimp;
-			case 'awd': 
-				if ( ! oLoaders.awd ) oLoaders.awd = new THREE.AWDLoader();
-				return oLoaders.awd;
-			case 'mmd': 
-				if ( ! oLoaders.mmd ) oLoaders.mmd = new THREE.MMDLoader();
-				return oLoaders.mmd;
 			case 'wrl': 
 			case 'wrz': 
 			case 'vrml': 
@@ -462,14 +463,48 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function getTextureLoader ( ext ) {
+	function getTextureLoader ( o ) {
 
-		switch ( ext ) {
-			case 'jpg': 
-			case 'png': 
-				tLoaders.main = tLoaders.main || new THREE.TextureLoader();
-				return tLoaders.main;
+		if ( o.tryPVR && getSupport( 'pvr' ) ) {//prefer pvr over ktx
+
+			tLoaders.pvr = tLoaders.pvr || new THREE.PVRLoader();
+
+			return tLoaders.pvr;
+
+		} else if ( o.tryKTX && getSupport( 'ktx' ) ) {
+
+			tLoaders.ktx = tLoaders.ktx || new THREE.KTXLoader();
+
+			return tLoaders.ktx;
+
+		} else {
+
+			tLoaders.main = tLoaders.main || new THREE.TextureLoader();
+
+			return tLoaders.main;
+
 		}
+
+	}
+
+	function getSupport ( ext ) {
+
+		if ( typeof support[ ext ] === 'undefined' ) {
+
+			extensions = extensions || renderer.context.getSupportedExtensions();
+
+			if ( ext === 'pvr' ) 
+
+				support[ ext ] = extensions.indexOf( 'WEBGL_compressed_texture_pvrtc' ) > -1 
+				|| extensions.indexOf( 'WEBKIT_WEBGL_compressed_texture_pvrtc' ) > -1;
+
+			else //ktx
+
+				support[ ext ] = extensions.indexOf( 'WEBGL_compressed_texture_etc1' ) > -1;
+
+		}
+
+		return support[ ext ];
 
 	}
 
@@ -533,13 +568,9 @@ function LoadScreen ( renderer, style ) {
 
 					oGA[ k ] = new THREE.BufferGeometry().fromGeometry( oGA[ k ] );
 
-				if ( gA[ k ].copyUv1ToUv2 && oGA[ k ].type === 'BufferGeometry' ) 
+				if ( gA[ k ].onComplete ) 
 
-					oGA[ k ].addAttribute( 'uv2', oGA[ k ].attributes.uv );
-
-				if ( gA[ k ].computeNormals ) oGA[ k ].computeVertexNormals();
-
-				if ( gA[ k ].computeFlatNormals ) oGA[ k ].computeFlatVertexNormals();
+					ga[ k ].onComplete( oGA[ k ] );
 
 				gA[ k ] = oGA[ k ];
 
