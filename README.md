@@ -115,14 +115,14 @@ assets.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//won't be proc
 ```
 
 ### Objects
-Specify object to load or to create from assets. Loaded in third place.
+Specify objects to load or to create from assets. Loaded in third place.
 ```js
 assets.objects = {
     myObject1: {//1. load from file
         path: 'path/to/object.wrl',
         fileSize: 3846//Ko
     },
-    myObject2: {//2. create from asset
+    myObject2: {//2. or create from asset
         geometry: 'myGeometry1',//use geometry asset 'myGeometry1'
         material: new THREE.MeshPhongMaterial()
     },
@@ -135,38 +135,16 @@ assets.objects = {
 
 //other parameters
 assets.objects.myObject5 = {
-    path: 'path/to/object.amf'
+    path: 'path/to/object.amf',
+    type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
     color: 0x33ff89,//assigned to material
-    map: 'myTexture1',//assigned to material
+    map: 'myTexture1',//asset assigned to material
     castShadow: true,//assigned to mesh
     info: 'This is my object',//unknown > assigned to mesh.userData
-    onComplete: function ( object ) {//onComplete available for any further change
+    onComplete: function ( object ) {//for any further change
         object.geometry.computeBoundingBox();
     }
 };
-```
-
-#### Options
-You can specify a rendering mode :
-```js
-type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
-```
-
-You can also add any other material or mesh parameter (they will be assigned automatically)
-```js
-aoMap: 'myTexture1',//asset.textures.myTexture1 assigned to material
-castShadow: false,//assigned to mesh
-unknownParam : { 
-    title: 'blabla', 
-    content: 'blabla' 
-},//assigned to mesh.userData.unknownParam
-onComplete: function ( object ) {
-    //further operations here : geometry change etc.
-}
-```
-
-#### Example
-```js
 ```
 
 ### Scene
