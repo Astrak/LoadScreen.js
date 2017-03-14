@@ -119,6 +119,7 @@ assets.objects = {};
 ```
 
 * Object from file
+
 Load files with object loaders, as for geometries and textures
 ```js
 assets.objects.myObject1 = {
@@ -128,6 +129,7 @@ assets.objects.myObject1 = {
 ```
 
 * Object from assets
+
 Or build it from an existing geometry
 ```js
 assets.objects.myObject2 = {
@@ -137,6 +139,7 @@ assets.objects.myObject2 = {
 ```
 
 * Options
+
 You can specify a rendering mode :
 ```js
 type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
