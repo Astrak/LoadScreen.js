@@ -118,7 +118,7 @@ Specify meshes to create if any. Two possibilities.
 assets.objects = {};
 ```
 
-* Object from file
+#### Object from file
 
 Load files with object loaders, as for geometries and textures
 ```js
@@ -128,7 +128,7 @@ assets.objects.myObject1 = {
 };
 ```
 
-* Object from assets
+#### Object from assets
 
 Or build it from an existing geometry
 ```js
@@ -138,7 +138,7 @@ assets.objects.myObject2 = {
 };
 ```
 
-* Options
+#### Options
 
 You can specify a rendering mode :
 ```js
