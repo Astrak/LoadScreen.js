@@ -22,7 +22,7 @@ This creates the following default :
 
 # Usage
 
-##Full pattern
+## Full pattern
 Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
 //Load screen creation
@@ -72,14 +72,14 @@ ls.setProgress( 0.5 );//etc.
 ls.remove( animate );
 ```
 
-##Assets declaration
+## Assets declaration
 
 ```js
 //input
 assets = {};
 ```
 
-###Textures
+### Textures
 Specify texture files if any. They will be loaded first and be accessible at their place, like `assets.textures.myTexture1`.
 ```js
 assets.textures = {
@@ -96,7 +96,7 @@ assets.textures = {
 };
 ```
 
-###Geometries
+### Geometries
 Specify geometry files for geometry loaders. They will be loaded second and be accessible at their place, like `assets.textures.myGeometry1`. You can also specify a geometry directly.
 ```js
 assets.geometries = {
@@ -112,7 +112,7 @@ assets.geometries = {
 };
 ```
 
-###Objects
+### Objects
 Specify meshes to create if any. Two possibilities.
 ```js
 assets.objects = {};
@@ -152,21 +152,21 @@ unknownParam : {
 }//assigned to mesh.userData.unknownParam
 ```
 
-###Scene
+### Scene
 todo
 
-##Support
+## Support
 Todo : gltf
 
-###Texture loaders
+### Texture loaders
 - [x] THREE.TextureLoader
 - [x] THREE.PVRLoader
 - [x] THREE.KTXLoader
 
-###Material loaders
+### Material loaders
 - [ ] THREE.MaterialLoader
 
-###Geometry loaders
+### Geometry loaders
 - [x] THREE.JSONLoader (threejs blender exporter)
 - [x] THREE.PLYLoader
 - [x] THREE.CTMLoader (`load` method)
@@ -174,7 +174,7 @@ Todo : gltf
 - [x] THREE.STLLoader
 - [ ] THREE.BufferGeometryLoader
 
-###Object loaders
+### Object loaders
 Animations not handled for now.
 - [x] THREE.ThreeMFLoader
 - [x] THREE.AMFLoader
@@ -187,7 +187,7 @@ Animations not handled for now.
 - [x] THREE.UTF8Loader
 - [x] THREE.ObjectLoader
 
-###Scene loaders
+### Scene loaders
 - [ ] THREE.AWDLoader
 - [ ] THREE.OBJLoader
 - [ ] THREE.FBXLoader
@@ -195,14 +195,14 @@ Animations not handled for now.
 - [ ] THREE.ColladaLoader (2)
 - [ ] THREE.BabylonLoader
 
-###Cubemap loaders
+### Cubemap loaders
 - [ ] THREE.CubeTextureLoader
 - [ ] THREE.HDRCubeTextureLoader
 
-###Animation loaders
+### Animation loaders
 - [ ] THREE.BVHLoader
 
-#Roadmap
+# Roadmap
 * Support more formats
 * Support cubemaps and pmrem
 * code the 'forcedStart' parameter
@@ -216,9 +216,9 @@ Animations not handled for now.
 * npm package
 * react component
 
-#License
+# License
 MIT
 
-#Dependencies : 
+# Dependencies : 
 * Threejs
 * Threejs loaders needed for your files
