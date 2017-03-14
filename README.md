@@ -15,6 +15,7 @@ function init () {
 
 }
 ```
+
 This creates the following default :
 
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
@@ -158,7 +159,7 @@ Todo : gltf
 ###Texture loaders
 - [x] THREE.TextureLoader
 - [x] THREE.PVRLoader
-- [ ] THREE.KTXLoader
+- [x] THREE.KTXLoader
 
 ###Material loaders
 - [ ] THREE.MaterialLoader
