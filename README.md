@@ -1,5 +1,5 @@
 # LoadScreen.js
-A JS library to reduce ThreeJS assets coding and provide different load screens.
+A JS library to simplify ThreeJS assets coding, manage their creation process and provide different load screens.
 
 ```js
 //create and insert renderer before
@@ -73,7 +73,10 @@ assets = {};
 ```
 
 ### Textures
-Specify texture files if any. They will be loaded first.
+Specify texture files if any. They will be loaded first. Supported texture loaders :
+- [x] THREE.TextureLoader
+- [x] THREE.PVRLoader
+- [ ] THREE.KTXLoader
 ```js
 assets.textures = {
     myTexture1: { 
@@ -93,7 +96,13 @@ assets.textures.myTexture1;//THREE.Texture
 ```
 
 ### Geometries
-Specify geometry files for geometry loaders. They will be loaded second.
+Specify geometry files for geometry loaders. They will be loaded second. Supported geometry loaders :
+- [x] THREE.JSONLoader (threejs blender exporter)
+- [x] THREE.PLYLoader
+- [x] THREE.CTMLoader (`load` method)
+- [x] THREE.VTKLoader
+- [x] THREE.STLLoader
+- [ ] THREE.BufferGeometryLoader
 ```js
 assets.geometries = {
     myGeometry1: {
@@ -115,7 +124,18 @@ assets.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//won't be proc
 ```
 
 ### Objects
-Specify objects to load or to create from assets. Loaded in third place.
+Specify objects to load or to create from assets. Loaded in third place. Supported object loaders :
+(animations not handled for now)
+- [x] THREE.ThreeMFLoader
+- [x] THREE.AMFLoader
+- [x] THREE.AssimpLoader
+- [x] THREE.AssimpJSONLoader
+- [ ] THREE.CTMLoader (`loadParts` method for multiple geometries)
+- [ ] THREE.MMDLoader
+- [x] THREE.ObjectLoader
+- [x] THREE.PlayCanvasLoader
+- [x] THREE.UTF8Loader
+- [x] THREE.VRMLLoader
 ```js
 assets.objects = {
     myObject1: {//1. load from file
@@ -142,47 +162,14 @@ assets.objects.myObject5 = {
     castShadow: true,//assigned to mesh
     info: 'This is my object',//unknown > assigned to mesh.userData
     onComplete: function ( object ) {//for any further change
-        object.geometry.computeBoundingBox();
+        //object.geometry.computeBoundingBox or anything
     }
 };
 ```
 
 ### Scene
-todo
-
-## Support
-Todo : gltf
-
-### Texture loaders
-- [x] THREE.TextureLoader
-- [x] THREE.PVRLoader
-- [x] THREE.KTXLoader
-
-### Material loaders
-- [ ] THREE.MaterialLoader
-
-### Geometry loaders
-- [x] THREE.JSONLoader (threejs blender exporter)
-- [x] THREE.PLYLoader
-- [x] THREE.CTMLoader (`load` method)
-- [x] THREE.VTKLoader
-- [x] THREE.STLLoader
-- [ ] THREE.BufferGeometryLoader
-
-### Object loaders
-Animations not handled for now.
-- [x] THREE.ThreeMFLoader
-- [x] THREE.AMFLoader
-- [x] THREE.AssimpLoader
-- [x] THREE.AssimpJSONLoader
-- [ ] THREE.MMDLoader
-- [ ] THREE.CTMLoader (`loadParts` method for multiple geometries)
-- [x] THREE.PlayCanvasLoader
-- [x] THREE.VRMLLoader
-- [x] THREE.UTF8Loader
-- [x] THREE.ObjectLoader
-
-### Scene loaders
+Todo.
+Supported scene loaders :
 - [ ] THREE.AWDLoader
 - [ ] THREE.OBJLoader
 - [ ] THREE.FBXLoader
@@ -190,16 +177,25 @@ Animations not handled for now.
 - [ ] THREE.ColladaLoader (2)
 - [ ] THREE.BabylonLoader
 
+### Material loaders
+Todo. 
+Supported material loaders :
+- [ ] THREE.MaterialLoader
+
 ### Cubemap loaders
+Todo. 
+Supported cubemap loaders :
 - [ ] THREE.CubeTextureLoader
 - [ ] THREE.HDRCubeTextureLoader
 
 ### Animation loaders
+Todo. 
+Supported animation loaders :
 - [ ] THREE.BVHLoader
 
 # Roadmap
-* Support more formats
-* Support cubemaps and pmrem
+* handle cubemaps, scenes, material, animation loaders + pmrem creation
+* support all loaders
 * code the 'forcedStart' parameter
 * check glTF resources organization for possible inspiration
 * add fancy loader types
