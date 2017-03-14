@@ -21,24 +21,24 @@ This creates the following default :
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
 # Usage
-
 ## Full pattern
 Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
 //Load screen creation
 //style optional argument, values are default.
 var style = {
-    type: 'bar',//main look. Also 'circular'. 'custom' empties the info container and lets you fill it
+    type: 'bar',//main look. Also 'circular'. 'custom' empties the info container
     size: '150px',//width of the central info container, in px or in %
     background: '#333',
     progressBarContainer: '#444',
     progressBar: '#fb0',
     weight: '6px',//weight of the progress element, in px ('bar' type) or svg units ('circular')
-    infoColor: '#666',
+    infoColor: '#666',//text color
     sizeInfo: true,
     textInfo: [ 'Loading', 'Processing', 'Compiling' ]//Can also be set to a single string or to false
 };
-var ls = new LoadScreen( renderer, style );
+
+var ls = new LoadScreen( renderer, style );//style is an optional argument
 
 //Resize is available. Can be a bit overkill on smartphones for loads < 5-6 seconds.
 window.addEventListener( 'resize', function () { 
@@ -46,36 +46,27 @@ window.addEventListener( 'resize', function () {
 	ls.setSize( width, height ); 
 });
 
-//Options can be passed.
 var options = {
     forcedStart: false,//start loading even if the canvas is out of sight (usually bad practice)
     verbose: false,//logs progress, process and compile duration + total load screen duration
-    tweenDuration: .5//progress and remove tweens durations
+    tweenDuration: .5//progress and removal tweens durations
 };
 ls.setOptions( options );
 
-//Do things on progress events. If style.type === 'custom', this can be used to update a custom UI
-ls.onProgress( function ( progress ) { ... } );
+ls.onProgress( function ( progress ) { ... } );//can be used to update a custom UI
 
-//Define callbacks to fire after loading, processing and compiling.
-ls.onComplete( init );
+ls.onComplete( init );//fired after processing and compiling
 
-//Ready ! Usually needs a assets object (see next for formatting). Appends infos to overlay.
-ls.start( assets );
+ls.start( assets );//loads > processes > compiles assets
+ls.start();//just add the info UI
+ls.setProgress( 0.5 );//for big script progress or just testing
 
-//or if you want to handle the progress yourself, for any case not handled in the library
-//(custom loader, display progress of a large script, or just for testing).
-ls.start();
-ls.setProgress( 0.5 );//etc.
-
-//Remove the load screen ! Removal is tweened so we define a callback
-ls.remove( animate );
+//when ready
+ls.remove( animate );//Removal is tweened so next action is defined in a callback
 ```
 
 ## Assets declaration
-
 ```js
-//input
 assets = {};
 ```
 
@@ -123,7 +114,6 @@ assets.objects = {};
 Specify meshes to create if any. Two possibilities.
 
 #### Object from file
-
 Load files with object loaders, as for geometries and textures
 ```js
 assets.objects.myObject1 = {
@@ -133,7 +123,6 @@ assets.objects.myObject1 = {
 ```
 
 #### Or object from assets
-
 From an existing geometry
 ```js
 assets.objects.myObject2 = {
@@ -150,7 +139,6 @@ assets.objects.myObject2 = new THREE.Mesh(...);//nothing will happen
 ```
 
 #### Options
-
 You can specify a rendering mode :
 ```js
 type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
@@ -170,7 +158,6 @@ onComplete: function ( object ) {
 ```
 
 #### Example
-
 ```js
 assets.objects.myObject1 = {
     path: 'path/to/object.amf'
