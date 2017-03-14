@@ -132,9 +132,9 @@ Specify objects to load or to create from assets. Loaded in third place. Support
 - [x] THREE.AssimpJSONLoader
 - [ ] THREE.CTMLoader (`loadParts` method for multiple geometries)
 - [ ] THREE.MMDLoader
-- [x] THREE.ObjectLoader
-- [x] THREE.PlayCanvasLoader
-- [x] THREE.UTF8Loader
+- [ ] THREE.ObjectLoader
+- [ ] THREE.PlayCanvasLoader
+- [ ] THREE.UTF8Loader
 - [x] THREE.VRMLLoader
 ```js
 assets.objects = {
