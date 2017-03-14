@@ -157,11 +157,13 @@ assets.objects = {
 assets.objects.myObject5 = {
     path: 'path/to/object.amf',
     type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
+    //specify any mesh or material property
     color: 0x33ff89,//assigned to material
     map: 'myTexture1',//asset assigned to material
     castShadow: true,//assigned to mesh
     info: 'This is my object',//unknown > assigned to mesh.userData
-    onComplete: function ( object ) {//for any further change
+    //for any further change
+    onComplete: function ( object ) {
         //object.geometry.computeBoundingBox or anything
     }
 };
