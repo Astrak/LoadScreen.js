@@ -226,23 +226,24 @@ function LoadScreen ( renderer, style ) {
 		//1. Count files to load and their total size, create the 'output' mirror of resources
 		if ( r.textures ) {
 
-			nFiles += Object.keys( r.textures ).length;
-
 			output.textures = {};
 
 			for ( var k in r.textures ) {
 
-				output.textures[ k ] = {};
-				textures[ k ] = { prog: 0, fileSize: r.textures[ k ].fileSize };
-				texSum += r.textures[ k ].fileSize;
+				if ( r.geometries[ k ].path && r.geometries[ k ].fileSize ) {//avoid ready textures
+
+					output.textures[ k ] = {};
+					textures[ k ] = { prog: 0, fileSize: r.textures[ k ].fileSize };
+					texSum += r.textures[ k ].fileSize;
+					nFiles++;
+
+				}
 
 			}
 
 		}
 
 		if ( r.geometries ) {
-
-			nFiles += Object.keys( r.geometries ).length;
 
 			output.geometries = {};
 
@@ -253,6 +254,7 @@ function LoadScreen ( renderer, style ) {
 					output.geometries[ k ] = {};
 					geometries[ k ] = { prog: 0, fileSize: r.geometries[ k ].fileSize };
 					geoSum += r.geometries[ k ].fileSize;
+					nFiles++;
 
 				}
 

@@ -54,7 +54,7 @@ var options = {
 };
 ls.setOptions( options );
 
-//Do things on progress events.
+//Do things on progress events. If style.type === 'custom', this can be used to update a custom UI
 ls.onProgress( function ( progress ) { ... } );
 
 //Define callbacks to fire after loading, processing and compiling.
@@ -80,7 +80,7 @@ assets = {};
 ```
 
 ### Textures
-Specify texture files if any. They will be loaded first and be accessible at their place, like `assets.textures.myTexture1`.
+Specify texture files if any. They will be loaded first.
 ```js
 assets.textures = {
     myTexture1: { 
@@ -90,19 +90,21 @@ assets.textures = {
         minFilter: THREE.LinearFilter,
         //optionnaly GPU compression can be used if 'pic.pvr' or 'pic.ktx' exist
         //format support will be checked internally
-        tryPVR: false,//Apple
+        tryPVR: false,//Apple devices
         tryKTX: false//Khronos spec.
     }
 };
+//after loading :
+assets.textures.myTexture1;//THREE.Texture
 ```
 
 ### Geometries
-Specify geometry files for geometry loaders. They will be loaded second and be accessible at their place, like `assets.textures.myGeometry1`. You can also specify a geometry directly.
+Specify geometry files for geometry loaders. They will be loaded second. A THREE.Geometry can also be declared and won't be processed.
 ```js
 assets.geometries = {
     myGeometry1: {
         path: 'path/to/geometry.ply',
-        fileSize: 9498,
+        fileSize: 9498,//Ko
         //next two are optional
         toBufferGeometry: false,//force creation of a BufferGeometry
         onComplete: function ( geometry ) {
@@ -110,6 +112,8 @@ assets.geometries = {
         }
     }
 };
+//after loading :
+assets.geometries.myGeometry1;//THREE.Geometry
 ```
 
 ### Objects
@@ -124,11 +128,11 @@ Load files with object loaders, as for geometries and textures
 ```js
 assets.objects.myObject1 = {
     path: 'path/to/object.wrl',
-    fileSize: 3846
+    fileSize: 3846//Ko
 };
 ```
 
-#### Object from assets
+#### Or object from assets
 
 From an existing geometry
 ```js
@@ -163,6 +167,21 @@ unknownParam : {
 onComplete: function ( object ) {
     //further operations here : geometry change etc.
 }
+```
+
+#### Example
+
+```js
+assets.objects.myObject1 = {
+    path: 'path/to/object.amf'
+    roughness: 1,
+    roughnessMap: 'myTexture1',
+    castShadow: true,
+    info: 'This is my object',
+    onComplete: function ( object ) {
+        object.geometry.computeBoundingBox();
+    }
+};
 ```
 
 ### Scene
