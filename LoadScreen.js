@@ -496,7 +496,7 @@ function LoadScreen ( renderer, style ) {
 			if ( ext === 'pvr' ) 
 
 				support[ ext ] = extensions.indexOf( 'WEBGL_compressed_texture_pvrtc' ) > -1 
-				|| extensions.indexOf( 'WEBKIT_WEBGL_compressed_texture_pvrtc' ) > -1;
+					|| extensions.indexOf( 'WEBKIT_WEBGL_compressed_texture_pvrtc' ) > -1;
 
 			else //ktx
 
@@ -581,30 +581,24 @@ function LoadScreen ( renderer, style ) {
 		}
 
 		//3. create objects
-		var oA = that.resources.objects;
+		var oA = that.resources.objects,
+			oOA = output.objects;
 
 		if ( oA ) {
 
-			for ( var k in oA ) {
+			var assignPropsToMaterial = function ( k, m ) {
 
-				var geometry = that.resources.geometries[ oA[ k ].geometry ], 
-					material = oA[ k ].material;
-
-				delete oA[ k ].geometry;
-				delete oA[ k ].material;
-
-				//1. assign properties to material
 				for ( var p in oA[ k ] ) {
 
-					if ( p !== 'type' && typeof material[ p ] !== 'undefined' ) {
+					if ( p !== 'type' && typeof m[ p ] !== 'undefined' ) {
 
 						if ( p.indexOf( 'map' ) > -1 || p.indexOf( 'Map' ) > -1 ) {
 
-							material[ p ] = tA[ oA[ k ][ p ] ];
+							m[ p ] = tA[ oA[ k ][ p ] ];
 
 						} else {
 
-							material[ p ] = oA[ k ][ p ];
+							m[ p ] = oA[ k ][ p ];
 
 						}
 
@@ -614,7 +608,10 @@ function LoadScreen ( renderer, style ) {
 
 				}
 
-				//2. create object
+			};
+
+			var createObjectFromType = function ( k, g, m ) {
+
 				var object;
 
 				switch ( oA[ k ].type ) {
@@ -631,20 +628,77 @@ function LoadScreen ( renderer, style ) {
 
 				delete oA[ k ].type;
 
-				//3. assign remaining properties to object or its userData
+				return object;
+
+			};
+
+			var assignPropsToObject = function ( k, o ) {
+
 				for ( var p in oA[ k ] ) {
 
-					console.log( p, k );
+					if ( typeof o[ p ] !== 'undefined' ) 
 
-					if ( typeof object[ p ] !== 'undefined' ) object[ p ] = oA[ k ][ p ];
-					else object.userData[ p ] = oA[ k ][ p ];
+						o[ p ] = oA[ k ][ p ];
+
+					else 
+
+						o.userData[ p ] = oA[ k ][ p ];
 
 					delete oA[ k ];
 
 				}
 
-				//4. assign object to resources
-				oA[ k ] = object;
+			};
+
+			for ( var k in oA ) {
+
+				if ( oA[ k ].path && oA[ k ].fileSize ) {//object pending in output.objects
+
+					assignPropsToMaterial( k, oOA[ k ].material );
+
+					assignPropsToObject( k, oOA[ k ] );
+
+					if ( oA[ k ].onComplete ) oA[ k ].onComplete( oOA[ k ] );
+
+					oA[ k ] = oOA[ k ];
+
+				} else if ( typeof oA[ k ].geometry === 'string' ) {//object to assemble from asset
+
+					var geometry = that.resources.geometries[ oA[ k ].geometry ], 
+						material = oA[ k ].material;
+
+					delete oA[ k ].geometry;
+					delete oA[ k ].material;
+
+					assignPropsToMaterial( k, material );
+
+					var object = createObjectFromType( k, geometry, material );
+
+					assignPropsToObject( k, object );
+
+					if ( oA[ k ].onComplete ) oA[ k ].onComplete( object );
+
+					oA[ k ] = object;
+
+				} else if ( ! oA[ k ] instanceof THREE.Object3D ) {//object to assemble
+
+					var geometry = oA[ k ].geometry, 
+						material = oA[ k ].material;
+
+					delete oA[ k ].geometry;
+					delete oA[ k ].material;
+
+					assignPropsToMaterial( k, oA[ k ].material );
+
+					var object = createObjectFromType( k, geometry, material );
+
+					assignPropsToObject( k, object );
+
+					if ( oA[ k ].onComplete ) oA[ k ].onComplete( object );
+
+					oA[ k ] = object;
+
+				}//else : it is a mesh, do nothing
 
 			}
 

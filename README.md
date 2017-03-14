@@ -113,10 +113,10 @@ assets.geometries = {
 ```
 
 ### Objects
-Specify meshes to create if any. Two possibilities.
 ```js
 assets.objects = {};
 ```
+Specify meshes to create if any. Two possibilities.
 
 #### Object from file
 
@@ -130,12 +130,19 @@ assets.objects.myObject1 = {
 
 #### Object from assets
 
-Or build it from an existing geometry
+From an existing geometry
 ```js
 assets.objects.myObject2 = {
-    geometry: 'myGeometry1',//asset will be used. You can also just pass a geometry instance.
+    geometry: 'myGeometry1',//assets.geometry.myGeometry1 will be used for object creation
     material: new THREE.MeshPhongMaterial()
 };
+//A geometry instance can simply be passed too.
+assets.objects.myObject2 = {
+    geometry: new THREE.BoxGeometry( 5, 5, 5 ),
+    material: new THREE.MeshPhongMaterial()
+};
+//Or even
+assets.objects.myObject2 = new THREE.Mesh(...);//nothing will happen
 ```
 
 #### Options
@@ -147,12 +154,15 @@ type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
 
 You can also add any other material or mesh parameter (they will be assigned automatically)
 ```js
-aoMap: 'myTexture1',//material.aoMap = asset 'myTexture1'
-castShadow: false,//mesh.castShadow = false
+aoMap: 'myTexture1',//asset.textures.myTexture1 assigned to material
+castShadow: false,//assigned to mesh
 unknownParam : { 
     title: 'blabla', 
     content: 'blabla' 
-}//assigned to mesh.userData.unknownParam
+},//assigned to mesh.userData.unknownParam
+onComplete: function ( object ) {
+    //further operations here : geometry change etc.
+}
 ```
 
 ### Scene
