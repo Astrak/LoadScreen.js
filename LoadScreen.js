@@ -24,11 +24,12 @@ function LoadScreen ( renderer, style ) {
 	var textInfo, sizeInfo;
 
 	var gLoaders = {},
-		tLoaders = {};
+		tLoaders = {},
+		oLoaders = {};
 
 	var output = {};
 
-	var	textures = {}, geometries = {}, texSum = 0, geoSum = 0;
+	var	textures = {}, geometries = {}, objects = {}, texSum = 0, geoSum = 0, objSum = 0;
 
 	/* API */
 	this.domElement = null;
@@ -253,6 +254,25 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
+		if ( r.objects ) {
+
+			output.objects = {};
+
+			for ( var k in r.objects ) {
+
+				if ( r.objects[ k ].path ) {
+
+					output.objects[ k ] = {};
+					objects[ k ] = { prog: 0, fileSize: r.objects[ k ].fileSize };
+					objSum += r.objects[ k ].fileSize;
+					nFiles ++;				
+
+				}
+
+			}
+
+		}
+
 		//2. Load files
 		if ( r.geometries ) 
 			
@@ -265,6 +285,14 @@ function LoadScreen ( renderer, style ) {
 			for ( var k in r.textures ) 
 
 				loadTexture( k );
+
+		if ( r.objects ) 
+			
+			for ( var k in r.objects ) 
+
+				if ( r.objects[ k ].path ) 
+
+					loadObject( k );
 
 	}
 
@@ -286,7 +314,7 @@ function LoadScreen ( renderer, style ) {
 
 				counter++;
 
-				updateProgress({ geometry: true, name: p, progress: 1 });
+				updateProgress({ type: 'Geometry', name: p, progress: 1 });
 
 				update( true );
 
@@ -299,7 +327,7 @@ function LoadScreen ( renderer, style ) {
 
 				if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
-					updateProgress({ geometry: true, name: p, progress: pr });
+					updateProgress({ type: 'Geometry', name: p, progress: pr });
 
 				update();
 
@@ -321,7 +349,7 @@ function LoadScreen ( renderer, style ) {
 				//assign properties
 				for ( var k in d )
 
-					if ( k !== 'fileSize' && k !== 'path' && typeof t[ k ] !== 'undefined' ) 
+					if ( typeof o[ k ] !== 'undefined' ) 
 
 						t[ k ] = d[ k ];
 
@@ -333,7 +361,7 @@ function LoadScreen ( renderer, style ) {
 
 				counter++;
 
-				updateProgress({ texture: true, name: p, progress: 1 });
+				updateProgress({ type: 'Texture', name: p, progress: 1 });
 
 				update( true );
 
@@ -346,7 +374,7 @@ function LoadScreen ( renderer, style ) {
 
 				if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
-					updateProgress({ texture: true, name: p, progress: pr });
+					updateProgress({ type: 'Texture', name: p, progress: pr });
 
 				update();
 
@@ -355,12 +383,91 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
+	function loadObject ( p ) {
+
+		/* TODO : handle animation & find how to transmit mixers */
+
+		var d = that.resources.objects[ p ],
+			arr = d.path.split( '.' ),
+			l = arr.length,
+			ext = arr[ l - 2 ] === 'assimp' ? arr[ l - 2 ] : arr[ l - 1 ];
+
+		getObjectLoader( ext ).load( 
+			d.path, 
+			function ( o, assimp ) {
+
+				var object = ext === 'assimp' ? assimp.object : o;
+
+				//assign properties
+				for ( var k in d )
+
+					if ( typeof object[ k ] !== 'undefined' ) 
+
+						object[ k ] = d[ k ];
+
+				object.name = p;
+
+				output.objects[ p ] = object;
+
+				objects[ p ].prog = 1;
+
+				counter++;
+
+				updateProgress({ type: 'Object', name: p, progress: 1 });
+
+				update( true );
+
+			}, 
+			function ( e ) {
+
+				var pr = e.loaded / e.total;
+
+				objects[ p ].prog = pr;
+
+				if ( pr !== 1 ) //otherwise onLoad will be called anyway
+
+					updateProgress({ type: 'Object', name: p, progress: pr });
+
+				update();
+
+			}
+		);
+
+	}
+
+	function getObjectLoader ( ext ) {
+
+		switch ( ext ) {
+			case '3mf': 
+				if ( ! oLoaders.threemf ) oLoaders.threemf = new THREE.ThreeMFLoader();
+				return oLoaders.threemf;
+			case 'amf': 
+				if ( ! oLoaders.amf ) oLoaders.amf = new THREE.AMFLoader();
+				return oLoaders.amf;
+			case 'assimp': 
+				if ( ! oLoaders.assimp ) oLoaders.assimp = new THREE.AssimpLoader();
+				return oLoaders.assimp;
+			case 'awd': 
+				if ( ! oLoaders.awd ) oLoaders.awd = new THREE.AWDLoader();
+				return oLoaders.awd;
+			case 'mmd': 
+				if ( ! oLoaders.mmd ) oLoaders.mmd = new THREE.MMDLoader();
+				return oLoaders.mmd;
+			case 'wrl': 
+			case 'wrz': 
+			case 'vrml': 
+				if ( ! oLoaders.vrml ) oLoaders.vrml = new THREE.VRMLLoader();
+				return oLoaders.vrml;
+		}
+
+	}
+
 	function getTextureLoader ( ext ) {
 
 		switch ( ext ) {
 			case 'jpg': 
 			case 'png': 
-				if ( ! tLoaders.main ) tLoaders.main = new THREE.TextureLoader();
+				tLoaders.main = tLoaders.main || new THREE.TextureLoader();
 				return tLoaders.main;
 		}
 
@@ -718,13 +825,9 @@ function LoadScreen ( renderer, style ) {
 		progress = ( texProg + geoProg ) / ( texSum + geoSum );
 
 		//2. Logs data
-		if ( typeof o !== 'undefined' && verbose ) {
+		if ( typeof o !== 'undefined' && verbose )
 
-			var type = o.texture ? 'Texture' : o.geometry ? 'Geometry' : 'Unknown asset type';
-
-			console.info( 'Progress = ' + progress + ', ' + type + ' > ' + o.name + ' > ' + Math.round( 100 * o.progress ) + '%' );
-
-		}
+			console.info( 'Progress = ' + progress + ', ' + o.type + ' > ' + o.name + ' > ' + Math.round( 100 * o.progress ) + '%' );
 
 		//3. call CBs and check completion
 		update();
