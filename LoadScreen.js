@@ -51,7 +51,7 @@ function LoadScreen ( renderer, style ) {
 		weight: style.weight ? style.weight : '6px',
 		infoColor: style.infoColor ? style.infoColor : '#666',
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
-		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing', 'Compiling' ]
+		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]
 	};
 
 	setLoadScreen();
@@ -977,7 +977,7 @@ function LoadScreen ( renderer, style ) {
 
 	function compile () {
 
-		//use renderer.compileMaterials( scene, camera ) in next threejs release
+		//use renderer.compile( scene, camera ) in next threejs release
 
 		var LSScene = new THREE.Scene(), 
 			LSCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 2 ),
@@ -1005,9 +1005,23 @@ function LoadScreen ( renderer, style ) {
 
 	function complete () {
 
-		for ( var i = 0 ; i < completeCBs.length ; i++ ) 
+		if ( style.type !== 'custom' && style.textInfo ) {
 
-			completeCBs[ i ]();
+			textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 3 ];
+
+			setTimeout( function () { 
+
+				if ( verbose ) console.time( 'Scene creation duration' );
+
+				for ( var i = 0 ; i < completeCBs.length ; i++ ) 
+
+					completeCBs[ i ]();
+
+				if ( verbose ) console.timeEnd( 'Scene creation duration' );
+
+			}, 20 );
+
+		}
 
 	}
 

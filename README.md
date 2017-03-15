@@ -1,9 +1,65 @@
 # LoadScreen.js
-A JS library to simplify ThreeJS assets coding, manage their creation process and provide different load screens.
+A JS library to wrap Three.js assets loading.
+1. Describe assets in a short declarative style, 
+2. Follow an UX-wise process : load > process > compile > scene creation.
+3. A load screen is automaticly displayed.
 
 ```js
-//create and insert renderer before
+//asets declaration
+var assets = {
+    textures: {
+        dirt: {
+            path: 'path/to/pic1.png',
+            fileSize: 1467,
+            tryPVR: true
+        },
+        foliage: {
+            path: 'path/to/pic2.jpg',
+            fileSize: 889,
+            minFilter: THREE.NearestFilter
+        }
+    },
+    geometry: {
+        model: {
+            path: 'path/to/model.json',
+            fileSize: 3876,
+            toBufferGeometry: true,
+            onComplete: function ( geometry ) { 
+                geometry.addAttribute( 'uv2', geometry.attributes.uv );
+            }
+        }
+    },
+    objects: {
+        house: {
+            geometry: 'model',
+            aoMap: 'dirt',
+            type: 'mesh',
+            material: new THREE.MeshStandardMaterial(),
+            castShadow: true,
+            receiveShadow: true
+        },
+        tree: {
+            path: 'path/to/tree.wrl',
+            fileSize: 311,
+            castShadow: true,
+            receiveShadow: true,
+            transparent: true,
+            alphaTest: .5,
+            map: 'foliage',
+            onComplete: function ( object ) {
+                object.scale.set( -1, 3, 1 );
+            }
+        }
+    }
+};
 
+//create and append renderer first
+var renderer = new THREE.WebGLRenderer();
+renderer.setPixelRatio( devicePixelRatio );
+renderer.setSize( x, y );
+container.appendChild( renderer.domElement );
+
+//starts app
 var ls = new LoadScreen( renderer ).onComplete( init ).start( assets );
 
 function init () {
@@ -13,9 +69,17 @@ function init () {
     ls.remove( animate );
 
 }
+
+function animate () {
+    
+    requestAnimationFrame( animate );
+
+    ...//render loop
+
+}
 ```
 
-This creates the following default :
+A default load screen automatically appears :
 
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
@@ -32,7 +96,7 @@ var style = {
     weight: '6px',//weight of the progress element, in px ('bar' type) or svg units ('circular')
     infoColor: '#666',//text color
     sizeInfo: true,
-    textInfo: [ 'Loading', 'Processing', 'Compiling' ]//Can also be set to a single string or to false
+    textInfo: [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]//Can also be set to a single string or to false
 };
 
 var options = {
