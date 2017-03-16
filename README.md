@@ -1,8 +1,8 @@
 # LoadScreen.js
 A JS library to wrap Three.js assets loading.
-1. Describe assets in a short declarative style, 
+1. Describe assets in a declarative style, 
 2. Follow an UX-wise process : load > process > compile > scene creation.
-3. A load screen is automaticly displayed.
+3. A load screen is automatically displayed.
 
 ```js
 //asets declaration
@@ -43,6 +43,7 @@ var assets = {
             fileSize: 311,
             castShadow: true,
             receiveShadow: true,
+            matrixAutoUpdate: false,
             transparent: true,
             alphaTest: .5,
             map: 'foliage',
@@ -141,6 +142,7 @@ Specify texture files if any. They will be loaded first. Supported texture loade
 - [x] THREE.TextureLoader
 - [x] THREE.PVRLoader
 - [ ] THREE.KTXLoader
+- [ ] THREE.TGALoader
 ```js
 assets.textures = {
     myTexture1: { 
