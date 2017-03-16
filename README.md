@@ -93,7 +93,7 @@ A default load screen automatically appears :
 ## Full pattern
 Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
-var style = {
+const style = {
     type: 'bar',//main look. Also 'circular'. 'custom' empties the info container
     size: '150px',//width of the central info container, in px or in %
     background: '#333',
@@ -105,13 +105,13 @@ var style = {
     textInfo: [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]//Can also be set to a single string or to false
 };
 
-var options = {
+const options = {
     forcedStart: false,//start loading even if the canvas is out of sight (usually bad practice)
     verbose: false,//logs progress, process and compile duration + total load screen duration
     tweenDuration: .5//progress and removal tweens durations
 };
 
-var ls = new LoadScreen( renderer, style );//style is optional
+const ls = new LoadScreen( renderer, style );//style is optional
 
 //Resize is available. Can be a bit overkill on smartphones for loads < 5-6 seconds.
 window.addEventListener( 'resize', function () { 
