@@ -1,8 +1,8 @@
 # LoadScreen.js
 A JS library to wrap Three.js assets loading.
-1. Describe assets in a declarative style, 
-2. Follow an UX-wise process : load > process > compile > scene creation.
-3. A load screen is automatically displayed.
+1. Declarative assets.
+2. UX-wise process : load > process > compile > scene creation.
+3. Load screens included.
 
 ```js
 /* Assets.js */
@@ -58,10 +58,10 @@ ASSETS.objects = {
 
 /* app.js */
 
-//create and append renderer first
+//create and append renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio( devicePixelRatio );
-renderer.setSize( x, y );
+renderer.setSize( width, height );
 container.appendChild( renderer.domElement );
 
 //start app
@@ -114,14 +114,14 @@ const options = {
 const ls = new LoadScreen( renderer, style );//style is optional
 
 //Resize is available. Can be a bit overkill on smartphones for loads < 5-6 seconds.
-window.addEventListener( 'resize', function () { 
+window.addEventListener( 'resize', () => { 
     renderer.setSize( width, height ); 
     ls.setSize( width, height ); 
 });
 
 ls.setOptions( options )
 
-.onProgress( function ( progress ) { ... } )//can be used to update a custom UI
+.onProgress( progress => { ... } )//can be used to update a custom UI
 
 .onComplete( init )//after processing and compiling
 
