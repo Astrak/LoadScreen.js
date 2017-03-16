@@ -8,7 +8,7 @@ A JS library to wrap Three.js assets loading.
 /* Assets.js */
 const ASSETS = {};
 
-ASSETS.textures: {
+ASSETS.textures = {
     dirt: {
         path: 'path/to/pic1.png',
         fileSize: 1467,
@@ -21,7 +21,7 @@ ASSETS.textures: {
     }
 };
 
-ASSETS.geometry: {
+ASSETS.geometry = {
     model: {
         path: 'path/to/model.json',
         fileSize: 3876,
@@ -32,7 +32,7 @@ ASSETS.geometry: {
     }
 };
 
-ASSETS.objects: {
+ASSETS.objects = {
     house: {
         geometry: 'model',
         aoMap: 'dirt',
@@ -138,10 +138,6 @@ ls.remove( animate );//Removal is tweened so next action is a callback
 ```
 
 ## Assets declaration
-```js
-assets = {};
-```
-
 ### Textures
 Specify texture files if any. They will be loaded first. Supported texture loaders :
 - [x] THREE.TextureLoader
@@ -149,7 +145,7 @@ Specify texture files if any. They will be loaded first. Supported texture loade
 - [ ] THREE.KTXLoader
 - [ ] THREE.TGALoader
 ```js
-assets.textures = {
+ASSETS.textures = {
     myTexture1: { 
         path: 'path/to/pic.jpg',
         fileSize: 2789,//in Ko
@@ -163,7 +159,7 @@ assets.textures = {
 };
 
 //after loading :
-assets.textures.myTexture1;//THREE.Texture
+ASSETS.textures.myTexture1;//THREE.Texture
 ```
 
 ### Geometries
@@ -175,7 +171,7 @@ Specify geometry files for geometry loaders. They will be loaded second. Support
 - [x] THREE.STLLoader
 - [ ] THREE.BufferGeometryLoader
 ```js
-assets.geometries = {
+ASSETS.geometries = {
     myGeometry1: {
         path: 'path/to/geometry.ply',
         fileSize: 9498,//Ko
@@ -188,10 +184,10 @@ assets.geometries = {
 };
 
 //after loading :
-assets.geometries.myGeometry1;//THREE.Geometry
+ASSETS.geometries.myGeometry1;//THREE.Geometry
 
 //also simply
-assets.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//won't be processed
+ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//won't be processed
 ```
 
 ### Objects
@@ -208,7 +204,7 @@ Specify objects to load or to create from assets. Loaded in third place. Support
 - [ ] THREE.UTF8Loader
 - [x] THREE.VRMLLoader
 ```js
-assets.objects = {
+ASSETS.objects = {
     myObject1: {//1. load from file
         path: 'path/to/object.wrl',
         fileSize: 3846//Ko
@@ -225,7 +221,7 @@ assets.objects = {
 };
 
 //other parameters
-assets.objects.myObject5 = {
+ASSETS.objects.myObject5 = {
     path: 'path/to/object.amf',
     type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
     //specify any mesh or material property
