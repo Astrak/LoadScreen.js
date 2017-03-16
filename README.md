@@ -5,63 +5,68 @@ A JS library to wrap Three.js assets loading.
 3. A load screen is automatically displayed.
 
 ```js
-//asets declaration
-var assets = {
-    textures: {
-        dirt: {
-            path: 'path/to/pic1.png',
-            fileSize: 1467,
-            tryPVR: true
-        },
-        foliage: {
-            path: 'path/to/pic2.jpg',
-            fileSize: 889,
-            minFilter: THREE.NearestFilter
-        }
+/* Assets.js */
+const ASSETS = {};
+
+ASSETS.textures: {
+    dirt: {
+        path: 'path/to/pic1.png',
+        fileSize: 1467,
+        tryPVR: true
     },
-    geometry: {
-        model: {
-            path: 'path/to/model.json',
-            fileSize: 3876,
-            toBufferGeometry: true,
-            onComplete: function ( geometry ) { 
-                geometry.addAttribute( 'uv2', geometry.attributes.uv );
-            }
-        }
-    },
-    objects: {
-        house: {
-            geometry: 'model',
-            aoMap: 'dirt',
-            type: 'mesh',
-            material: new THREE.MeshStandardMaterial(),
-            castShadow: true,
-            receiveShadow: true
-        },
-        tree: {
-            path: 'path/to/tree.wrl',
-            fileSize: 311,
-            castShadow: true,
-            receiveShadow: true,
-            matrixAutoUpdate: false,
-            transparent: true,
-            alphaTest: .5,
-            map: 'foliage',
-            onComplete: function ( object ) {
-                object.scale.set( -1, 3, 1 );
-            }
+    foliage: {
+        path: 'path/to/pic2.jpg',
+        fileSize: 889,
+        minFilter: THREE.NearestFilter
+    }
+};
+
+ASSETS.geometry: {
+    model: {
+        path: 'path/to/model.json',
+        fileSize: 3876,
+        toBufferGeometry: true,
+        onComplete: function ( geometry ) { 
+            geometry.addAttribute( 'uv2', geometry.attributes.uv );
         }
     }
 };
 
+ASSETS.objects: {
+    house: {
+        geometry: 'model',
+        aoMap: 'dirt',
+        type: 'mesh',
+        material: new THREE.MeshStandardMaterial(),
+        castShadow: true,
+        receiveShadow: true
+    },
+    tree: {
+        path: 'path/to/tree.wrl',
+        fileSize: 311,
+        castShadow: true,
+        receiveShadow: true,
+        matrixAutoUpdate: false,
+        transparent: true,
+        alphaTest: .5,
+        map: 'foliage',
+        onComplete: function ( object ) {
+            object.scale.set( -1, 3, 1 );
+        }
+    }
+};
+
+/* app.js */
+
 //create and append renderer first
-var renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio( devicePixelRatio );
 renderer.setSize( x, y );
 container.appendChild( renderer.domElement );
 
-//starts app
-var ls = new LoadScreen( renderer ).onComplete( init ).start( assets );
+//start app
+const ls = new LoadScreen( renderer );
+ls.onComplete( init ).start( ASSETS );
 
 function init () {
     
