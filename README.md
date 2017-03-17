@@ -257,7 +257,7 @@ ASSETS.objects.myObject7 = new THREE.Object3D(...);//Won't be processed.
 ```
 
 # Roadmap
-* complete loader loaders
+* complete loader support
 * code the 'forcedStart' parameter
 * add fancy loader types
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
