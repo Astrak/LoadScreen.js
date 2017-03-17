@@ -12,7 +12,8 @@ const ASSETS = {
             path: 'path/to/pic1.png',
             fileSize: 1467,
             minFilter: THREE.LinearFilter,
-            tryPVR: true
+            tryPVR: true,
+            PVRSize: 2145
         }
     }, 
     geometries: {
