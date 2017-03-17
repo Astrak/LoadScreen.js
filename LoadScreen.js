@@ -479,11 +479,20 @@ function LoadScreen ( renderer, style ) {
 
 			return tLoaders.ktx;
 
-		} else {
+		} 
 
-			tLoaders.main = tLoaders.main || new THREE.TextureLoader();
+		var a = o.path.split( '.' ),
+			ext = a[ a.length - 1 ];
 
-			return tLoaders.main;
+		switch ( ext ) {
+
+			case 'tga':
+				tLoaders.tga = tLoaders.tga || new THREE.TGALoader();
+				return tLoaders.tga;
+				break;
+			default: 
+				tLoaders.main = tLoaders.main || new THREE.TextureLoader();
+				return tLoaders.main;
 
 		}
 

@@ -37,19 +37,19 @@ const ASSETS = {
 };
 
 /* app.js */
-//create and append renderer
+//Create and append renderer.
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio( devicePixelRatio );
 renderer.setSize( width, height );
 container.appendChild( renderer.domElement );
 
-//start app
+//Start app.
 const ls = new LoadScreen( renderer );
 ls.onComplete( init ).start( ASSETS );
 
 function init () {
     
-    ...//scene initiation
+    ...//Scene initiation.
 
     ls.remove( animate );
 
@@ -59,12 +59,12 @@ function animate () {
     
     requestAnimationFrame( animate );
 
-    ...//render loop
+    ...//Render loop.
 
 }
 ```
 
-A default load screen automatically appears :
+A default load screen automatically appears. Renders only start when ready.
 
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
@@ -73,26 +73,25 @@ A default load screen automatically appears :
 Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
 const style = {
-    type: 'bar',//main look. Also 'circular'. 'custom' empties the info container
-    size: '150px',//width of the central info container, in px or in %
+    type: 'bar',//Main look. Also 'circular'. 'custom' empties the info container.
+    size: '150px',//Width of the central info container, in px or in %.
     background: '#333',
     progressBarContainer: '#444',
     progressBar: '#fb0',
-    weight: '6px',//weight of the progress element, in px ('bar' type) or svg units ('circular')
-    infoColor: '#666',//text color
+    infoColor: '#666',//Text color.
+    weight: '6px',//Weight of the progress element, in px ('bar' type) or svg units ('circular').
     sizeInfo: true,
-    textInfo: [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]//Can also be set to a single string or to false
+    textInfo: [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]//Or false to remove.
 };
 
 const options = {
-    forcedStart: false,//start loading even if the canvas is out of sight (usually bad practice)
-    verbose: false,//logs progress, process and compile duration + total load screen duration
-    tweenDuration: .5//progress and removal tweens durations
+    forcedStart: false,//Start loading even if the canvas is out of sight (usually bad practice).
+    verbose: false,//Logs progress, process and compile duration + total load screen duration.
+    tweenDuration: .5//Progress and removal tweens durations.
 };
 
-const ls = new LoadScreen( renderer, style );//style is optional
+const ls = new LoadScreen( renderer, style );//Style is optional.
 
-//Resize is available. Can be a bit overkill on smartphones for loads < 5-6 seconds.
 window.addEventListener( 'resize', () => { 
     renderer.setSize( width, height ); 
     ls.setSize( width, height ); 
@@ -100,44 +99,46 @@ window.addEventListener( 'resize', () => {
 
 ls.setOptions( options )
 
-.onProgress( progress => { ... } )//can be used to update a custom UI
+.onProgress( progress => { ... } )//Can be used to update a custom UI.
 
-.onComplete( init )//after processing and compiling
+.onComplete( init )//After processing and compiling.
 
-.start( assets );//load > process > compile assets
+.start( assets );//Load assets > process assets > compile materials > scene creation.
 
 //or
-.start();//just add the info UI
+.start();//Just add the info UI.
 
-//then for big script progress or just testing
+//Then for big script progress or just testing.
 ls.setProgress( 0.5 );
 
-//finally at the end of the onComplete callback
-ls.remove( animate );//Removal is tweened so next action is a callback
+//Finally at the end of the onComplete callback
+ls.remove( animate );//Removal is tweened so next action is a callback.
 ```
 
 ## Assets declaration
 ### Textures
 Specify texture files if any. They will be loaded first. Supported texture loaders :
 - [x] THREE.TextureLoader
+- [x] THREE.TGALoader
 - [x] THREE.PVRLoader
 - [ ] THREE.KTXLoader
-- [ ] THREE.TGALoader
 ```js
 ASSETS.textures = {
     myTexture1: { 
         path: 'path/to/pic.jpg',
         fileSize: 2789,//in Ko
-        //other threejs textures properties can be specified
+        //Other threejs textures properties can be specified.
         minFilter: THREE.LinearFilter,
-        //optionnaly GPU compression can be used if 'pic.pvr' or 'pic.ktx' exist
-        //format support will be checked internally
-        tryPVR: false,//Apple devices
+        //Optionnaly GPU compression can be used, script will check device support.
+        //Needs 'path/to/pic.pvr' or 'path/to/pic.ktx'.
+        tryPVR: false,//Apple devices.
+        PVRSize: null,//if tryPVR is set to true, file size has to be specified.
         tryKTX: false//Khronos spec.
+        KTXSize: null
     }
 };
 
-//after loading :
+//After loading :
 ASSETS.textures.myTexture1;//THREE.Texture
 ```
 
@@ -154,18 +155,18 @@ ASSETS.geometries = {
     myGeometry1: {
         path: 'path/to/geometry.ply',
         fileSize: 9498,//Ko
-        //next two are optional
-        toBufferGeometry: false,//force creation of a BufferGeometry
+        //Next two are optional :
+        toBufferGeometry: false,//Force creation of a BufferGeometry.
         onComplete: function ( geometry ) {
             //geometry.computeFlatVertexNormals / translate / center / merge / addAttribute...
         }
     }
 };
 
-//after loading :
+//After loading :
 ASSETS.geometries.myGeometry1;//THREE.Geometry
 
-//also simply
+//Also simply
 ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//won't be processed
 ```
 
@@ -189,28 +190,28 @@ ASSETS.objects = {
         fileSize: 3846//Ko
     },
     myObject2: {//2. or create from asset
-        geometry: 'myGeometry1',//use geometry asset 'myGeometry1'
+        geometry: 'myGeometry1',//Use geometry asset 'myGeometry1'
         material: new THREE.MeshPhongMaterial()
     },
     myObject3: {//3. or create from scratch
         geometry: new THREE.PlaneBufferGeometry( 5, 3, 9 ),
         material: new THREE.MeshBasicMaterial()
     }
-    myObject4: new THREE.Mesh(...);//won't be processed
+    myObject4: new THREE.Mesh(...);//Won't be processed
 };
 
 //other parameters
 ASSETS.objects.myObject5 = {
     path: 'path/to/object.amf',
-    type: 'mesh',//or 'points' or 'line', defaults to 'mesh'
-    //specify any mesh or material property
-    color: 0x33ff89,//assigned to material
-    map: 'myTexture1',//asset assigned to material
-    castShadow: true,//assigned to mesh
-    info: 'This is my object',//unknown > assigned to mesh.userData
-    //for any further change
+    type: 'mesh',//Or 'points' or 'line', defaults to 'mesh'.
+    //Specify any mesh or material property.
+    color: 0x33ff89,//Assigned to material.
+    map: 'myTexture1',//Asset assigned to material.
+    castShadow: true,//Assigned to mesh.
+    info: 'This is my object',//Unknown > assigned to mesh.userData.
+    //For any further change :
     onComplete: function ( object ) {
-        //object.geometry.computeBoundingBox or anything
+        //object.geometry.computeBoundingBox or anything.
     }
 };
 ```
