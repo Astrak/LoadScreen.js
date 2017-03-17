@@ -19,19 +19,23 @@ function LoadScreen ( renderer, style ) {
 
 	var loadComplete;
 
-	var counter = 0, tCounter = 0, nFiles = 0;
+	var counter = 0, nFiles = 0;
 
 	var textInfo, sizeInfo;
 
+	var pmremGen, pmremcubeuvpacker;
+
 	var gLoaders = {},
 		tLoaders = {},
+		cTLoaders = {},
 		oLoaders = {};
 
 	var output = {};
 
 	var extensions, support = {};
 
-	var	textures = {}, geometries = {}, objects = {}, texSum = 0, geoSum = 0, objSum = 0;
+	var	textures = {}, cubeTextures = {}, geometries = {}, objects = {}, 
+		texSum = 0, cTexSum = 0, geoSum = 0, objSum = 0;
 
 	/* API */
 	this.domElement = null;
@@ -260,6 +264,28 @@ function LoadScreen ( renderer, style ) {
 
 			}
 
+		}		
+
+		if ( r.cubeTextures ) {
+
+			output.cubeTextures = {};
+
+			for ( var k in r.cubeTextures ) {
+
+				var t = r.cubeTextures[ k ];
+
+				if ( t.paths && t.filesSize ) {//avoid ready textures
+
+					output.cubeTextures[ k ] = {};
+
+					cubeTextures[ k ] = { prog: 0, fileSize: t.filesSize };
+					cTexSum += t.filesSize;
+					nFiles++;
+
+				}
+
+			}
+
 		}
 
 		if ( r.geometries ) {
@@ -306,7 +332,17 @@ function LoadScreen ( renderer, style ) {
 			
 			for ( var k in r.textures ) 
 
-				loadTexture( k );
+				if ( r.textures[ k ].path && r.textures[ k ].fileSize )
+
+					loadTexture( k );
+
+		if ( r.cubeTextures ) 
+			
+			for ( var k in r.cubeTextures ) 
+
+				if ( r.cubeTextures[ k ].paths && r.cubeTextures[ k ].filesSize )
+
+					loadCubeTexture( k );
 
 		if ( r.geometries ) 
 			
@@ -379,7 +415,7 @@ function LoadScreen ( renderer, style ) {
 				//assign properties
 				for ( var k in d )
 
-					if ( typeof o[ k ] !== 'undefined' ) 
+					if ( typeof t[ k ] !== 'undefined' ) 
 
 						t[ k ] = d[ k ];
 
@@ -413,37 +449,43 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function loadObject ( p ) {
+	function loadCubeTexture ( p ) {
 
-		/* TODO : handle animation & find how to transmit mixers */
+		var d = that.resources.cubeTextures[ p ],
+			arr = d.paths[ 0 ].split( '.' ),
+			ext = arr[ arr.length - 1 ];
 
-		var d = that.resources.objects[ p ],
-			a = d.path.split( '.' ),
-			l = a.length,
-			ext = a[ l - 2 ] === 'assimp' ? 'assimp.json' : a[ l - 1 ];
+		getCubeTextureLoader( ext ).load( 
+			d.paths, 
+			function ( t ) {
 
-		getObjectLoader( ext ).load( 
-			d.path, 
-			function ( o, assimp ) {
+				if ( d.toPMREM ) {
 
-				var object = ext === 'assimp' ? assimp.object : o;
+					var pmremGen = new THREE.PMREMGenerator( t );
+					pmremGen.update( renderer );
+
+					var pmremcubeuvpacker = new THREE.PMREMCubeUVPacker( pmremGen.cubeLods );
+					pmremcubeuvpacker.update( renderer );
+					t = pmremcubeuvpacker.CubeUVRenderTarget.texture;
+
+				}
 
 				//assign properties
 				for ( var k in d )
 
-					if ( typeof object[ k ] !== 'undefined' ) 
+					if ( typeof t[ k ] !== 'undefined' ) 
 
-						object[ k ] = d[ k ];
+						t[ k ] = d[ k ];
 
-				object.name = p;
+				t.name = p;
 
-				output.objects[ p ] = object;
+				output.cubeTextures[ p ] = t;
 
-				objects[ p ].prog = 1;
+				cubeTextures[ p ].prog = 1;
 
 				counter++;
 
-				updateProgress({ type: 'Object', name: p, progress: 1 });
+				updateProgress({ type: 'Cube texture', name: p, progress: 1 });
 
 				update( true );
 
@@ -452,16 +494,80 @@ function LoadScreen ( renderer, style ) {
 
 				var pr = e.loaded / e.total;
 
-				objects[ p ].prog = pr;
+				cubeTextures[ p ].prog = pr;
 
 				if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
-					updateProgress({ type: 'Object', name: p, progress: pr });
+					updateProgress({ type: 'Cube texture', name: p, progress: pr });
 
 				update();
 
 			}
 		);
+
+	}
+
+	function loadObject ( p ) {
+
+		var d = that.resources.objects[ p ],
+			a = d.path.split( '.' ),
+			l = a.length,
+			ext = a[ l - 2 ] === 'assimp' ? 'assimpJSON' : a[ l - 1 ], 
+			loader = getObjectLoader( ext );
+
+		var oC = function ( o, assimp ) {
+
+			//todo
+			//o.kinematics (collada)
+
+			var object = ext === 'assimp' ? assimp : o;
+
+			//assign properties
+			for ( var k in d )
+
+				if ( typeof object[ k ] !== 'undefined' ) 
+
+					object[ k ] = d[ k ];
+
+			object.name = p;
+
+			output.objects[ p ] = object;
+
+			objects[ p ].prog = 1;
+
+			counter++;
+
+			updateProgress({ type: 'Object', name: p, progress: 1 });
+
+			update( true );
+
+		};
+
+		var oP = function ( e ) {
+
+			var pr = e.loaded / e.total;
+
+			objects[ p ].prog = pr;
+
+			if ( pr !== 1 ) //otherwise onLoad will be called anyway
+
+				updateProgress({ type: 'Object', name: p, progress: pr });
+
+			update();
+
+		};
+
+		switch ( ext ) {
+
+			case 'mmd': 
+				loader.load( d.path, d.vmdPaths, oC, oP );
+				break;
+			case 'dae':
+				if ( d.convertUpAxis ) loader.convertUpAxis = d.convertUpAxis;//continue
+			default: 
+				loader.load( d.path, oC, oP );
+
+		}
 
 	}
 
@@ -477,6 +583,27 @@ function LoadScreen ( renderer, style ) {
 			case 'assimp': 
 				if ( ! oLoaders.assimp ) oLoaders.assimp = new THREE.AssimpLoader();
 				return oLoaders.assimp;
+			case 'assimpJSON': 
+				if ( ! oLoaders.assimpJSON ) oLoaders.assimpJSON = new THREE.AssimpJSONLoader();
+				return oLoaders.assimpJSON;
+			case 'awd': 
+				if ( ! oLoaders.awd ) oLoaders.awd = new THREE.AWDLoader();
+				return oLoaders.awd;
+			case 'babylon': 
+				if ( ! oLoaders.babylon ) oLoaders.babylon = new THREE.BabylonLoader();
+				return oLoaders.babylon;
+			case 'dae': 
+				if ( ! oLoaders.dae ) oLoaders.dae = new THREE.ColladaLoader();
+				return oLoaders.dae;
+			case 'fbx': 
+				if ( ! oLoaders.fbx ) oLoaders.fbx = new THREE.FBXLoader();
+				return oLoaders.fbx;
+			case 'obj': 
+				if ( ! oLoaders.obj ) oLoaders.obj = new THREE.OBJLoader();
+				return oLoaders.obj;
+			case 'utf8': 
+				if ( ! oLoaders.utf8 ) oLoaders.utf8 = new THREE.UTF8Loader();
+				return oLoaders.utf8;
 			case 'wrl': 
 			case 'wrz': 
 			case 'vrml': 
@@ -510,6 +637,22 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
+	function getCubeTextureLoader ( ext ) {
+
+		switch ( ext ) {
+
+			case 'hdr':
+				cTLoaders.hdr = cTLoaders.hdr || new THREE.HDRCubeTextureLoader();
+				return cTLoaders.hdr;
+				break;
+			default: 
+				cTLoaders.main = cTLoaders.main || new THREE.CubeTextureLoader();
+				return cTLoaders.main;
+
+		}
+
+	}
+
 	function getSupport ( ext ) {
 
 		if ( typeof support[ ext ] === 'undefined' ) {
@@ -534,6 +677,9 @@ function LoadScreen ( renderer, style ) {
 	function getGeometryLoader ( ext ) {
 
 		switch ( ext ) {
+			case 'ctm': 
+				gLoaders.ctm = gLoaders.ctm || new THREE.CTMLoader();
+				return gLoaders.ctm;
 			case 'json': 
 				gLoaders.json = gLoaders.json || new THREE.JSONLoader();
 				return gLoaders.json;
@@ -543,9 +689,6 @@ function LoadScreen ( renderer, style ) {
 			case 'stl': 
 				gLoaders.stl = gLoaders.stl || new THREE.STLLoader();
 				return gLoaders.stl;
-			case 'ctm': 
-				gLoaders.ctm = gLoaders.ctm || new THREE.CTMLoader();
-				return gLoaders.ctm;
 			case 'vtk': 
 				gLoaders.vtk = gLoaders.vtk || new THREE.VTKLoader();
 				return gLoaders.vtk;
@@ -677,13 +820,33 @@ function LoadScreen ( renderer, style ) {
 
 				if ( oA[ k ].path && oA[ k ].fileSize ) {//object pending in output.objects
 
-					assignPropsToMaterial( k, oOA[ k ].material );
+					var p = oA[ k ].path,
+						a = p.split( '.' ),
+						l = a.length;
 
-					assignPropsToObject( k, oOA[ k ] );
+					var obj;
 
-					if ( oA[ k ].onComplete ) oA[ k ].onComplete( oOA[ k ] );
+					if ( a[ l - 2 ] === 'assimp' ) {//AssimpJSON > .object
 
-					oA[ k ] = oOA[ k ];
+						obj = oOA[ k ].object;
+
+					} else if ( a[ l - 1 ] === 'dae' ) {//Collada > .scene, .kinematics..
+
+						obj = oOA[ k ].scene;
+
+					} else {
+
+						obj = oOA[ k ];
+
+					}
+
+					assignPropsToMaterial( k, obj.material );
+
+					assignPropsToObject( k, obj );
+
+					if ( oA[ k ].onComplete ) oA[ k ].onComplete( obj );
+
+					oA[ k ] = obj;
 
 				} else if ( typeof oA[ k ].geometry === 'string' ) {//object to assemble from asset
 

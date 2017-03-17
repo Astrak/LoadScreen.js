@@ -15,6 +15,8 @@ function init () {
 
 * Automatical load screens.
 
+'Loading' > 'Processing' > 'Compiling' > 'Creating scene' messages
+
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
 * Simple assets management in a declarative style :
@@ -96,7 +98,7 @@ ls.remove( animate );//Removal is tweened so next action is a callback.
 
 ## Assets declaration
 ### Textures
-Specify texture files if any. They will be loaded first. Supported texture loaders :
+Loaded first if any. Supported texture loaders :
 - [x] THREE.TextureLoader
 - [x] THREE.TGALoader
 - [x] THREE.PVRLoader
@@ -120,12 +122,37 @@ ASSETS.textures.myTexture1.GPUCompression: {
 //After loading :
 ASSETS.textures.myTexture1;//THREE.Texture
 
-//Also simply
-ASSETS.textures.myTexture2 = new THREE.Texture(...);//won't be processed
+//Also simply :
+ASSETS.textures.myTexture2 = new THREE.Texture(...);//Won't be processed.
 ```
 
+### Cubemap loaders
+Loaded in second place if any. Supported cube texture loaders :
+- [x] THREE.CubeTextureLoader
+- [x] THREE.HDRCubeTextureLoader
+```js
+ASSETS.cubeTextures.myCubeTexture1 = {
+    paths: [ 'face1.hdr', 'face2.hdr', 'face3.hdr', 'face4.hdr', 'face5.hdr', 'face6.hdr' ],
+    filesSize: 5321,
+    toPMREM: true//Output a PMREM for PBR IBL (also needs PMREM generation files).
+};
+
+//After loading :
+ASSETS.cubeTextures.myCubeTexture1;//THREE.Texture
+```
+
+### Material loaders
+Todo. 
+Supported material loaders :
+- [ ] THREE.MaterialLoader
+
+### Animation loaders
+Todo. 
+Supported animation loaders :
+- [ ] THREE.BVHLoader
+
 ### Geometries
-Specify geometry files for geometry loaders. They will be loaded second. Supported geometry loaders :
+Loaded in third place if any. Supported geometry loaders :
 - [x] THREE.JSONLoader (threejs blender exporter)
 - [x] THREE.PLYLoader
 - [x] THREE.CTMLoader (`load` method)
@@ -148,87 +175,90 @@ ASSETS.geometries = {
 //After loading :
 ASSETS.geometries.myGeometry1;//THREE.Geometry
 
-//Also simply
-ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//won't be processed
+//Also simply :
+ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//Won't be processed.
 ```
 
 ### Objects
-Specify objects to load or to create from assets. Loaded in third place. Supported object loaders :
-(animations not handled for now)
+To load or to create from assets if any. Loaded in third place. Supported object loaders :
 - [x] THREE.ThreeMFLoader
 - [x] THREE.AMFLoader
 - [x] THREE.AssimpLoader
 - [x] THREE.AssimpJSONLoader
+- [x] THREE.AWDLoader
+- [x] THREE.BabylonLoader
+- [x] THREE.ColladaLoader
+- [x] THREE.ColladaLoader (2)
 - [ ] THREE.CTMLoader (`loadParts` method for multiple geometries)
-- [ ] THREE.MMDLoader
+- [ ] THREE.FBXLoader
+- [x] THREE.FBXLoader (2)
+- [ ] THREE.GLTFLoader
+- [ ] THREE.GLTFLoader (2)
+- [x] THREE.MMDLoader (needs the additional parameter `VMDPaths` )
 - [ ] THREE.ObjectLoader
+- [x] THREE.OBJLoader
 - [ ] THREE.PlayCanvasLoader
-- [ ] THREE.UTF8Loader
+- [x] THREE.UTF8Loader
 - [x] THREE.VRMLLoader
 ```js
 ASSETS.objects = {
-    myObject1: {//1. load from file
-        path: 'path/to/object.wrl',
+    myObject1: {//Load from file :
+        path: 'path/to/object.obj',
         fileSize: 3846//Ko
     },
-    myObject2: {//2. or create from asset
+    myObject2: {//Or create from asset :
         geometry: 'myGeometry1',//Use geometry asset 'myGeometry1'
         material: new THREE.MeshPhongMaterial()
     },
-    myObject3: {//3. or create from scratch
+    myObject3: {//Or create from scratch :
         geometry: new THREE.PlaneBufferGeometry( 5, 3, 9 ),
         material: new THREE.MeshBasicMaterial()
+    },
+    myObject4: {//The object may have a hierarchy :
+        path: 'path/to/object.utf8',
+        fileSize: 1111,
+        onComplete: object => {
+            object.traverse( child => { child.material.map = ASSETS.textures.myTexture1; } );
+        }
+    },
+    myObject5: {//The object may have a hierarchy and an animation :
+        path: 'path/to/object.dae',
+        fileSize: 1615,
+        convertUpAxis: true,//Collada loader option.
+        onComplete: collada => {
+            collada.scene.traverse( child => {
+                if ( child instanceof THREE.SkinnedMesh ) {
+                    const animation = new THREE.Animation( child, child.geometry.animation );
+                    animation.play();
+                }
+            });
+        }
     }
-    myObject4: new THREE.Mesh(...);//Won't be processed
 };
 
 //other parameters
-ASSETS.objects.myObject5 = {
-    path: 'path/to/object.amf',
+ASSETS.objects.myObject6 = {
+    geometry: 'myGeometry1',
+    material: new THREE.MeshPhongMaterial(),
     type: 'mesh',//Or 'points' or 'line', defaults to 'mesh'.
-    //Specify any mesh or material property.
-    color: 0x33ff89,//Assigned to material.
+    //Specify any mesh or material property 
+    //(if the object is a loaded hierarchy, they will be assigned to the root mesh).
     map: 'myTexture1',//Asset assigned to material.
+    color: 0x33ff89,//Assigned to material.
     castShadow: true,//Assigned to mesh.
     info: 'This is my object',//Unknown key 'info' in mesh and material > assigned to mesh.userData.
-    //For any further change :
-    onComplete: function ( object ) {
-        //object.geometry.computeBoundingBox or anything.
-    }
 };
+
+//After loading : 
+ASSETS.objects.myObject6;//THREE.Mesh
+
+//Also simply :
+ASSETS.objects.myObject7 = new THREE.Object3D(...);//Won't be processed.
 ```
 
-### Scene
-Todo.
-Supported scene loaders :
-- [ ] THREE.AWDLoader
-- [ ] THREE.OBJLoader
-- [ ] THREE.FBXLoader
-- [ ] THREE.ColladaLoader
-- [ ] THREE.ColladaLoader (2)
-- [ ] THREE.BabylonLoader
-
-### Material loaders
-Todo. 
-Supported material loaders :
-- [ ] THREE.MaterialLoader
-
-### Cubemap loaders
-Todo. 
-Supported cubemap loaders :
-- [ ] THREE.CubeTextureLoader
-- [ ] THREE.HDRCubeTextureLoader
-
-### Animation loaders
-Todo. 
-Supported animation loaders :
-- [ ] THREE.BVHLoader
-
 # Roadmap
-* handle cubemaps, scenes, material, animation loaders + pmrem creation
-* support all loaders
+* complete loader loaders
 * code the 'forcedStart' parameter
-* check glTF resources organization for possible inspiration
 * add fancy loader types
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
 * second progress bar at top of screen for assets loading after start
