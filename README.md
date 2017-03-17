@@ -1,73 +1,51 @@
 # LoadScreen.js
 A JS library to wrap Three.js assets loading.
-1. Declarative assets.
-2. UX-wise process : load > process > compile > scene creation.
-3. Load screens included.
 
+
+* Short implementation :
 ```js
-/* assets.js */
+//First create and append a webgl renderer, then :
+const ls = new LoadScreen( renderer ).onComplete( init ).start( ASSETS );
+
+function init () {
+    //Init scene, then :
+    ls.remove( animate );
+}
+```
+
+* Automatical load screens.
+
+![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
+
+* Simple assets management in a declarative style :
+```js
 const ASSETS = {
     textures: {
         foliage: {
-            path: 'path/to/pic1.png',
-            fileSize: 1467,
-            minFilter: THREE.LinearFilter,
-            tryPVR: true,
-            PVRSize: 2145
+            path: 'path/to/pic1.png', fileSize: 1467,
+            minFilter: THREE.LinearFilter
         }
     }, 
     geometries: {
         treeGeo: {
-            path: 'path/to/model.json',
-            fileSize: 3876,
+            path: 'path/to/model.json', fileSize: 3876,
             toBufferGeometry: true
         }
     }, 
     objects: {
         tree: {
             geometry: 'treeGeo',
-            material: new THREE.MeshBasicMaterial(),
             map: 'foliage',
+            material: new THREE.MeshBasicMaterial(),
             castShadow: true,
             transparent: true,
             onComplete: function ( object ) {
-                object.scale.set( -1, 3, 1 );
+                object.scale.set( 1, 3, 1 );
             }
         }
     }
 };
-
-/* app.js */
-//Create and append renderer.
-const renderer = new THREE.WebGLRenderer();
-renderer.setPixelRatio( devicePixelRatio );
-renderer.setSize( width, height );
-container.appendChild( renderer.domElement );
-
-//Start app.
-const ls = new LoadScreen( renderer );
-ls.onComplete( init ).start( ASSETS );
-
-function init () {
-    
-    ...//Scene initiation.
-
-    ls.remove( animate );
-
-}
-
-function animate () {
-    
-    requestAnimationFrame( animate );
-
-    ...//Render loop.
-
-}
 ```
-
-A default load screen automatically appears. Renders only start when ready.
-
-![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
 # Usage
 ## Full pattern
@@ -122,25 +100,28 @@ Specify texture files if any. They will be loaded first. Supported texture loade
 - [x] THREE.TextureLoader
 - [x] THREE.TGALoader
 - [x] THREE.PVRLoader
-- [ ] THREE.KTXLoader
+- [x] THREE.KTXLoader
 ```js
 ASSETS.textures = {
     myTexture1: { 
         path: 'path/to/pic.jpg',
         fileSize: 2789,//in Ko
         //Other threejs textures properties can be specified.
-        minFilter: THREE.LinearFilter,
-        //Optionnaly GPU compression can be used, script will check device support.
-        //Needs 'path/to/pic.pvr' or 'path/to/pic.ktx'.
-        tryPVR: false,//Apple devices.
-        PVRSize: null,//if tryPVR is set to true, file size has to be specified.
-        tryKTX: false//Khronos spec.
-        KTXSize: null
+        minFilter: THREE.LinearFilter
     }
+};
+
+//GPU compression formats can be used, script will check device support.
+ASSETS.textures.myTexture1.GPUCompression: {
+    PVR: { path: 'path/to/PVR/pic.pvr', fileSize: 3298 },//Apple format.
+    KTX: { path: 'path/to/KTX/pic.ktx', fileSize: 2983 }//Khronos format.
 };
 
 //After loading :
 ASSETS.textures.myTexture1;//THREE.Texture
+
+//Also simply
+ASSETS.textures.myTexture2 = new THREE.Texture(...);//won't be processed
 ```
 
 ### Geometries
@@ -209,7 +190,7 @@ ASSETS.objects.myObject5 = {
     color: 0x33ff89,//Assigned to material.
     map: 'myTexture1',//Asset assigned to material.
     castShadow: true,//Assigned to mesh.
-    info: 'This is my object',//Unknown > assigned to mesh.userData.
+    info: 'This is my object',//Unknown key 'info' in mesh and material > assigned to mesh.userData.
     //For any further change :
     onComplete: function ( object ) {
         //object.geometry.computeBoundingBox or anything.

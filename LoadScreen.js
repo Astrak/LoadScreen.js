@@ -230,11 +230,30 @@ function LoadScreen ( renderer, style ) {
 
 			for ( var k in r.textures ) {
 
-				if ( r.geometries[ k ].path && r.geometries[ k ].fileSize ) {//avoid ready textures
+				var t = r.textures[ k ];
+
+				if ( t.path && t.fileSize ) {//avoid ready textures
 
 					output.textures[ k ] = {};
-					textures[ k ] = { prog: 0, fileSize: r.textures[ k ].fileSize };
-					texSum += r.textures[ k ].fileSize;
+
+					if ( t.GPUCompression ) {
+
+						if ( t.GPUCompression.PVR && getSupport( 'PVR' ) ) {
+
+							t.path = t.GPUCompression.PVR.path;
+							t.fileSize = t.GPUCompression.PVR.fileSize;
+
+						} else if ( t.GPUCompression.KTX && getSupport( 'KTX' ) ) {
+
+							t.path = t.GPUCompression.KTX.path;
+							t.fileSize = t.GPUCompression.KTX.fileSize;
+
+						}
+
+					}
+
+					textures[ k ] = { prog: 0, fileSize: t.fileSize };
+					texSum += t.fileSize;
 					nFiles++;
 
 				}
@@ -349,9 +368,11 @@ function LoadScreen ( renderer, style ) {
 
 	function loadTexture ( p ) {
 
-		var d = that.resources.textures[ p ];
+		var d = that.resources.textures[ p ],
+			arr = d.path.split( '.' ),
+			ext = arr[ arr.length - 1 ];
 
-		getTextureLoader( d ).load( 
+		getTextureLoader( ext ).load( 
 			d.path, 
 			function ( t ) {
 
@@ -465,30 +486,21 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function getTextureLoader ( o ) {
-
-		if ( o.tryPVR && getSupport( 'pvr' ) ) {//prefer pvr over ktx
-
-			tLoaders.pvr = tLoaders.pvr || new THREE.PVRLoader();
-
-			return tLoaders.pvr;
-
-		} else if ( o.tryKTX && getSupport( 'ktx' ) ) {
-
-			tLoaders.ktx = tLoaders.ktx || new THREE.KTXLoader();
-
-			return tLoaders.ktx;
-
-		} 
-
-		var a = o.path.split( '.' ),
-			ext = a[ a.length - 1 ];
+	function getTextureLoader ( ext ) {
 
 		switch ( ext ) {
 
 			case 'tga':
 				tLoaders.tga = tLoaders.tga || new THREE.TGALoader();
 				return tLoaders.tga;
+				break;
+			case 'pvr':
+				tLoaders.pvr = tLoaders.pvr || new THREE.PVRLoader();
+				return tLoaders.pvr;
+				break;
+			case 'ktx':
+				tLoaders.ktx = tLoaders.ktx || new THREE.KTXLoader();
+				return tLoaders.ktx;
 				break;
 			default: 
 				tLoaders.main = tLoaders.main || new THREE.TextureLoader();
@@ -504,7 +516,7 @@ function LoadScreen ( renderer, style ) {
 
 			extensions = extensions || renderer.context.getSupportedExtensions();
 
-			if ( ext === 'pvr' ) 
+			if ( ext === 'PVR' ) 
 
 				support[ ext ] = extensions.indexOf( 'WEBGL_compressed_texture_pvrtc' ) > -1 
 					|| extensions.indexOf( 'WEBKIT_WEBGL_compressed_texture_pvrtc' ) > -1;
