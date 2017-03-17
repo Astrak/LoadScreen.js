@@ -5,59 +5,38 @@ A JS library to wrap Three.js assets loading.
 3. Load screens included.
 
 ```js
-/* Assets.js */
-const ASSETS = {};
-
-ASSETS.textures = {
-    dirt: {
-        path: 'path/to/pic1.png',
-        fileSize: 1467,
-        tryPVR: true
-    },
-    foliage: {
-        path: 'path/to/pic2.jpg',
-        fileSize: 889,
-        minFilter: THREE.NearestFilter
-    }
-};
-
-ASSETS.geometry = {
-    model: {
-        path: 'path/to/model.json',
-        fileSize: 3876,
-        toBufferGeometry: true,
-        onComplete: function ( geometry ) { 
-            geometry.addAttribute( 'uv2', geometry.attributes.uv );
+/* assets.js */
+const ASSETS = {
+    textures: {
+        foliage: {
+            path: 'path/to/pic1.png',
+            fileSize: 1467,
+            minFilter: THREE.LinearFilter,
+            tryPVR: true
         }
-    }
-};
-
-ASSETS.objects = {
-    house: {
-        geometry: 'model',
-        aoMap: 'dirt',
-        type: 'mesh',
-        material: new THREE.MeshStandardMaterial(),
-        castShadow: true,
-        receiveShadow: true
-    },
-    tree: {
-        path: 'path/to/tree.wrl',
-        fileSize: 311,
-        castShadow: true,
-        receiveShadow: true,
-        matrixAutoUpdate: false,
-        transparent: true,
-        alphaTest: .5,
-        map: 'foliage',
-        onComplete: function ( object ) {
-            object.scale.set( -1, 3, 1 );
+    }, 
+    geometries: {
+        treeGeo: {
+            path: 'path/to/model.json',
+            fileSize: 3876,
+            toBufferGeometry: true
+        }
+    }, 
+    objects: {
+        tree: {
+            geometry: 'treeGeo',
+            material: new THREE.MeshBasicMaterial(),
+            map: 'foliage',
+            castShadow: true,
+            transparent: true,
+            onComplete: function ( object ) {
+                object.scale.set( -1, 3, 1 );
+            }
         }
     }
 };
 
 /* app.js */
-
 //create and append renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio( devicePixelRatio );
