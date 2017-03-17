@@ -166,7 +166,7 @@ ASSETS.geometries = {
         fileSize: 9498,//Ko
         //Next two are optional :
         toBufferGeometry: false,//Force creation of a BufferGeometry.
-        onComplete: function ( geometry ) {
+        onComplete ( geometry ) {
             //geometry.computeFlatVertexNormals / translate / center / merge / addAttribute...
         }
     }
@@ -195,6 +195,7 @@ To load or to create from assets if any. Loaded in third place. Supported object
 - [ ] THREE.GLTFLoader
 - [ ] THREE.GLTFLoader (2)
 - [x] THREE.MMDLoader (needs the additional parameter `VMDPaths` )
+- [x] THREE.PCDLoader (needs the additional parameter `VMDPaths` )
 - [ ] THREE.ObjectLoader
 - [x] THREE.OBJLoader
 - [ ] THREE.PlayCanvasLoader
@@ -225,7 +226,7 @@ ASSETS.objects = {
         path: 'path/to/object.dae',
         fileSize: 1615,
         convertUpAxis: true,//Collada loader option.
-        onComplete: collada => {
+        onComplete ( collada ) {
             collada.scene.traverse( child => {
                 if ( child instanceof THREE.SkinnedMesh ) {
                     const animation = new THREE.Animation( child, child.geometry.animation );

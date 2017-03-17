@@ -601,6 +601,9 @@ function LoadScreen ( renderer, style ) {
 			case 'obj': 
 				if ( ! oLoaders.obj ) oLoaders.obj = new THREE.OBJLoader();
 				return oLoaders.obj;
+			case 'pcd': 
+				if ( ! oLoaders.pcd ) oLoaders.pcd = new THREE.PCDLoader();
+				return oLoaders.pcd;
 			case 'utf8': 
 				if ( ! oLoaders.utf8 ) oLoaders.utf8 = new THREE.UTF8Loader();
 				return oLoaders.utf8;
