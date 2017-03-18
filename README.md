@@ -5,7 +5,7 @@
 
 A Three.js assets loading wrapper.
 
-##Summary
+## Summary
 
 1. [Usage](#usage)
 1. [Installation](#installation)
