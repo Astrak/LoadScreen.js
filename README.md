@@ -283,3 +283,10 @@ MIT
 # Dependencies : 
 * Threejs
 * Threejs loaders needed for your files
+
+[npm-badge]: https://img.shields.io/npm/v/loadscreen.svg
+[npm-badge-url]: https://www.npmjs.com/package/loadscreen
+[license-badge]: https://img.shields.io/npm/l/loadscreen.svg
+[license-badge-url]: ./LICENSE
+[dependencies-badge]: https://img.shields.io/david/astrak/loadscreen.js.svg
+[dependencies-badge-url]: https://david-dm.org/astrak/loadscreen.js
