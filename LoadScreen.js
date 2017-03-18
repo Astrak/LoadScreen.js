@@ -25,17 +25,18 @@ function LoadScreen ( renderer, style ) {
 
 	var pmremGen, pmremcubeuvpacker;
 
-	var gLoaders = {},
-		tLoaders = {},
+	var tLoaders = {},
 		cTLoaders = {},
+		fLoaders = {},
+		gLoaders = {},
 		oLoaders = {};
 
 	var output = {};
 
 	var extensions, support = {};
 
-	var	textures = {}, cubeTextures = {}, geometries = {}, objects = {}, 
-		texSum = 0, cTexSum = 0, geoSum = 0, objSum = 0;
+	var	textures = {}, cubeTextures = {}, fonts = {}, geometries = {}, objects = {}, 
+		texSum = 0, cTexSum = 0, fontSum = 0, geoSum = 0, objSum = 0;
 
 	/* API */
 	this.domElement = null;
@@ -286,6 +287,28 @@ function LoadScreen ( renderer, style ) {
 
 			}
 
+		}		
+
+		if ( r.fonts ) {
+
+			output.fonts = {};
+
+			for ( var k in r.fonts ) {
+
+				var f = r.fonts[ k ];
+
+				if ( f.path && f.fileSize ) {//avoid ready font
+
+					output.fonts[ k ] = {};
+
+					fonts[ k ] = { prog: 0, fileSize: f.fileSize };
+					fontSum += f.filesSize;
+					nFiles++;
+
+				}
+
+			}
+
 		}
 
 		if ( r.geometries ) {
@@ -342,7 +365,15 @@ function LoadScreen ( renderer, style ) {
 
 				if ( r.cubeTextures[ k ].paths && r.cubeTextures[ k ].filesSize )
 
-					loadCubeTexture( k );
+					loadCubeTexture( k );		
+
+		if ( r.fonts ) 
+			
+			for ( var k in r.fonts ) 
+
+				if ( r.fonts[ k ].path && r.fonts[ k ].fileSize )
+
+					loadFont( k );
 
 		if ( r.geometries ) 
 			
@@ -371,8 +402,6 @@ function LoadScreen ( renderer, style ) {
 		getGeometryLoader( ext ).load( 
 			d.path, 
 			function ( g ) {
-
-				g.name = p;
 
 				output.geometries[ p ] = g;
 
@@ -412,15 +441,6 @@ function LoadScreen ( renderer, style ) {
 			d.path, 
 			function ( t ) {
 
-				//assign properties
-				for ( var k in d )
-
-					if ( typeof t[ k ] !== 'undefined' ) 
-
-						t[ k ] = d[ k ];
-
-				t.name = p;
-
 				output.textures[ p ] = t;
 
 				textures[ p ].prog = 1;
@@ -449,6 +469,42 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
+	function loadFont ( p ) {
+
+		fLoaders.main = fLoaders.main || new THREE.TTFLoader();
+
+		fLoaders.main.load( 
+			that.resources.fonts[ p ].path, 
+			function ( json ) {
+
+				output.fonts[ p ] = json;
+
+				fonts[ p ].prog = 1;
+
+				counter++;
+
+				updateProgress({ type: 'Font', name: p, progress: 1 });
+
+				update( true );
+
+			}, 
+			function ( e ) {
+
+				var pr = e.loaded / e.total;
+
+				fonts[ p ].prog = pr;
+
+				if ( pr !== 1 ) //otherwise onLoad will be called anyway
+
+					updateProgress({ type: 'Font', name: p, progress: pr });
+
+				update();
+
+			}
+		);
+
+	}
+
 	function loadCubeTexture ( p ) {
 
 		var d = that.resources.cubeTextures[ p ],
@@ -458,26 +514,6 @@ function LoadScreen ( renderer, style ) {
 		getCubeTextureLoader( ext ).load( 
 			d.paths, 
 			function ( t ) {
-
-				if ( d.toPMREM ) {
-
-					var pmremGen = new THREE.PMREMGenerator( t );
-					pmremGen.update( renderer );
-
-					var pmremcubeuvpacker = new THREE.PMREMCubeUVPacker( pmremGen.cubeLods );
-					pmremcubeuvpacker.update( renderer );
-					t = pmremcubeuvpacker.CubeUVRenderTarget.texture;
-
-				}
-
-				//assign properties
-				for ( var k in d )
-
-					if ( typeof t[ k ] !== 'undefined' ) 
-
-						t[ k ] = d[ k ];
-
-				t.name = p;
 
 				output.cubeTextures[ p ] = t;
 
@@ -517,19 +553,7 @@ function LoadScreen ( renderer, style ) {
 
 		var oC = function ( o, assimp ) {
 
-			//todo
-			//o.kinematics (collada)
-
 			var object = ext === 'assimp' ? assimp : o;
-
-			//assign properties
-			for ( var k in d )
-
-				if ( typeof object[ k ] !== 'undefined' ) 
-
-					object[ k ] = d[ k ];
-
-			object.name = p;
 
 			output.objects[ p ] = object;
 
@@ -713,19 +737,82 @@ function LoadScreen ( renderer, style ) {
 
 				for ( var p in tA[ k ] ) 
 
-					if ( p !== 'path' && p !== 'fileSize' ) 
+					if ( typeof oTA[ k ][ p ] !== 'undefined' ) 
 
 						oTA[ k ][ p ] = tA[ k ][ p ];
 
 				tA[ k ] = oTA[ k ];
+
+				tA[ k ].name = k;
 
 				delete oTA[ k ];
 
 			}
 
 		}
+
+		//2. replace cube textures in resources
+		var cTA = that.resources.cubeTextures,
+			oCTA = output.cubeTextures;
+
+		if ( cTA ) {
+
+			for ( var k in oCTA ) {
+
+				if ( cTA[ k ].toPMREM ) {
+
+					var pmremGen = new THREE.PMREMGenerator( oCTA[ k ] );
+					pmremGen.update( renderer );
+
+					var pmremcubeuvpacker = new THREE.PMREMCubeUVPacker( pmremGen.cubeLods );
+					pmremcubeuvpacker.update( renderer );
+					oCTA[ k ] = pmremcubeuvpacker.CubeUVRenderTarget.texture;
+
+				}
+
+				for ( var p in cTA[ k ] ) 
+
+					if ( typeof oCTA[ k ][ p ] !== 'undefined' ) 
+
+						oCTA[ k ][ p ] = cTA[ k ][ p ];
+
+				cTA[ k ] = oCTA[ k ];
+
+				cTA[ k ].name = k;
+
+				delete oCTA[ k ];
+
+			}
+
+		}
+
+		//3. replace fonts in resources
+		var fA = that.resources.fonts,
+			oFA = output.fonts;
+
+		if ( fA ) {
+
+			for ( var k in oFA ) {
+
+				oFA[ k ] = new THREE.Font( oFA[ k ] );
+
+				for ( var p in fA[ k ] ) 
+
+					if ( typeof oFA[ k ][ p ] !== 'undefined' ) 
+
+						oFA[ k ][ p ] = fA[ k ][ p ];
+
+				fA[ k ] = oFA[ k ];
+
+				fA[ k ].name = k;;
+
+				delete oFA[ k ];
+
+			}
+
+		}
 	
-		//2. process geometries and replace in resources
+		//4. process geometries and replace in resources
 		var gA = that.resources.geometries, 
 			oGA = output.geometries;
 
@@ -743,13 +830,15 @@ function LoadScreen ( renderer, style ) {
 
 				gA[ k ] = oGA[ k ];
 
+				gA[ k ].name = k;
+
 				delete oGA[ k ];
 
 			}
 
 		}
 
-		//3. create objects
+		//5. create objects
 		var oA = that.resources.objects,
 			oOA = output.objects;
 
@@ -827,29 +916,33 @@ function LoadScreen ( renderer, style ) {
 						a = p.split( '.' ),
 						l = a.length;
 
-					var obj;
+					var object;
 
 					if ( a[ l - 2 ] === 'assimp' ) {//AssimpJSON > .object
 
-						obj = oOA[ k ].object;
+						object = oOA[ k ].object;
 
 					} else if ( a[ l - 1 ] === 'dae' ) {//Collada > .scene, .kinematics..
 
-						obj = oOA[ k ].scene;
+						object = oOA[ k ].scene;
 
 					} else {
 
-						obj = oOA[ k ];
+						object = oOA[ k ];
 
 					}
 
-					assignPropsToMaterial( k, obj.material );
+					assignPropsToMaterial( k, object.material );
 
-					assignPropsToObject( k, obj );
+					assignPropsToObject( k, object );
 
-					if ( oA[ k ].onComplete ) oA[ k ].onComplete( obj );
+					if ( oA[ k ].onComplete ) oA[ k ].onComplete( object );
 
-					oA[ k ] = obj;
+					oA[ k ] = object;
+
+					oA[ k ].name = k;
+
+					delete oOA[ k ];
 
 				} else if ( typeof oA[ k ].geometry === 'string' ) {//object to assemble from asset
 
@@ -869,6 +962,8 @@ function LoadScreen ( renderer, style ) {
 
 					oA[ k ] = object;
 
+					oA[ k ].name = k;
+
 				} else if ( ! oA[ k ] instanceof THREE.Object3D ) {//object to assemble
 
 					var geometry = oA[ k ].geometry, 
@@ -886,6 +981,8 @@ function LoadScreen ( renderer, style ) {
 					if ( oA[ k ].onComplete ) oA[ k ].onComplete( object );
 
 					oA[ k ] = object;
+
+					oA[ k ].name = k;
 
 				}//else : it is a mesh, do nothing
 

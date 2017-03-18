@@ -1,5 +1,5 @@
 # LoadScreen.js
-A JS library to wrap Three.js assets loading.
+A Three.js assets loading wrapper.
 
 
 * Short implementation :
@@ -41,7 +41,7 @@ const ASSETS = {
             material: new THREE.MeshBasicMaterial(),
             castShadow: true,
             transparent: true,
-            onComplete: function ( object ) {
+            onComplete ( object ) {
                 object.scale.set( 1, 3, 1 );
             }
         }
@@ -134,7 +134,7 @@ Loaded in second place if any. Supported cube texture loaders :
 ASSETS.cubeTextures.myCubeTexture1 = {
     paths: [ 'face1.hdr', 'face2.hdr', 'face3.hdr', 'face4.hdr', 'face5.hdr', 'face6.hdr' ],
     filesSize: 5321,
-    toPMREM: true//Output a PMREM for PBR IBL (also needs PMREM generation files).
+    toPMREM: true//Output a PMREM if files provided are HDR.
 };
 
 //After loading :
@@ -151,8 +151,21 @@ Todo.
 Supported animation loaders :
 - [ ] THREE.BVHLoader
 
+### Font loader
+Loaded in third place if any. Supported font loader :
+- [x] THREE.TTFLoader
+```js
+ASSETS.fonts.myFont1 = {
+    path: 'path/to/font.ttf',
+    fileSize: 321
+};
+
+//After loading :
+ASSETS.fonts.myFont1;//THREE.Font
+```
+
 ### Geometries
-Loaded in third place if any. Supported geometry loaders :
+Loaded in fourth place if any. Supported geometry loaders :
 - [x] THREE.JSONLoader (threejs blender exporter)
 - [x] THREE.PLYLoader
 - [x] THREE.CTMLoader (`load` method)
@@ -180,7 +193,7 @@ ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//Won't be proc
 ```
 
 ### Objects
-To load or to create from assets if any. Loaded in third place. Supported object loaders :
+To load or to create from assets if any. Loaded in fifth place. Supported object loaders :
 - [x] THREE.ThreeMFLoader
 - [x] THREE.AMFLoader
 - [x] THREE.AssimpLoader
@@ -218,7 +231,7 @@ ASSETS.objects = {
     myObject4: {//The object may have a hierarchy :
         path: 'path/to/object.utf8',
         fileSize: 1111,
-        onComplete: object => {
+        onComplete ( object ) => {
             object.traverse( child => { child.material.map = ASSETS.textures.myTexture1; } );
         }
     },
@@ -259,6 +272,8 @@ ASSETS.objects.myObject7 = new THREE.Object3D(...);//Won't be processed.
 
 # Roadmap
 * complete loader support
+* include a service-worker to auto-register assets ?
+* auto-tween exposure ?
 * code the 'forcedStart' parameter
 * add fancy loader types
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
