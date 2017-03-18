@@ -231,7 +231,7 @@ ASSETS.objects = {
     myObject4: {//The object may have a hierarchy :
         path: 'path/to/object.utf8',
         fileSize: 1111,
-        onComplete ( object ) => {
+        onComplete ( object ) {
             object.traverse( child => { child.material.map = ASSETS.textures.myTexture1; } );
         }
     },
