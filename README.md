@@ -4,8 +4,16 @@
 [![Dependencies][dependencies-badge]][dependencies-badge-url]
 
 A Three.js assets loading wrapper.
-# Usage
-## Example
+
+##Summary
+
+1. [Usage](#usage)
+1. [Installation](#installation)
+1. [Full pattern](#full-pattern)
+1. [Assets declaration](#assets-declaration)
+1. [Roadmap](#roadmap)
+
+## Usage
 * Short implementation :
 ```js
 //First create and append a webgl renderer, then :
@@ -51,6 +59,15 @@ const ASSETS = {
         }
     }
 };
+```
+## Installation
+Install with NPM :
+```
+npm install loadscreen
+```
+Or include in your page :
+```html
+<script type="text/javascript" src="LoadScreen.min.js"/>
 ```
 
 ## Full pattern
@@ -268,7 +285,7 @@ ASSETS.objects.myObject7 = new THREE.Mesh(...);//Won't be processed.
 ### Animation loaders
 - [ ] THREE.BVHLoader
 
-# Roadmap
+## Roadmap
 * complete loader support
 * auto-tween exposure after removal ?
 * code the 'forcedStart' parameter
@@ -277,13 +294,6 @@ ASSETS.objects.myObject7 = new THREE.Mesh(...);//Won't be processed.
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
 * second progress bar at top of screen for assets loading after start
 * add setStyle method for another style if further calls
-
-# License
-MIT
-
-# Dependencies : 
-* Threejs
-* Threejs loaders needed for your files
 
 [npm-badge]: https://img.shields.io/npm/v/loadscreen.svg
 [npm-badge-url]: https://www.npmjs.com/package/loadscreen
