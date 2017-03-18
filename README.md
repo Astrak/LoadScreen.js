@@ -84,7 +84,7 @@ ls.setOptions( options )
 
 .onComplete( init )//After processing and compiling.
 
-.start( assets );//Load assets > process assets > compile materials > scene creation.
+.start( ASSETS );//Load assets > process assets > compile materials > scene creation.
 
 //or
 .start();//Just add the info UI.

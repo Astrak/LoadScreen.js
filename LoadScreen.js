@@ -29,14 +29,15 @@ function LoadScreen ( renderer, style ) {
 		cTLoaders = {},
 		fLoaders = {},
 		gLoaders = {},
-		oLoaders = {};
+		oLoaders = {},
+		fLoader;
 
 	var output = {};
 
 	var extensions, support = {};
 
-	var	textures = {}, cubeTextures = {}, fonts = {}, geometries = {}, objects = {}, 
-		texSum = 0, cTexSum = 0, fontSum = 0, geoSum = 0, objSum = 0;
+	var	textures = {}, cubeTextures = {}, fonts = {}, geometries = {}, objects = {}, files = {}, 
+		texSum = 0, cTexSum = 0, fontSum = 0, geoSum = 0, objSum = 0, fileSum = 0;
 
 	/* API */
 	this.domElement = null;
@@ -229,6 +230,27 @@ function LoadScreen ( renderer, style ) {
 		var r = that.resources;
 
 		//1. Count files to load and their total size, create the 'output' mirror of resources
+		if ( r.files ) {
+
+			output.files = {};
+
+			for ( var k in r.files ) {
+
+				var f = r.files[ k ];
+
+				if ( f.path && f.fileSize ) {//avoid ready files
+
+					output.files[ k ] = {};
+
+					files[ k ] = { prog: 0, fileSize: t.fileSize };
+					fileSum += t.fileSize;
+					nFiles++;
+
+				}
+
+			}
+
+		}	
 		if ( r.textures ) {
 
 			output.textures = {};
@@ -351,6 +373,14 @@ function LoadScreen ( renderer, style ) {
 
 		//2. Load files
 
+		if ( r.files ) 
+			
+			for ( var k in r.files ) 
+
+				if ( r.files[ k ].path && r.files[ k ].fileSize )
+
+					loadFile( k );
+
 		if ( r.textures ) 
 			
 			for ( var k in r.textures ) 
@@ -423,6 +453,42 @@ function LoadScreen ( renderer, style ) {
 				if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
 					updateProgress({ type: 'Geometry', name: p, progress: pr });
+
+				update();
+
+			}
+		);
+
+	}
+
+	function loadFile ( p ) {
+
+		var fLoader = fLoader || new THREE.FileLoader();
+
+		fLoader.load( 
+			that.resources.files[ p ].path, 
+			function ( f ) {
+
+				output.files[ p ] = f;
+
+				files[ p ].prog = 1;
+
+				counter++;
+
+				updateProgress({ type: 'File', name: p, progress: 1 });
+
+				update( true );
+
+			}, 
+			function ( e ) {
+
+				var pr = e.loaded / e.total;
+
+				geometries[ p ].prog = pr;
+
+				if ( pr !== 1 ) //otherwise onLoad will be called anyway
+
+					updateProgress({ type: 'File', name: p, progress: pr });
 
 				update();
 
@@ -726,6 +792,34 @@ function LoadScreen ( renderer, style ) {
 	function processResources () {
 
 		if ( verbose ) console.time( 'Processing duration' );
+
+		//0. replace files in resources
+		var fA = that.resources.files,
+			oFA = output.files;
+
+		if ( fA ) {
+
+			for ( var k in oFA ) {
+
+				for ( var p in fA[ k ] ) 
+
+					if ( typeof oFA[ k ][ p ] !== 'undefined' ) 
+
+						oFA[ k ][ p ] = fA[ k ][ p ];
+
+				if ( fA[ k ].onComplete )
+
+					fA[ k ].onComplete( oFA[ k ] );
+
+				fA[ k ] = oFA[ k ];
+
+				fA[ k ].name = k;
+
+				delete oFA[ k ];
+
+			}
+
+		}
 
 		//1. replace textures in resources
 		var tA = that.resources.textures,
@@ -1183,17 +1277,29 @@ function LoadScreen ( renderer, style ) {
 	function updateProgress ( o ) {
 
 		//1. compute progress value
-		var texProg = 0, geoProg = 0;
+		var texProg = 0, geoProg = 0, objProg = 0, fileProg = 0, cTexProg = 0;
+
+		for ( var k in files ) 
+
+			texProg += files[ k ].prog * files[ k ].fileSize;
 
 		for ( var k in textures ) 
 
 			texProg += textures[ k ].prog * textures[ k ].fileSize;
 
+		for ( var k in cubeTextures ) 
+
+			cTexProg += cubeTextures[ k ].prog * cubeTextures[ k ].fileSize;
+
 		for ( var k in geometries ) 
 
 			geoProg += geometries[ k ].prog * geometries[ k ].fileSize;
 
-		progress = ( texProg + geoProg ) / ( texSum + geoSum );
+		for ( var k in objects ) 
+
+			objProg += objects[ k ].prog * objects[ k ].fileSize;
+
+		progress = ( texProg + geoProg + objProg + cTexProg + fileProg ) / ( texSum + geoSum + objSum + cTexSum + fileSum );
 
 		//2. Logs data
 		if ( typeof o !== 'undefined' && verbose )
