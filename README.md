@@ -7,8 +7,8 @@ A Three.js assets loading wrapper.
 
 ## Summary
 
-1. [Usage](#usage)
 1. [Installation](#installation)
+1. [Usage](#usage)
 1. [Full pattern](#full-pattern)
 1. [Assets declaration](#assets-declaration)
 1. [Roadmap](#roadmap)
