@@ -13,6 +13,16 @@ A Three.js assets loading wrapper.
 1. [Assets declaration](#assets-declaration)
 1. [Roadmap](#roadmap)
 
+## Installation
+Install with NPM :
+```
+npm install loadscreen
+```
+Or include in your page :
+```html
+<script type="text/javascript" src="LoadScreen.min.js"/>
+```
+
 ## Usage
 * Short implementation :
 ```js
@@ -60,16 +70,6 @@ const ASSETS = {
     }
 };
 ```
-## Installation
-Install with NPM :
-```
-npm install loadscreen
-```
-Or include in your page :
-```html
-<script type="text/javascript" src="LoadScreen.min.js"/>
-```
-
 ## Full pattern
 Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
@@ -167,7 +167,7 @@ ASSETS.textures.myTexture1;//THREE.Texture
 ASSETS.textures.myTexture3 = new THREE.Texture(...);//Won't be processed.
 ```
 
-### 3. Font loader
+### 3. Fonts
 - [x] THREE.TTFLoader
 ```js
 ASSETS.fonts.myFont1 = {
@@ -279,14 +279,9 @@ ASSETS.objects.myObject6;//THREE.Mesh
 ASSETS.objects.myObject7 = new THREE.Mesh(...);//Won't be processed.
 ```
 
-### Material loaders
-- [ ] THREE.MaterialLoader
-
-### Animation loaders
-- [ ] THREE.BVHLoader
-
 ## Roadmap
-* complete loader support
+* add material and support THREE.MaterialLoader
+* add animations and support THREE.BVHLoader
 * auto-tween exposure after removal ?
 * code the 'forcedStart' parameter
 * add fancy loader types
