@@ -14,6 +14,9 @@
     "loadscreen",
     "loader"
   ],
+  "dependencies": {
+
+  },
   "author": "Astrak",
   "license": "MIT"
 }

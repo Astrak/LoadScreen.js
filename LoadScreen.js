@@ -1287,11 +1287,9 @@ function LoadScreen ( renderer, style ) {
 
 	function compile () {
 
-		//use renderer.compile( scene, camera ) in next threejs release
-
 		var LSScene = new THREE.Scene(), 
 			LSCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 2 ),
-			LSRT = new THREE.WebGLRenderTarget( 10, 10, { generateMipmaps: true } );//remove
+			LSRT;
 
 		for ( var k in that.resources.objects )
 
@@ -1299,15 +1297,25 @@ function LoadScreen ( renderer, style ) {
 
 		if ( verbose ) console.time( 'Compiling duration' );
 
-		renderer.render( LSScene, LSCamera, LSRT );//replace here
+		if ( typeof renderer.compile === 'undefined' ) {//pre r85
+
+			LSRT = new THREE.WebGLRenderTarget( 10, 10, { generateMipmaps: true } );
+
+			renderer.render( LSScene, LSCamera, LSRT );
+
+			LSRT.dispose();
+
+		} else {
+
+			renderer.compile( LSScene, LSCamera );
+
+		}
 
 		for ( var k in that.resources.objects )
 
 			LSScene.remove( that.resources.objects[ k ] );
 
 		if ( verbose ) console.timeEnd( 'Compiling duration' );
-
-		LSRT.dispose();//remove
 
 		complete();
 

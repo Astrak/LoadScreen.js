@@ -239,7 +239,7 @@ ASSETS.objects = {
     }
 };
 
-//other parameters
+//Other parameters.
 ASSETS.objects.myObject6 = {
     geometry: 'myGeometry1',
     material: new THREE.MeshPhongMaterial(),
@@ -247,7 +247,7 @@ ASSETS.objects.myObject6 = {
     //Specify any mesh or material property 
     //(if the object is a hierarchy, they will only get assigned to the root mesh).
     map: 'myTexture1',//Asset assigned to material.
-    color: 0x33ff89,//Assigned to material.
+    color: 0x33ff89,//Converted to a THREE.Color and assigned to material.
     castShadow: true,//Assigned to mesh.
     info: 'This is my object',//Unknown key 'info' in mesh and material > assigned to mesh.userData.
 };
@@ -269,7 +269,6 @@ Todo.
 
 # Roadmap
 * complete loader support
-* include a service-worker to auto-register assets ?
 * auto-tween exposure ?
 * code the 'forcedStart' parameter
 * add fancy loader types
