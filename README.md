@@ -1,6 +1,8 @@
 # LoadScreen.js
 A Three.js assets loading wrapper.
-
+[![Latest NPM release][npm-badge]][npm-badge-url]
+[![License][license-badge]][license-badge-url]
+[![Dependencies][dependencies-badge]][dependencies-badge-url]
 # Usage
 ## Example
 * Short implementation :
@@ -270,12 +272,10 @@ ASSETS.objects.myObject7 = new THREE.Mesh(...);//Won't be processed.
 * auto-tween exposure after removal ?
 * code the 'forcedStart' parameter
 * add fancy loader types
+* webgl loader instead of html ?
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
 * second progress bar at top of screen for assets loading after start
 * add setStyle method for another style if further calls
-* webgl loader instead of html ?
-* extend to BabylonJS
-* react component
 
 # License
 MIT
