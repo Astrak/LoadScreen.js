@@ -97,8 +97,22 @@ ls.remove( animate );//Removal is tweened so next action is a callback.
 ```
 
 ## Assets declaration
-### Textures
-Loaded first if any. Supported texture loaders :
+By order of processing :
+### 1. Files
+- [x] THREE.FileLoader
+```js
+ASSETS.files = {
+    myFile1: { 
+        path: 'path/to/file.txt',
+        fileSize: 2789,//in Ko
+        onComplete ( file ) {
+            //do something
+        }
+    }
+};
+```
+
+### 2. Textures
 - [x] THREE.TextureLoader
 - [x] THREE.TGALoader
 - [x] THREE.PVRLoader
@@ -126,8 +140,7 @@ ASSETS.textures.myTexture1;//THREE.Texture
 ASSETS.textures.myTexture2 = new THREE.Texture(...);//Won't be processed.
 ```
 
-### Cubemap loaders
-Loaded in second place if any. Supported cube texture loaders :
+### 3. Cubemap loaders
 - [x] THREE.CubeTextureLoader
 - [x] THREE.HDRCubeTextureLoader
 ```js
@@ -141,18 +154,7 @@ ASSETS.cubeTextures.myCubeTexture1 = {
 ASSETS.cubeTextures.myCubeTexture1;//THREE.Texture
 ```
 
-### Material loaders
-Todo. 
-Supported material loaders :
-- [ ] THREE.MaterialLoader
-
-### Animation loaders
-Todo. 
-Supported animation loaders :
-- [ ] THREE.BVHLoader
-
-### Font loader
-Loaded in third place if any. Supported font loader :
+### 4. Font loader
 - [x] THREE.TTFLoader
 ```js
 ASSETS.fonts.myFont1 = {
@@ -164,14 +166,13 @@ ASSETS.fonts.myFont1 = {
 ASSETS.fonts.myFont1;//THREE.Font
 ```
 
-### Geometries
-Loaded in fourth place if any. Supported geometry loaders :
+### 5. Geometries
+- [ ] THREE.BufferGeometryLoader
+- [x] THREE.CTMLoader (`load` method)
 - [x] THREE.JSONLoader (threejs blender exporter)
 - [x] THREE.PLYLoader
-- [x] THREE.CTMLoader (`load` method)
-- [x] THREE.VTKLoader
 - [x] THREE.STLLoader
-- [ ] THREE.BufferGeometryLoader
+- [x] THREE.VTKLoader
 ```js
 ASSETS.geometries = {
     myGeometry1: {
@@ -192,8 +193,7 @@ ASSETS.geometries.myGeometry1;//THREE.Geometry
 ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//Won't be processed.
 ```
 
-### Objects
-To load or to create from assets if any. Loaded in fifth place. Supported object loaders :
+### 6. Objects
 - [x] THREE.ThreeMFLoader
 - [x] THREE.AMFLoader
 - [x] THREE.AssimpLoader
@@ -267,8 +267,16 @@ ASSETS.objects.myObject6 = {
 ASSETS.objects.myObject6;//THREE.Mesh
 
 //Also simply :
-ASSETS.objects.myObject7 = new THREE.Object3D(...);//Won't be processed.
+ASSETS.objects.myObject7 = new THREE.Mesh(...);//Won't be processed.
 ```
+
+### Material loaders
+Todo. 
+- [ ] THREE.MaterialLoader
+
+### Animation loaders
+Todo. 
+- [ ] THREE.BVHLoader
 
 # Roadmap
 * complete loader support
