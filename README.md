@@ -260,16 +260,14 @@ ASSETS.objects.myObject7 = new THREE.Mesh(...);//Won't be processed.
 ```
 
 ### Material loaders
-Todo. 
 - [ ] THREE.MaterialLoader
 
 ### Animation loaders
-Todo. 
 - [ ] THREE.BVHLoader
 
 # Roadmap
 * complete loader support
-* auto-tween exposure ?
+* auto-tween exposure after removal ?
 * code the 'forcedStart' parameter
 * add fancy loader types
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
@@ -277,7 +275,6 @@ Todo.
 * add setStyle method for another style if further calls
 * webgl loader instead of html ?
 * extend to BabylonJS
-* npm package
 * react component
 
 # License

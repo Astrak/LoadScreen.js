@@ -1,5 +1,5 @@
 {
-  "name": "LoadScreen.js",
+  "name": "loadscreen",
   "version": "0.13.3",
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -15,8 +15,9 @@
     "loader"
   ],
   "dependencies": {
-
+    "three": "*"
   },
+  "main": "LoadScreen.js",
   "author": "Astrak",
   "license": "MIT"
 }
