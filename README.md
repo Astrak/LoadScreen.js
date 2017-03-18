@@ -1,8 +1,9 @@
 # LoadScreen.js
-A Three.js assets loading wrapper.
 [![Latest NPM release][npm-badge]][npm-badge-url]
 [![License][license-badge]][license-badge-url]
 [![Dependencies][dependencies-badge]][dependencies-badge-url]
+
+A Three.js assets loading wrapper.
 # Usage
 ## Example
 * Short implementation :
