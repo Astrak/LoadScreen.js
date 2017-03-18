@@ -245,7 +245,7 @@ ASSETS.objects.myObject6 = {
     material: new THREE.MeshPhongMaterial(),
     type: 'mesh',//Or 'points' or 'line', defaults to 'mesh'.
     //Specify any mesh or material property 
-    //(if the object is a loaded hierarchy, they will be assigned to the root mesh).
+    //(if the object is a hierarchy, they will only get assigned to the root mesh).
     map: 'myTexture1',//Asset assigned to material.
     color: 0x33ff89,//Assigned to material.
     castShadow: true,//Assigned to mesh.

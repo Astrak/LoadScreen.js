@@ -860,6 +860,10 @@ function LoadScreen ( renderer, style ) {
 
 							m[ p ] = tA[ oA[ k ][ p ] ];
 
+						} else if ( [ 'emissive', 'color' ].indexOf( p ) > -1 && ! oA[ k ][ p ] instanceof THREE.Color ) {
+
+							m[ p ] = new THREE.Color( oA[ k ][ p ] );
+
 						} else {
 
 							m[ p ] = oA[ k ][ p ];
