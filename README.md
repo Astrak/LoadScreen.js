@@ -1,7 +1,8 @@
 # LoadScreen.js
 A Three.js assets loading wrapper.
 
-
+# Usage
+## Example
 * Short implementation :
 ```js
 //First create and append a webgl renderer, then :
@@ -49,7 +50,6 @@ const ASSETS = {
 };
 ```
 
-# Usage
 ## Full pattern
 Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
@@ -113,17 +113,24 @@ ASSETS.files = {
 ```
 
 ### 2. Textures
+- [x] THREE.CubeTextureLoader
+- [x] THREE.HDRCubeTextureLoader
+- [x] THREE.KTXLoader
+- [x] THREE.PVRLoader
 - [x] THREE.TextureLoader
 - [x] THREE.TGALoader
-- [x] THREE.PVRLoader
-- [x] THREE.KTXLoader
 ```js
 ASSETS.textures = {
-    myTexture1: { 
+    myTexture1: {//simple textures
         path: 'path/to/pic.jpg',
         fileSize: 2789,//in Ko
         //Other threejs textures properties can be specified.
         minFilter: THREE.LinearFilter
+    },
+    myTexture2: {//cubemaps
+        paths: [ '1.hdr', '2.hdr', '3.hdr', '4.hdr', '5.hdr', '6.hdr' ],
+        filesSize: 5321,
+        toPMREM: true//Output a PMREM if files provided are HDR.
     }
 };
 
@@ -137,24 +144,10 @@ ASSETS.textures.myTexture1.GPUCompression: {
 ASSETS.textures.myTexture1;//THREE.Texture
 
 //Also simply :
-ASSETS.textures.myTexture2 = new THREE.Texture(...);//Won't be processed.
+ASSETS.textures.myTexture3 = new THREE.Texture(...);//Won't be processed.
 ```
 
-### 3. Cubemap loaders
-- [x] THREE.CubeTextureLoader
-- [x] THREE.HDRCubeTextureLoader
-```js
-ASSETS.cubeTextures.myCubeTexture1 = {
-    paths: [ 'face1.hdr', 'face2.hdr', 'face3.hdr', 'face4.hdr', 'face5.hdr', 'face6.hdr' ],
-    filesSize: 5321,
-    toPMREM: true//Output a PMREM if files provided are HDR.
-};
-
-//After loading :
-ASSETS.cubeTextures.myCubeTexture1;//THREE.Texture
-```
-
-### 4. Font loader
+### 3. Font loader
 - [x] THREE.TTFLoader
 ```js
 ASSETS.fonts.myFont1 = {
@@ -166,7 +159,7 @@ ASSETS.fonts.myFont1 = {
 ASSETS.fonts.myFont1;//THREE.Font
 ```
 
-### 5. Geometries
+### 4. Geometries
 - [ ] THREE.BufferGeometryLoader
 - [x] THREE.CTMLoader (`load` method)
 - [x] THREE.JSONLoader (threejs blender exporter)
@@ -193,7 +186,7 @@ ASSETS.geometries.myGeometry1;//THREE.Geometry
 ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//Won't be processed.
 ```
 
-### 6. Objects
+### 5. Objects
 - [x] THREE.ThreeMFLoader
 - [x] THREE.AMFLoader
 - [x] THREE.AssimpLoader
@@ -208,7 +201,7 @@ ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//Won't be proc
 - [ ] THREE.GLTFLoader
 - [ ] THREE.GLTFLoader (2)
 - [x] THREE.MMDLoader (needs the additional parameter `VMDPaths` )
-- [x] THREE.PCDLoader (needs the additional parameter `VMDPaths` )
+- [x] THREE.PCDLoader
 - [ ] THREE.ObjectLoader
 - [x] THREE.OBJLoader
 - [ ] THREE.PlayCanvasLoader

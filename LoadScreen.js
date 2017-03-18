@@ -26,7 +26,6 @@ function LoadScreen ( renderer, style ) {
 	var pmremGen, pmremcubeuvpacker;
 
 	var tLoaders = {},
-		cTLoaders = {},
 		fLoaders = {},
 		gLoaders = {},
 		oLoaders = {},
@@ -36,8 +35,8 @@ function LoadScreen ( renderer, style ) {
 
 	var extensions, support = {};
 
-	var	textures = {}, cubeTextures = {}, fonts = {}, geometries = {}, objects = {}, files = {}, 
-		texSum = 0, cTexSum = 0, fontSum = 0, geoSum = 0, objSum = 0, fileSum = 0;
+	var	textures = {}, fonts = {}, geometries = {}, objects = {}, files = {}, 
+		texSum = 0, fontSum = 0, geoSum = 0, objSum = 0, fileSum = 0;
 
 	/* API */
 	this.domElement = null;
@@ -287,29 +286,7 @@ function LoadScreen ( renderer, style ) {
 
 			}
 
-		}		
-
-		if ( r.cubeTextures ) {
-
-			output.cubeTextures = {};
-
-			for ( var k in r.cubeTextures ) {
-
-				var t = r.cubeTextures[ k ];
-
-				if ( t.paths && t.filesSize ) {//avoid ready textures
-
-					output.cubeTextures[ k ] = {};
-
-					cubeTextures[ k ] = { prog: 0, fileSize: t.filesSize };
-					cTexSum += t.filesSize;
-					nFiles++;
-
-				}
-
-			}
-
-		}		
+		}	
 
 		if ( r.fonts ) {
 
@@ -388,14 +365,6 @@ function LoadScreen ( renderer, style ) {
 				if ( r.textures[ k ].path && r.textures[ k ].fileSize )
 
 					loadTexture( k );
-
-		if ( r.cubeTextures ) 
-			
-			for ( var k in r.cubeTextures ) 
-
-				if ( r.cubeTextures[ k ].paths && r.cubeTextures[ k ].filesSize )
-
-					loadCubeTexture( k );		
 
 		if ( r.fonts ) 
 			
@@ -499,9 +468,19 @@ function LoadScreen ( renderer, style ) {
 
 	function loadTexture ( p ) {
 
-		var d = that.resources.textures[ p ],
-			arr = d.path.split( '.' ),
+		var d = that.resources.textures[ p ], arr, ext;
+
+		if ( typeof d.path === 'string' ) {
+
+			arr = d.path.split( '.' );
 			ext = arr[ arr.length - 1 ];
+
+		} else {
+
+			arr = d.path[ 0 ].split( '.' );
+			ext = arr[ arr.length - 1 ] === 'hdr' ? 'cubehdr' : 'cube';
+
+		}
 
 		getTextureLoader( ext ).load( 
 			d.path, 
@@ -563,44 +542,6 @@ function LoadScreen ( renderer, style ) {
 				if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
 					updateProgress({ type: 'Font', name: p, progress: pr });
-
-				update();
-
-			}
-		);
-
-	}
-
-	function loadCubeTexture ( p ) {
-
-		var d = that.resources.cubeTextures[ p ],
-			arr = d.paths[ 0 ].split( '.' ),
-			ext = arr[ arr.length - 1 ];
-
-		getCubeTextureLoader( ext ).load( 
-			d.paths, 
-			function ( t ) {
-
-				output.cubeTextures[ p ] = t;
-
-				cubeTextures[ p ].prog = 1;
-
-				counter++;
-
-				updateProgress({ type: 'Cube texture', name: p, progress: 1 });
-
-				update( true );
-
-			}, 
-			function ( e ) {
-
-				var pr = e.loaded / e.total;
-
-				cubeTextures[ p ].prog = pr;
-
-				if ( pr !== 1 ) //otherwise onLoad will be called anyway
-
-					updateProgress({ type: 'Cube texture', name: p, progress: pr });
 
 				update();
 
@@ -722,25 +663,17 @@ function LoadScreen ( renderer, style ) {
 				tLoaders.ktx = tLoaders.ktx || new THREE.KTXLoader();
 				return tLoaders.ktx;
 				break;
+			case 'cubehdr':
+				tLoaders.hdr = tLoaders.hdr || new THREE.HDRCubeTextureLoader();
+				return tLoaders.hdr;
+				break;
+			case 'cube':
+				tLoaders.cube = tLoaders.cube || new THREE.CubeTextureLoader();
+				return tLoaders.cube;
+				break;
 			default: 
 				tLoaders.main = tLoaders.main || new THREE.TextureLoader();
 				return tLoaders.main;
-
-		}
-
-	}
-
-	function getCubeTextureLoader ( ext ) {
-
-		switch ( ext ) {
-
-			case 'hdr':
-				cTLoaders.hdr = cTLoaders.hdr || new THREE.HDRCubeTextureLoader();
-				return cTLoaders.hdr;
-				break;
-			default: 
-				cTLoaders.main = cTLoaders.main || new THREE.CubeTextureLoader();
-				return cTLoaders.main;
 
 		}
 
@@ -793,7 +726,7 @@ function LoadScreen ( renderer, style ) {
 
 		if ( verbose ) console.time( 'Processing duration' );
 
-		//0. replace files in resources
+		//1. replace files in resources
 		var fA = that.resources.files,
 			oFA = output.files;
 
@@ -821,13 +754,24 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		//1. replace textures in resources
+		//2. replace textures in resources
 		var tA = that.resources.textures,
 			oTA = output.textures;
 
 		if ( tA ) {
 
 			for ( var k in oTA ) {
+
+				if ( tA[ k ].toPMREM ) {
+
+					var pmremGen = new THREE.PMREMGenerator( oTA[ k ] );
+					pmremGen.update( renderer );
+
+					var pmremcubeuvpacker = new THREE.PMREMCubeUVPacker( pmremGen.cubeLods );
+					pmremcubeuvpacker.update( renderer );
+					oTA[ k ] = pmremcubeuvpacker.CubeUVRenderTarget.texture;
+
+				}
 
 				for ( var p in tA[ k ] ) 
 
@@ -840,41 +784,6 @@ function LoadScreen ( renderer, style ) {
 				tA[ k ].name = k;
 
 				delete oTA[ k ];
-
-			}
-
-		}
-
-		//2. replace cube textures in resources
-		var cTA = that.resources.cubeTextures,
-			oCTA = output.cubeTextures;
-
-		if ( cTA ) {
-
-			for ( var k in oCTA ) {
-
-				if ( cTA[ k ].toPMREM ) {
-
-					var pmremGen = new THREE.PMREMGenerator( oCTA[ k ] );
-					pmremGen.update( renderer );
-
-					var pmremcubeuvpacker = new THREE.PMREMCubeUVPacker( pmremGen.cubeLods );
-					pmremcubeuvpacker.update( renderer );
-					oCTA[ k ] = pmremcubeuvpacker.CubeUVRenderTarget.texture;
-
-				}
-
-				for ( var p in cTA[ k ] ) 
-
-					if ( typeof oCTA[ k ][ p ] !== 'undefined' ) 
-
-						oCTA[ k ][ p ] = cTA[ k ][ p ];
-
-				cTA[ k ] = oCTA[ k ];
-
-				cTA[ k ].name = k;
-
-				delete oCTA[ k ];
 
 			}
 
@@ -1299,7 +1208,7 @@ function LoadScreen ( renderer, style ) {
 
 			objProg += objects[ k ].prog * objects[ k ].fileSize;
 
-		progress = ( texProg + geoProg + objProg + cTexProg + fileProg ) / ( texSum + geoSum + objSum + cTexSum + fileSum );
+		progress = ( texProg + geoProg + objProg + fileProg ) / ( texSum + geoSum + objSum + fileSum );
 
 		//2. Logs data
 		if ( typeof o !== 'undefined' && verbose )
