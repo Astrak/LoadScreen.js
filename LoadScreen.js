@@ -629,6 +629,9 @@ function LoadScreen ( renderer, style ) {
 			case 'fbx': 
 				if ( ! oLoaders.fbx ) oLoaders.fbx = new THREE.FBXLoader();
 				return oLoaders.fbx;
+			case 'gltf': 
+				if ( ! oLoaders.gltf ) oLoaders.gltf = new THREE.GLTFLoader();
+				return oLoaders.gltf;
 			case 'obj': 
 				if ( ! oLoaders.obj ) oLoaders.obj = new THREE.OBJLoader();
 				return oLoaders.obj;
@@ -928,6 +931,10 @@ function LoadScreen ( renderer, style ) {
 					} else if ( a[ l - 1 ] === 'dae' ) {//Collada > .scene, .kinematics..
 
 						object = oOA[ k ].scene;
+
+					} else if ( a[ l - 1 ] === 'gltf' ) {
+
+						object = typeof oOA[ k ].scene !== 'undefined' ? oOA[ k ].scene : oOA[ k ].scenes[ 0 ];
 
 					} else {
 

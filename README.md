@@ -121,13 +121,13 @@ ASSETS.files = {
 - [x] THREE.TGALoader
 ```js
 ASSETS.textures = {
-    myTexture1: {//simple textures
+    myTexture1: {//Regular textures.
         path: 'path/to/pic.jpg',
         fileSize: 2789,//in Ko
         //Other threejs textures properties can be specified.
         minFilter: THREE.LinearFilter
     },
-    myTexture2: {//cubemaps
+    myTexture2: {//Cubemaps.
         paths: [ '1.hdr', '2.hdr', '3.hdr', '4.hdr', '5.hdr', '6.hdr' ],
         filesSize: 5321,
         toPMREM: true//Output a PMREM if files provided are HDR.
@@ -198,7 +198,7 @@ ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//Won't be proc
 - [ ] THREE.CTMLoader (`loadParts` method for multiple geometries)
 - [ ] THREE.FBXLoader
 - [x] THREE.FBXLoader (2)
-- [ ] THREE.GLTFLoader
+- [x] THREE.GLTFLoader
 - [ ] THREE.GLTFLoader (2)
 - [x] THREE.MMDLoader (needs the additional parameter `VMDPaths` )
 - [x] THREE.PCDLoader
@@ -233,12 +233,8 @@ ASSETS.objects = {
         fileSize: 1615,
         convertUpAxis: true,//Collada loader option.
         onComplete ( collada ) {
-            collada.scene.traverse( child => {
-                if ( child instanceof THREE.SkinnedMesh ) {
-                    const animation = new THREE.Animation( child, child.geometry.animation );
-                    animation.play();
-                }
-            });
+            //Regular code for catching collada.animations, collada.kinematics...
+            //Same with GLTF.
         }
     }
 };
