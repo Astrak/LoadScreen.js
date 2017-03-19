@@ -25,18 +25,19 @@ function LoadScreen ( renderer, style ) {
 
 	var pmremGen, pmremcubeuvpacker;
 
-	var tLoaders = {},
-		fLoaders = {},
+	var fLoader,
+		foLoaders = {},
+		tLoaders = {},
+		aLoader,
 		gLoaders = {},
-		oLoaders = {},
-		fLoader;
+		oLoaders = {};
 
 	var output = {};
 
 	var extensions, support = {};
 
-	var	textures = {}, fonts = {}, geometries = {}, objects = {}, files = {}, 
-		texSum = 0, fontSum = 0, geoSum = 0, objSum = 0, fileSum = 0;
+	var	files = {}, fonts = {}, textures = {}, geometries = {}, animations = {}, objects = {},  
+		fileSum = 0, fontSum = 0, texSum = 0, geoSum = 0, animSum = 0, objSum = 0;
 
 	/* API */
 	this.domElement = null;
@@ -250,6 +251,29 @@ function LoadScreen ( renderer, style ) {
 			}
 
 		}	
+
+		if ( r.fonts ) {
+
+			output.fonts = {};
+
+			for ( var k in r.fonts ) {
+
+				var f = r.fonts[ k ];
+
+				if ( f.path && f.fileSize ) {//avoid ready font
+
+					output.fonts[ k ] = {};
+
+					fonts[ k ] = { prog: 0, fileSize: f.fileSize };
+					fontSum += f.filesSize;
+					nFiles++;
+
+				}
+
+			}
+
+		}
+
 		if ( r.textures ) {
 
 			output.textures = {};
@@ -286,28 +310,6 @@ function LoadScreen ( renderer, style ) {
 
 			}
 
-		}	
-
-		if ( r.fonts ) {
-
-			output.fonts = {};
-
-			for ( var k in r.fonts ) {
-
-				var f = r.fonts[ k ];
-
-				if ( f.path && f.fileSize ) {//avoid ready font
-
-					output.fonts[ k ] = {};
-
-					fonts[ k ] = { prog: 0, fileSize: f.fileSize };
-					fontSum += f.filesSize;
-					nFiles++;
-
-				}
-
-			}
-
 		}
 
 		if ( r.geometries ) {
@@ -321,6 +323,25 @@ function LoadScreen ( renderer, style ) {
 					output.geometries[ k ] = {};
 					geometries[ k ] = { prog: 0, fileSize: r.geometries[ k ].fileSize };
 					geoSum += r.geometries[ k ].fileSize;
+					nFiles++;
+
+				}
+
+			}
+
+		}
+
+		if ( r.animations ) {
+
+			output.animations = {};
+
+			for ( var k in r.animations ) {
+
+				if ( r.animations[ k ].path && r.animations[ k ].fileSize ) {//avoids real animations & force passing fileSize
+
+					output.animations[ k ] = {};
+					animations[ k ] = { prog: 0, fileSize: r.animations[ k ].fileSize };
+					animSum += r.animations[ k ].fileSize;
 					nFiles++;
 
 				}
@@ -358,14 +379,6 @@ function LoadScreen ( renderer, style ) {
 
 					loadFile( k );
 
-		if ( r.textures ) 
-			
-			for ( var k in r.textures ) 
-
-				if ( r.textures[ k ].path && r.textures[ k ].fileSize )
-
-					loadTexture( k );
-
 		if ( r.fonts ) 
 			
 			for ( var k in r.fonts ) 
@@ -373,6 +386,14 @@ function LoadScreen ( renderer, style ) {
 				if ( r.fonts[ k ].path && r.fonts[ k ].fileSize )
 
 					loadFont( k );
+
+		if ( r.textures ) 
+			
+			for ( var k in r.textures ) 
+
+				if ( r.textures[ k ].path && r.textures[ k ].fileSize )
+
+					loadTexture( k );
 
 		if ( r.geometries ) 
 			
@@ -430,9 +451,9 @@ function LoadScreen ( renderer, style ) {
 
 	function loadFont ( p ) {
 
-		fLoaders.main = fLoaders.main || new THREE.TTFLoader();
+		foLoaders.main = foLoaders.main || new THREE.TTFLoader();
 
-		fLoaders.main.load( 
+		foLoaders.main.load( 
 			that.resources.fonts[ p ].path, 
 			function ( json ) {
 
@@ -558,23 +579,21 @@ function LoadScreen ( renderer, style ) {
 
 	function loadAnimation ( p ) {
 
-		var d = that.resources.animations[ p ],
-			arr = d.path.split( '.' ),
-			ext = arr[ arr.length - 1 ].toLowerCase();
+		var d = that.resources.animations[ p ];
 
-		if ( ext === 'bvh' )
+		aLoader = aLoader || new THREE.BVHLoader();
 
-		getGeometryLoader( ext ).load( 
+		aLoader.load( 
 			d.path, 
-			function ( g ) {
+			function ( a ) {
 
-				output.animations[ p ] = g;
+				output.animations[ p ] = a;
 
 				animations[ p ].prog = 1;
 
 				counter++;
 
-				updateProgress({ type: 'Geometry', name: p, progress: 1 });
+				updateProgress({ type: 'Animation', name: p, progress: 1 });
 
 				update( true );
 
@@ -587,7 +606,7 @@ function LoadScreen ( renderer, style ) {
 
 				if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
-					updateProgress({ type: 'Geometry', name: p, progress: pr });
+					updateProgress({ type: 'Animation', name: p, progress: pr });
 
 				update();
 
@@ -804,26 +823,26 @@ function LoadScreen ( renderer, style ) {
 		}
 
 		//2. replace fonts in resources
-		var fA = that.resources.fonts,
-			oFA = output.fonts;
+		var foA = that.resources.fonts,
+			oFoA = output.fonts;
 
-		if ( fA ) {
+		if ( foA ) {
 
-			for ( var k in oFA ) {
+			for ( var k in oFoA ) {
 
-				oFA[ k ] = new THREE.Font( oFA[ k ] );
+				oFoA[ k ] = new THREE.Font( oFoA[ k ] );
 
-				for ( var p in fA[ k ] ) 
+				for ( var p in foA[ k ] ) 
 
-					if ( typeof oFA[ k ][ p ] !== 'undefined' ) 
+					if ( typeof oFoA[ k ][ p ] !== 'undefined' ) 
 
-						oFA[ k ][ p ] = fA[ k ][ p ];
+						oFoA[ k ][ p ] = foA[ k ][ p ];
 
-				fA[ k ] = oFA[ k ];
+				foA[ k ] = oFoA[ k ];
 
-				fA[ k ].name = k;;
+				foA[ k ].name = k;;
 
-				delete oFA[ k ];
+				delete oFoA[ k ];
 
 			}
 
@@ -896,7 +915,27 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		//6. animations, todo
+		//6. animations
+		var aA = that.resources.animations, 
+			oAA = output.animations;
+
+		if ( aA ) {
+
+			for ( var k in oAA ) {
+
+				if ( aA[ k ].onComplete ) 
+
+					ga[ k ].onComplete( oAA[ k ] );
+
+				aA[ k ] = oAA[ k ];
+
+				aA[ k ].name = k;
+
+				delete oAA[ k ];
+
+			}
+
+		}
 
 		//7. create objects
 		var oA = that.resources.objects,

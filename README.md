@@ -231,15 +231,21 @@ ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//Won't be proc
 ### 6. Animations
 - [ ] THREE.BVHLoader
 ```js
-ASSETS.materials = {
-    myMaterial1
+ASSETS.animations = {
+    myAnimation1: {
+        path: 'path/to/anim.bvh',
+        fileSize: 4827,
+        onComplete ( bvh ) {
+            //catch bvh.skeleton and bvh.clip
+        }
+    }
 };
 
 //After loading :
-ASSETS.materials.myMaterial1;//THREE.Material
+ASSETS.animations.myMaterial1;//THREE.Material
 
 //Also simply :
-ASSETS.materials.myMaterial2 = new THREE.Material();//Won't be processed.
+ASSETS.animations.myMaterial2 = new THREE.Material();//Won't be processed.
 ```
 
 ### 7. Objects
