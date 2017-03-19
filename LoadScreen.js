@@ -8,9 +8,10 @@ function LoadScreen ( renderer, style ) {
 	var	infos = null,
 		verbose = false, 
 		forcedStart = false, 
+		tweenDuration = .5,
+		autoTweenExposure = 5,
 		progress = 0,
 		removed = false,
-		tweenDuration = .5,
 		tweens = {},
 		updateCBs = [],
 		completeCBs = [];
@@ -40,6 +41,8 @@ function LoadScreen ( renderer, style ) {
 	var	files = {}, fonts = {}, textures = {}, materials = {}, geometries = {}, animations = {}, objects = {},  
 		fileSum = 0, fontSum = 0, texSum = 0, matSum = 0, geoSum = 0, animSum = 0, objSum = 0;
 
+	var LSScene, LSCamera, LSRT;
+
 	/* API */
 	this.domElement = null;
 	this.infoContainer = null;
@@ -50,14 +53,16 @@ function LoadScreen ( renderer, style ) {
 	style = style || {};
 
 	style = {
-		type: typeof style.type !== 'undefined' ? style.type : 'bar',
+		type: typeof style.type !== 'undefined' ? style.type : 'progress-bar',
 		size: style.size || '150px',
-		background: style.background || '#333',
+		background: typeof style.background !== 'undefined' ? style.background : '#333',
 		progressBarContainer: style.progressBarContainer || '#444',
 		progressBar: style.progressBar || '#fb0',
 		weight: style.weight || '6px',
 		infoColor: style.infoColor || '#666',
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
+		percentInfo: typeof style.percentInfo !== 'undefined' ? style.percentInfo : false,
+		progressInfo: typeof style.progressInfo !== 'undefined' ? style.progressInfo : true,
 		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]
 	};
 
@@ -67,35 +72,64 @@ function LoadScreen ( renderer, style ) {
 
 	this.start = function ( resources ) {
 
-		if ( style !== 'custom' ) {
+		var fire = function () {
 
-			that.domElement.appendChild( that.infoContainer );
+			if ( style !== 'custom' ) {
 
-			var marginTop = - parseInt( getComputedStyle( that.infoContainer, null ).height ) / 2;
+				that.domElement.appendChild( that.infoContainer );
 
-			that.infoContainer.style.marginTop = marginTop + 'px';
+				var marginTop = - parseInt( getComputedStyle( that.infoContainer, null ).height ) / 2;
 
-			if ( style.type === 'circular' ) {
+				that.infoContainer.style.marginTop = marginTop + 'px';
 
-				var mTop = - parseInt( getComputedStyle( that.infoContainer.lastElementChild, null ).height ) / 2;
+				if ( style.progressInfo && style.type === 'circular' ) {
 
-				that.infoContainer.lastElementChild.style.marginTop = mTop + 'px';
+					var mTop = - parseInt( getComputedStyle( that.infoContainer.lastElementChild, null ).height ) / 2;
+
+					that.infoContainer.lastElementChild.style.marginTop = mTop + 'px';
+
+				}
+
+				animate();
 
 			}
 
-			animate();
+			if ( verbose ) console.time( 'Total load screen duration' );
+			
+			if ( resources ) { 
 
-		}
+				if ( verbose ) console.time( 'Loading duration' );
 
-		if ( verbose ) console.time( 'Total load screen duration' );
-		
-		if ( resources ) { 
+				that.resources = resources;
 
-			if ( verbose ) console.time( 'Loading duration' );
+				loadResources();
 
-			that.resources = resources;
+			}
 
-			loadResources();
+		};
+
+		if ( forcedStart ) {
+
+			fire();
+
+		} else {
+
+			var checkInSight = function () {
+
+				var top = renderer.domElement.getBoundingClientRect().top,
+					height = parseInt( renderer.domElement.style.height );
+
+				if ( top < innerHeight && ( top + height ) > 0 ) {
+
+					window.removeEventListener( 'scroll', checkInSight );
+
+					fire();
+
+				}
+
+			};
+
+			window.addEventListener( 'scroll', checkInSight );
 
 		}
 
@@ -116,7 +150,29 @@ function LoadScreen ( renderer, style ) {
 				initialValue: 1,
 				value: 1, 
 				onUpdate: function () { that.infoContainer.style.opacity = tweens.disappear.value; },
-				onComplete: function () { cancelAnimationFrame( rAFID ); end( cb ); }
+				onComplete: function () { 
+
+					end( cb ); 
+
+					if ( autoTweenExposure ) {
+					
+						tweens.exposure = {
+							key: 'exposure',
+							duration: autoTweenExposure,
+							targetValue: 1,
+							initialValue: 0,
+							value: 0,
+							onUpdate: function () { renderer.toneMappingExposure = tweens.exposure.value; },
+							onComplete: function () { cancelAnimationFrame( rAFID ); }
+						};
+
+					} else {
+
+						cancelAnimationFrame( rAFID );
+
+					}
+
+				}
 			};
 
 		} else {
@@ -137,8 +193,9 @@ function LoadScreen ( renderer, style ) {
 
 	this.setOptions = function ( o ) {
 
-		tweenDuration = typeof o.tweenDuration !== 'undefined' ? o.tweenDuration : tweenDuration;
+		autoTweenExposure = typeof o.autoTweenExposure !== 'undefined' ? o.autoTweenExposure : autoTweenExposure;
 		forcedStart = typeof o.forcedStart !== 'undefined' ? o.forcedStart : forcedStart;
+		tweenDuration = typeof o.tweenDuration !== 'undefined' ? o.tweenDuration : tweenDuration;
 		verbose = typeof o.verbose !== 'undefined' ? o.verbose : verbose;
 
 		return that;
@@ -870,6 +927,9 @@ function LoadScreen ( renderer, style ) {
 			case 'babylon': 
 				if ( ! oLoaders.babylon ) oLoaders.babylon = new THREE.BabylonLoader();
 				return oLoaders.babylon;
+			case 'bin': 
+				if ( ! oLoaders.bin ) oLoaders.bin = new THREE.BinaryLoader();
+				return oLoaders.bin;
 			case 'dae': 
 				if ( ! oLoaders.dae ) oLoaders.dae = new THREE.ColladaLoader();
 				return oLoaders.dae;
@@ -1307,8 +1367,21 @@ function LoadScreen ( renderer, style ) {
 		if ( style.sizeInfo ) {
 
 			sizeInfo = document.createElement( 'p' );
-			sizeInfo.textContent = '0.00MB';
+			sizeInfo.textContent = '0.00 MB';
 			sizeInfo.style.cssText = ''+ 
+				'color: ' + style.infoColor + ';'+
+				'font-family: monospace;'+
+				'font-size: 12px;'+
+				'display: inline-block;';
+
+
+		}
+
+		if ( style.percentInfo ) {
+
+			percentInfo = document.createElement( 'p' );
+			percentInfo.textContent = '0 %';
+			percentInfo.style.cssText = ''+ 
 				'color: ' + style.infoColor + ';'+
 				'font-family: monospace;'+
 				'font-size: 12px;'+
@@ -1329,35 +1402,43 @@ function LoadScreen ( renderer, style ) {
 
 	function makeBarProgress () {
 
-		var progressBarContainer = document.createElement( 'div' ),
-			progressBar = document.createElement( 'div' );
+		if ( style.progressInfo ) {
 
-		progressBarContainer.style.cssText = ''+
-			'background: ' + style.progressBarContainer + ';'+
-			'border: solid 1px ' + style.progressBarContainer + ';'+
-			'width: 100%; height: ' + style.weight + ';'+
-			'box-sizing: border-box;'+
-			'position: relative;';
+			var progressBarContainer = document.createElement( 'div' ),
+				progressBar = document.createElement( 'div' );
 
-		progressBar.style.cssText = ''+
-			'background: ' + style.progressBar + ';'+
-			'width: 0%; height: 100%;'+
-			'top: 0; left: 0;'+
-			'position: absolute;';
+			progressBarContainer.style.cssText = ''+
+				'background: ' + style.progressBarContainer + ';'+
+				'border: solid 1px ' + style.progressBarContainer + ';'+
+				'width: 100%; height: ' + style.weight + ';'+
+				'box-sizing: border-box;'+
+				'position: relative;';
 
-		progressBarContainer.appendChild( progressBar );
+			progressBar.style.cssText = ''+
+				'background: ' + style.progressBar + ';'+
+				'width: 0%; height: 100%;'+
+				'top: 0; left: 0;'+
+				'position: absolute;';
+
+			progressBarContainer.appendChild( progressBar );
+
+		}
 
 		if ( style.textInfo ) that.infoContainer.appendChild( textInfo );
 
-		that.infoContainer.appendChild( progressBarContainer );
+		if ( style.progressInfo ) that.infoContainer.appendChild( progressBarContainer );
+
+		if ( style.percentInfo ) that.infoContainer.appendChild( percentInfo );
 
 		if ( style.sizeInfo ) that.infoContainer.appendChild( sizeInfo );
 
 		var updateStyle = function () { 
 
-			progressBar.style.width = ( 100 * tweens.progress.value ).toString() + '%'; 
+			if ( style.progressInfo ) progressBar.style.width = ( 100 * tweens.progress.value ).toString() + '%'; 
 
 			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
+
+			if ( style.percentInfo ) percentInfo.textContent = ( tweens.progress.value * 100 ).toFixed( 0 ) + ' %';
 
 		};
 
@@ -1382,37 +1463,55 @@ function LoadScreen ( renderer, style ) {
 
 	function makeCircularProgress () {
 
-		//shorter than using the namespace elements creation API.
-		var svg = ""+
-			"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
-			"	<circle fill=" + style.progressBarContainer + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 + parseInt( style.weight ) / 2 + 2 ).toString()+ "'/>"+
-			"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
-			"	<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='80' stroke-dashoffset='1503'/>"+
-			"</svg>";
+		if ( style.progressInfo ) {
 
-		that.infoContainer.innerHTML = svg;
+			//far shorter than using the namespace elements creation API.
+			var svg = ""+
+				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
+				"	<circle fill=" + style.progressBarContainer + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 + parseInt( style.weight ) / 2 + 2 ).toString()+ "'/>"+
+				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
+				"	<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='80' stroke-dashoffset='1503'/>"+
+				"</svg>";
 
-		var circleProgress = that.infoContainer.firstElementChild.lastElementChild;
+			that.infoContainer.innerHTML = svg;
 
-		circleProgress.style.cssText = ''+
-			'stroke:' + style.progressBar + ';'+
-			'stroke-width:' + parseInt( style.weight )+ ';'+
-			'stroke-dasharray:502;';
+			var circleProgress = that.infoContainer.firstElementChild.lastElementChild;
+
+			circleProgress.style.cssText = ''+
+				'stroke:' + style.progressBar + ';'+
+				'stroke-width:' + parseInt( style.weight )+ ';'+
+				'stroke-dasharray:502;';
+
+		}
 
 		if ( style.textInfo || style.sizeInfo ) {
 
-			var textContainer = document.createElement( 'div' );
+			var container;
 
-			textContainer.style.cssText = ''+
-				'width: 100%; left: 50%; top: 50%;'+
-				'margin-left: -50%;'+
-				'position: absolute;';
+			if ( style.progressInfo ) {
 
-			that.infoContainer.appendChild( textContainer );
+				var textContainer = document.createElement( 'div' );
 
-			if ( style.textInfo ) textContainer.appendChild( textInfo );
+				textContainer.style.cssText = ''+
+					'width: 100%; left: 50%; top: 50%;'+
+					'margin-left: -50%;'+
+					'position: absolute;';
 
-			if ( style.sizeInfo ) textContainer.appendChild( sizeInfo );
+				that.infoContainer.appendChild( textContainer );
+
+				container = textContainer;
+
+			} else {
+
+				container = that.infoContainer;
+
+			}
+
+			if ( style.textInfo ) container.appendChild( textInfo );
+
+			if ( style.sizeInfo ) container.appendChild( sizeInfo );
+
+			if ( style.percentInfo ) container.appendChild( percentInfo );
 
 			textInfo.style.display = sizeInfo.style.display = 'block';
 			
@@ -1420,9 +1519,11 @@ function LoadScreen ( renderer, style ) {
 
 		var updateStyle = function () { 
 
-			circleProgress.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
+			if ( style.progressInfo )circleProgress.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
 
 			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
+
+			if ( style.percentInfo ) percentInfo.textContent = ( tweens.progress.value * 100 ).toFixed( 0 ) + ' %';
 
 		};
 
@@ -1538,9 +1639,8 @@ function LoadScreen ( renderer, style ) {
 
 	function compile () {
 
-		var LSScene = new THREE.Scene(), 
-			LSCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 2 ),
-			LSRT;
+		LSScene = new THREE.Scene();
+		LSCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 2 );
 
 		for ( var k in that.resources.objects )
 
@@ -1550,7 +1650,7 @@ function LoadScreen ( renderer, style ) {
 
 		if ( typeof renderer.compile === 'undefined' ) {//pre r85
 
-			LSRT = new THREE.WebGLRenderTarget( 10, 10, { generateMipmaps: true } );
+			LSRT = new THREE.WebGLRenderTarget( 1, 1, { generateMipmaps: true } );
 
 			renderer.render( LSScene, LSCamera, LSRT );
 

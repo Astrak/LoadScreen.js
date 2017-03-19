@@ -11,13 +11,13 @@ A Three.js assets loading wrapper.
 1. [Usage](#usage)
 1. [Full pattern](#full-pattern)
 1. [Assets declaration](#assets-declaration)
-    1. [Files](#files)
-    1. [Fonts](#fonts)
-    1. [Textures](#textures)
-    1. [Materials](#materials)
-    1. [Geometries](#geometries)
-    1. [Animations](#animations)
-    1. [Objects](#objects)
+    1. [Files](#1-files)
+    1. [Fonts](#2-fonts)
+    1. [Textures](#3-textures)
+    1. [Materials](#4-materials)
+    1. [Geometries](#5-geometries)
+    1. [Animations](#6-animations)
+    1. [Objects](#7-objects)
 1. [Roadmap](#roadmap)
 
 ## Installation
@@ -79,18 +79,21 @@ const ASSETS = {
 Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
 const style = {
-    type: 'bar',//Main look. Also 'circular'. 'custom' empties the info container.
+    type: 'progress-bar',//Main look. Also 'circular'. 'custom' empties the info container.
     size: '150px',//Width of the central info container, in px or in %.
     background: '#333',
     progressBarContainer: '#444',
     progressBar: '#fb0',
     infoColor: '#666',//Text color.
     weight: '6px',//Weight of the progress element, in px ('bar' type) or svg units ('circular').
-    sizeInfo: true,
+    sizeInfo: true,//Display size progress in MB.
+    progressInfo: true,//Display the progress element.
+    percentInfo: false,//Display progress in % (can be redundant with progressInfo and sizeInfo).
     textInfo: [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]//Or false to remove.
 };
 
 const options = {
+    autoTweenExposure: 5,//Duration of the opening fading, after removal. 0 to cancel.
     forcedStart: false,//Start loading even if the canvas is out of sight (usually bad practice).
     verbose: false,//Logs progress, process and compile duration + total load screen duration.
     tweenDuration: .5//Progress and removal tweens durations.
@@ -216,7 +219,7 @@ ASSETS.materials.myMaterial2 = new THREE.Material();//Won't be processed.
 ```
 
 ### 5. Geometries
-- [ ] THREE.BufferGeometryLoader
+- [ ] THREE.BufferGeometryLoader (format conflict with JSONLoader)
 - [x] THREE.CTMLoader (`load` method)
 - [x] THREE.JSONLoader (threejs blender exporter)
 - [x] THREE.PLYLoader
@@ -263,26 +266,25 @@ ASSETS.animations.myMaterial2 = new THREE.Material();//Won't be processed.
 ```
 
 ### 7. Objects
-- [ ] THREE.3DSLoader
 - [x] THREE.ThreeMFLoader
 - [x] THREE.AMFLoader
 - [x] THREE.AssimpLoader
 - [x] THREE.AssimpJSONLoader
 - [x] THREE.AWDLoader
 - [x] THREE.BabylonLoader
-- [ ] THREE.BinaryLoader
+- [x] THREE.BinaryLoader
 - [x] THREE.ColladaLoader
 - [x] THREE.ColladaLoader (2)
 - [ ] THREE.CTMLoader (`loadParts` method for multiple geometries)
-- [ ] THREE.FBXLoader
+- [x] THREE.FBXLoader
 - [x] THREE.FBXLoader (2)
 - [x] THREE.GLTFLoader
-- [ ] THREE.GLTFLoader (2)
+- [x] THREE.GLTFLoader (2)
 - [x] THREE.MMDLoader (needs the additional parameter `VMDPaths` )
 - [x] THREE.PCDLoader
 - [x] THREE.ObjectLoader
 - [x] THREE.OBJLoader
-- [ ] THREE.PlayCanvasLoader
+- [ ] THREE.PlayCanvasLoader (format conflict with ObjectLoader)
 - [x] THREE.UTF8Loader
 - [x] THREE.VRMLLoader
 ```js
@@ -332,15 +334,11 @@ ASSETS.objects.myObject6 = new THREE.Mesh(...);//Won't be processed.
 ```
 
 ## Roadmap
-* auto-tween exposure after removal ?
-* percentInfo todo
-* add some 'progressElement' (on/off) parametrization
-* code the 'forcedStart' parameter
-* add fancy loader types
-* webgl loader instead of html ?
-* handle custom message/warning/buttons before loading without setting style type to custom.. ?
 * second progress bar at top of screen for assets loading after start
 * add setStyle method for another style if further calls
+* add fancy loader types
+* add webgl loaders
+* handle custom message/warning/buttons before loading without setting style type to custom.. ?
 * add 'gui' parameter that creates a dat.GUI UI for specified parameters, like gui: [ 'metalness', 'side', 'castShadow' ].. ?
 
 [npm-badge]: https://img.shields.io/npm/v/loadscreen.svg
