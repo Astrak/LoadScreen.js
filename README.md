@@ -11,6 +11,13 @@ A Three.js assets loading wrapper.
 1. [Usage](#usage)
 1. [Full pattern](#full-pattern)
 1. [Assets declaration](#assets-declaration)
+    1. [Files](#files)
+    1. [Fonts](#fonts)
+    1. [Textures](#textures)
+    1. [Materials](#materials)
+    1. [Geometries](#geometries)
+    1. [Animations](#animations)
+    1. [Objects](#objects)
 1. [Roadmap](#roadmap)
 
 ## Installation
@@ -24,7 +31,7 @@ Or include in your page :
 ```
 
 ## Usage
-* Short implementation :
+Short implementation :
 ```js
 //First create and append a webgl renderer, then :
 const ls = new LoadScreen( renderer ).onComplete( init ).start( ASSETS );
@@ -35,13 +42,11 @@ function init () {
 }
 ```
 
-* Automatical load screens.
-
-'Loading' > 'Processing' > 'Compiling' > 'Creating scene' messages
+Automatical load screens. 'Loading' > 'Processing' > 'Compiling' > 'Creating scene' messages.
 
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
-* Simple assets management in a declarative style :
+Simple assets management in a declarative style :
 ```js
 const ASSETS = {
     textures: {
@@ -118,6 +123,7 @@ ls.remove( animate );//Removal is tweened so next action is a callback.
 
 ## Assets declaration
 By order of processing :
+
 ### 1. Files
 - [x] THREE.FileLoader
 ```js
@@ -132,7 +138,19 @@ ASSETS.files = {
 };
 ```
 
-### 2. Textures
+### 2. Fonts
+- [x] THREE.TTFLoader
+```js
+ASSETS.fonts.myFont1 = {
+    path: 'path/to/font.ttf',
+    fileSize: 321
+};
+
+//After loading :
+ASSETS.fonts.myFont1;//THREE.Font
+```
+
+### 3. Textures
 - [x] THREE.CubeTextureLoader
 - [x] THREE.HDRCubeTextureLoader
 - [x] THREE.KTXLoader
@@ -148,9 +166,10 @@ ASSETS.textures = {
         minFilter: THREE.LinearFilter
     },
     myTexture2: {//Cubemaps.
-        paths: [ '1.hdr', '2.hdr', '3.hdr', '4.hdr', '5.hdr', '6.hdr' ],
-        filesSize: 5321,
-        toPMREM: true//Output a PMREM if files provided are HDR.
+        path: [ '1.hdr', '2.hdr', '3.hdr', '4.hdr', '5.hdr', '6.hdr' ],
+        fileSize: 5321,
+        //Optional : if files are HDR, a PMREM can get output.
+        toPMREM: true
     }
 };
 
@@ -167,19 +186,22 @@ ASSETS.textures.myTexture1;//THREE.Texture
 ASSETS.textures.myTexture3 = new THREE.Texture(...);//Won't be processed.
 ```
 
-### 3. Fonts
-- [x] THREE.TTFLoader
+### 4. Materials
+- [ ] THREE.MaterialLoader
+- [ ] THREE.MTLLoader
 ```js
-ASSETS.fonts.myFont1 = {
-    path: 'path/to/font.ttf',
-    fileSize: 321
+ASSETS.materials = {
+    myMaterial1
 };
 
 //After loading :
-ASSETS.fonts.myFont1;//THREE.Font
+ASSETS.materials.myMaterial1;//THREE.Material
+
+//Also simply :
+ASSETS.materials.myMaterial2 = new THREE.Material();//Won't be processed.
 ```
 
-### 4. Geometries
+### 5. Geometries
 - [ ] THREE.BufferGeometryLoader
 - [x] THREE.CTMLoader (`load` method)
 - [x] THREE.JSONLoader (threejs blender exporter)
@@ -206,13 +228,29 @@ ASSETS.geometries.myGeometry1;//THREE.Geometry
 ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//Won't be processed.
 ```
 
-### 5. Objects
+### 6. Animations
+- [ ] THREE.BVHLoader
+```js
+ASSETS.materials = {
+    myMaterial1
+};
+
+//After loading :
+ASSETS.materials.myMaterial1;//THREE.Material
+
+//Also simply :
+ASSETS.materials.myMaterial2 = new THREE.Material();//Won't be processed.
+```
+
+### 7. Objects
+- [ ] THREE.3DSLoader
 - [x] THREE.ThreeMFLoader
 - [x] THREE.AMFLoader
 - [x] THREE.AssimpLoader
 - [x] THREE.AssimpJSONLoader
 - [x] THREE.AWDLoader
 - [x] THREE.BabylonLoader
+- [ ] THREE.BinaryLoader
 - [x] THREE.ColladaLoader
 - [x] THREE.ColladaLoader (2)
 - [ ] THREE.CTMLoader (`loadParts` method for multiple geometries)
@@ -241,26 +279,19 @@ ASSETS.objects = {
         geometry: new THREE.PlaneBufferGeometry( 5, 3, 9 ),
         material: new THREE.MeshBasicMaterial()
     },
-    myObject4: {//The object may have a hierarchy :
-        path: 'path/to/object.utf8',
-        fileSize: 1111,
-        onComplete ( object ) {
-            object.traverse( child => { child.material.map = ASSETS.textures.myTexture1; } );
-        }
-    },
-    myObject5: {//The object may have a hierarchy and an animation :
+    myObject4: {//The object may have a hierarchy and / or animation(s):
         path: 'path/to/object.dae',
-        fileSize: 1615,
+        fileSize: 1111,
         convertUpAxis: true,//Collada loader option.
-        onComplete ( collada ) {
-            //Regular code for catching collada.animations, collada.kinematics...
+        onComplete ( object ) {
+            //Catch object.scene, object.animation etc.
             //Same with GLTF.
         }
     }
 };
 
 //Other parameters.
-ASSETS.objects.myObject6 = {
+ASSETS.objects.myObject5 = {
     geometry: 'myGeometry1',
     material: new THREE.MeshPhongMaterial(),
     type: 'mesh',//Or 'points' or 'line', defaults to 'mesh'.
@@ -273,10 +304,10 @@ ASSETS.objects.myObject6 = {
 };
 
 //After loading : 
-ASSETS.objects.myObject6;//THREE.Mesh
+ASSETS.objects.myObject5;//THREE.Mesh
 
 //Also simply :
-ASSETS.objects.myObject7 = new THREE.Mesh(...);//Won't be processed.
+ASSETS.objects.myObject6 = new THREE.Mesh(...);//Won't be processed.
 ```
 
 ## Roadmap
@@ -289,6 +320,7 @@ ASSETS.objects.myObject7 = new THREE.Mesh(...);//Won't be processed.
 * handle custom message/warning/buttons before loading without setting style type to custom.. ?
 * second progress bar at top of screen for assets loading after start
 * add setStyle method for another style if further calls
+* add 'gui' parameter that creates a dat.GUI UI for specified parameters, like gui: [ 'metalness', 'side', 'castShadow' ].. ?
 
 [npm-badge]: https://img.shields.io/npm/v/loadscreen.svg
 [npm-badge-url]: https://www.npmjs.com/package/loadscreen

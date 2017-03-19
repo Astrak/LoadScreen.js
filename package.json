@@ -12,7 +12,11 @@
   },
   "keywords": [
     "loadscreen",
-    "loader"
+    "loader",
+    "assets",
+    "setup",
+    "wrapper",
+    "progress"
   ],
   "dependencies": {
     "three": "*"

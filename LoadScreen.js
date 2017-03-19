@@ -49,12 +49,12 @@ function LoadScreen ( renderer, style ) {
 
 	style = {
 		type: typeof style.type !== 'undefined' ? style.type : 'bar',
-		size: style.size ? style.size : '150px',
-		background: style.background ? style.background : '#333',
-		progressBarContainer: style.progressBarContainer ? style.progressBarContainer : '#444',
-		progressBar: style.progressBar ? style.progressBar : '#fb0',
-		weight: style.weight ? style.weight : '6px',
-		infoColor: style.infoColor ? style.infoColor : '#666',
+		size: style.size || '150px',
+		background: style.background || '#333',
+		progressBarContainer: style.progressBarContainer || '#444',
+		progressBar: style.progressBar || '#fb0',
+		weight: style.weight || '6px',
+		infoColor: style.infoColor || '#666',
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
 		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]
 	};
@@ -392,44 +392,6 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function loadGeometry ( p ) {
-
-		var d = that.resources.geometries[ p ],
-			arr = d.path.split( '.' ),
-			ext = arr[ arr.length - 1 ];
-
-		getGeometryLoader( ext ).load( 
-			d.path, 
-			function ( g ) {
-
-				output.geometries[ p ] = g;
-
-				geometries[ p ].prog = 1;
-
-				counter++;
-
-				updateProgress({ type: 'Geometry', name: p, progress: 1 });
-
-				update( true );
-
-			}, 
-			function ( e ) {
-
-				var pr = e.loaded / e.total;
-
-				geometries[ p ].prog = pr;
-
-				if ( pr !== 1 ) //otherwise onLoad will be called anyway
-
-					updateProgress({ type: 'Geometry', name: p, progress: pr });
-
-				update();
-
-			}
-		);
-
-	}
-
 	function loadFile ( p ) {
 
 		var fLoader = fLoader || new THREE.FileLoader();
@@ -458,54 +420,6 @@ function LoadScreen ( renderer, style ) {
 				if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
 					updateProgress({ type: 'File', name: p, progress: pr });
-
-				update();
-
-			}
-		);
-
-	}
-
-	function loadTexture ( p ) {
-
-		var d = that.resources.textures[ p ], arr, ext;
-
-		if ( typeof d.path === 'string' ) {
-
-			arr = d.path.split( '.' );
-			ext = arr[ arr.length - 1 ];
-
-		} else {
-
-			arr = d.path[ 0 ].split( '.' );
-			ext = arr[ arr.length - 1 ] === 'hdr' ? 'cubehdr' : 'cube';
-
-		}
-
-		getTextureLoader( ext ).load( 
-			d.path, 
-			function ( t ) {
-
-				output.textures[ p ] = t;
-
-				textures[ p ].prog = 1;
-
-				counter++;
-
-				updateProgress({ type: 'Texture', name: p, progress: 1 });
-
-				update( true );
-
-			}, 
-			function ( e ) {
-
-				var pr = e.loaded / e.total;
-
-				textures[ p ].prog = pr;
-
-				if ( pr !== 1 ) //otherwise onLoad will be called anyway
-
-					updateProgress({ type: 'Texture', name: p, progress: pr });
 
 				update();
 
@@ -550,13 +464,145 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
+	function loadTexture ( p ) {
+
+		var d = that.resources.textures[ p ], arr, ext;
+
+		if ( typeof d.path === 'string' ) {
+
+			arr = d.path.split( '.' );
+			ext = arr[ arr.length - 1 ];
+
+		} else {
+
+			arr = d.path[ 0 ].split( '.' );
+			ext = arr[ arr.length - 1 ].toLowerCase() === 'hdr' ? 'cubehdr' : 'cube';
+
+		}
+
+		getTextureLoader( ext.toLowerCase() ).load( 
+			d.path, 
+			function ( t ) {
+
+				output.textures[ p ] = t;
+
+				textures[ p ].prog = 1;
+
+				counter++;
+
+				updateProgress({ type: 'Texture', name: p, progress: 1 });
+
+				update( true );
+
+			}, 
+			function ( e ) {
+
+				var pr = e.loaded / e.total;
+
+				textures[ p ].prog = pr;
+
+				if ( pr !== 1 ) //otherwise onLoad will be called anyway
+
+					updateProgress({ type: 'Texture', name: p, progress: pr });
+
+				update();
+
+			}
+		);
+
+	}
+
+	function loadMaterial ( p ) {
+
+
+
+	}
+
+	function loadGeometry ( p ) {
+
+		var d = that.resources.geometries[ p ],
+			arr = d.path.split( '.' ),
+			ext = arr[ arr.length - 1 ];
+
+		getGeometryLoader( ext.toLowerCase() ).load( 
+			d.path, 
+			function ( g ) {
+
+				output.geometries[ p ] = g;
+
+				geometries[ p ].prog = 1;
+
+				counter++;
+
+				updateProgress({ type: 'Geometry', name: p, progress: 1 });
+
+				update( true );
+
+			}, 
+			function ( e ) {
+
+				var pr = e.loaded / e.total;
+
+				geometries[ p ].prog = pr;
+
+				if ( pr !== 1 ) //otherwise onLoad will be called anyway
+
+					updateProgress({ type: 'Geometry', name: p, progress: pr });
+
+				update();
+
+			}
+		);
+
+	}
+
+	function loadAnimation ( p ) {
+
+		var d = that.resources.animations[ p ],
+			arr = d.path.split( '.' ),
+			ext = arr[ arr.length - 1 ].toLowerCase();
+
+		if ( ext === 'bvh' )
+
+		getGeometryLoader( ext ).load( 
+			d.path, 
+			function ( g ) {
+
+				output.animations[ p ] = g;
+
+				animations[ p ].prog = 1;
+
+				counter++;
+
+				updateProgress({ type: 'Geometry', name: p, progress: 1 });
+
+				update( true );
+
+			}, 
+			function ( e ) {
+
+				var pr = e.loaded / e.total;
+
+				animations[ p ].prog = pr;
+
+				if ( pr !== 1 ) //otherwise onLoad will be called anyway
+
+					updateProgress({ type: 'Geometry', name: p, progress: pr });
+
+				update();
+
+			}
+		);
+
+	}
+
 	function loadObject ( p ) {
 
 		var d = that.resources.objects[ p ],
 			a = d.path.split( '.' ),
 			l = a.length,
-			ext = a[ l - 2 ] === 'assimp' ? 'assimpJSON' : a[ l - 1 ], 
-			loader = getObjectLoader( ext );
+			ext = a[ l - 2 ].toLowerCase() === 'assimp' ? 'assimpJSON' : a[ l - 1 ], 
+			loader = getObjectLoader( ext.toLowerCase() );
 
 		var oC = function ( o, assimp ) {
 
@@ -757,42 +803,7 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		//2. replace textures in resources
-		var tA = that.resources.textures,
-			oTA = output.textures;
-
-		if ( tA ) {
-
-			for ( var k in oTA ) {
-
-				if ( tA[ k ].toPMREM ) {
-
-					var pmremGen = new THREE.PMREMGenerator( oTA[ k ] );
-					pmremGen.update( renderer );
-
-					var pmremcubeuvpacker = new THREE.PMREMCubeUVPacker( pmremGen.cubeLods );
-					pmremcubeuvpacker.update( renderer );
-					oTA[ k ] = pmremcubeuvpacker.CubeUVRenderTarget.texture;
-
-				}
-
-				for ( var p in tA[ k ] ) 
-
-					if ( typeof oTA[ k ][ p ] !== 'undefined' ) 
-
-						oTA[ k ][ p ] = tA[ k ][ p ];
-
-				tA[ k ] = oTA[ k ];
-
-				tA[ k ].name = k;
-
-				delete oTA[ k ];
-
-			}
-
-		}
-
-		//3. replace fonts in resources
+		//2. replace fonts in resources
 		var fA = that.resources.fonts,
 			oFA = output.fonts;
 
@@ -817,8 +828,49 @@ function LoadScreen ( renderer, style ) {
 			}
 
 		}
+
+		//3. replace textures in resources
+		var tA = that.resources.textures,
+			oTA = output.textures;
+
+		if ( tA ) {
+
+			for ( var k in oTA ) {
+
+				if ( tA[ k ].toPMREM ) {
+
+					if ( verbose ) console.time( 'Texture > ' + k + ' > PMREM creation time' );
+
+					var pmremGen = new THREE.PMREMGenerator( oTA[ k ] );
+					pmremGen.update( renderer );
+
+					var pmremcubeuvpacker = new THREE.PMREMCubeUVPacker( pmremGen.cubeLods );
+					pmremcubeuvpacker.update( renderer );
+					oTA[ k ] = pmremcubeuvpacker.CubeUVRenderTarget.texture;
+
+					if ( verbose ) console.timeEnd( 'Texture > ' + k + ' > PMREM creation time' );
+
+				}
+
+				for ( var p in tA[ k ] ) 
+
+					if ( typeof oTA[ k ][ p ] !== 'undefined' ) 
+
+						oTA[ k ][ p ] = tA[ k ][ p ];
+
+				tA[ k ] = oTA[ k ];
+
+				tA[ k ].name = k;
+
+				delete oTA[ k ];
+
+			}
+
+		}
+
+		//4. materials, todo
 	
-		//4. process geometries and replace in resources
+		//5. process geometries and replace in resources
 		var gA = that.resources.geometries, 
 			oGA = output.geometries;
 
@@ -844,7 +896,9 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		//5. create objects
+		//6. animations, todo
+
+		//7. create objects
 		var oA = that.resources.objects,
 			oOA = output.objects;
 
