@@ -28,16 +28,17 @@ function LoadScreen ( renderer, style ) {
 	var fLoader,
 		foLoaders = {},
 		tLoaders = {},
-		aLoader,
+		mLoaders = {},
 		gLoaders = {},
+		aLoader,
 		oLoaders = {};
 
 	var output = {};
 
 	var extensions, support = {};
 
-	var	files = {}, fonts = {}, textures = {}, geometries = {}, animations = {}, objects = {},  
-		fileSum = 0, fontSum = 0, texSum = 0, geoSum = 0, animSum = 0, objSum = 0;
+	var	files = {}, fonts = {}, textures = {}, materials = {}, geometries = {}, animations = {}, objects = {},  
+		fileSum = 0, fontSum = 0, texSum = 0, matSum = 0, geoSum = 0, animSum = 0, objSum = 0;
 
 	/* API */
 	this.domElement = null;
@@ -230,6 +231,7 @@ function LoadScreen ( renderer, style ) {
 		var r = that.resources;
 
 		//1. Count files to load and their total size, create the 'output' mirror of resources
+		
 		if ( r.files ) {
 
 			output.files = {};
@@ -304,6 +306,28 @@ function LoadScreen ( renderer, style ) {
 
 					textures[ k ] = { prog: 0, fileSize: t.fileSize };
 					texSum += t.fileSize;
+					nFiles++;
+
+				}
+
+			}
+
+		}
+
+		if ( r.materials ) {
+
+			output.materials = {};
+
+			for ( var k in r.materials ) {
+
+				var t = r.materials[ k ];
+
+				if ( t.path && t.fileSize ) {//avoid ready materials
+
+					output.materials[ k ] = {};
+
+					materials[ k ] = { prog: 0, fileSize: t.fileSize };
+					matSum += t.fileSize;
 					nFiles++;
 
 				}
@@ -395,6 +419,14 @@ function LoadScreen ( renderer, style ) {
 
 					loadTexture( k );
 
+		if ( r.materials ) 
+			
+			for ( var k in r.materials ) 
+
+				if ( r.materials[ k ].path && r.materials[ k ].fileSize )
+
+					loadMaterial( k );
+
 		if ( r.geometries ) 
 			
 			for ( var k in r.geometries ) 
@@ -402,6 +434,14 @@ function LoadScreen ( renderer, style ) {
 				if ( r.geometries[ k ].path && r.geometries[ k ].fileSize )
 
 					loadGeometry( k );
+
+		if ( r.animations ) 
+			
+			for ( var k in r.animations ) 
+
+				if ( r.animations[ k ].path && r.animations[ k ].fileSize )
+
+					loadAnimation( k );
 
 		if ( r.objects ) 
 			
@@ -535,7 +575,61 @@ function LoadScreen ( renderer, style ) {
 
 	function loadMaterial ( p ) {
 
+		var d = that.resources.materials[ p ],
+			arr = d.path.split( '.' ),
+			ext = arr[ arr.length - 1 ];
 
+		getMaterialLoader( ext.toLowerCase() ).load( 
+			d.path, 
+			function ( m ) {
+
+				output.materials[ p ] = m;
+
+				materials[ p ].prog = 1;
+
+				counter++;
+
+				updateProgress({ type: 'Material', name: p, progress: 1 });
+
+				update( true );
+
+				if ( m instanceof THREE.MTLLoader.MaterialCreator ) {
+
+					//Check if .obj path with 'setMaterials' === p, then load
+					var o = that.resources.objects;
+
+					if ( o ) {
+
+						for ( var k in o ) {
+
+							var ext = o.path.split( '.' );
+							ext = ext[ ext.length - 1 ];
+
+							if ( o[ k ].setMaterials === p && ext === 'obj' )
+
+								loadObject( k, m );
+
+						}
+
+					}
+
+				}
+
+			}, 
+			function ( e ) {
+
+				var pr = e.loaded / e.total;
+
+				materials[ p ].prog = pr;
+
+				if ( pr !== 1 ) //otherwise onLoad will be called anyway
+
+					updateProgress({ type: 'Material', name: p, progress: pr });
+
+				update();
+
+			}
+		);
 
 	}
 
@@ -615,13 +709,17 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function loadObject ( p ) {
+	function loadObject ( p, materialCreator ) {
 
 		var d = that.resources.objects[ p ],
 			a = d.path.split( '.' ),
 			l = a.length,
-			ext = a[ l - 2 ].toLowerCase() === 'assimp' ? 'assimpJSON' : a[ l - 1 ], 
-			loader = getObjectLoader( ext.toLowerCase() );
+			ext = a[ l - 2 ].toLowerCase() === 'assimp' ? 'assimpJSON' : a[ l - 1 ];
+			
+
+		//If the OBJLoader's option 'setMaterials' is specified,
+		//don't load here, it will happen inside the MTLLoader.
+		if ( ext === 'obj' && d.setMaterials ) return;
 
 		var oC = function ( o, assimp ) {
 
@@ -653,64 +751,30 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
-		switch ( ext ) {
+		if ( materialCreator ) {
 
-			case 'mmd': 
-				loader.load( d.path, d.vmdPaths, oC, oP );
-				break;
-			case 'dae':
-				if ( d.convertUpAxis ) loader.convertUpAxis = d.convertUpAxis;//continue
-			default: 
-				loader.load( d.path, oC, oP );
+			var loader = new THREE.OBJLoader();
 
-		}
+			loader.setMaterials( materialCreator.preload() );
 
-	}
+			loader.load( d.path, oC, oP );			
+			
+		} else {
 
-	function getObjectLoader ( ext ) {
+			var loader = getObjectLoader( ext.toLowerCase() );
 
-		switch ( ext ) {
-			case '3mf': 
-				if ( ! oLoaders.threemf ) oLoaders.threemf = new THREE.ThreeMFLoader();
-				return oLoaders.threemf;
-			case 'amf': 
-				if ( ! oLoaders.amf ) oLoaders.amf = new THREE.AMFLoader();
-				return oLoaders.amf;
-			case 'assimp': 
-				if ( ! oLoaders.assimp ) oLoaders.assimp = new THREE.AssimpLoader();
-				return oLoaders.assimp;
-			case 'assimpJSON': 
-				if ( ! oLoaders.assimpJSON ) oLoaders.assimpJSON = new THREE.AssimpJSONLoader();
-				return oLoaders.assimpJSON;
-			case 'awd': 
-				if ( ! oLoaders.awd ) oLoaders.awd = new THREE.AWDLoader();
-				return oLoaders.awd;
-			case 'babylon': 
-				if ( ! oLoaders.babylon ) oLoaders.babylon = new THREE.BabylonLoader();
-				return oLoaders.babylon;
-			case 'dae': 
-				if ( ! oLoaders.dae ) oLoaders.dae = new THREE.ColladaLoader();
-				return oLoaders.dae;
-			case 'fbx': 
-				if ( ! oLoaders.fbx ) oLoaders.fbx = new THREE.FBXLoader();
-				return oLoaders.fbx;
-			case 'gltf': 
-				if ( ! oLoaders.gltf ) oLoaders.gltf = new THREE.GLTFLoader();
-				return oLoaders.gltf;
-			case 'obj': 
-				if ( ! oLoaders.obj ) oLoaders.obj = new THREE.OBJLoader();
-				return oLoaders.obj;
-			case 'pcd': 
-				if ( ! oLoaders.pcd ) oLoaders.pcd = new THREE.PCDLoader();
-				return oLoaders.pcd;
-			case 'utf8': 
-				if ( ! oLoaders.utf8 ) oLoaders.utf8 = new THREE.UTF8Loader();
-				return oLoaders.utf8;
-			case 'wrl': 
-			case 'wrz': 
-			case 'vrml': 
-				if ( ! oLoaders.vrml ) oLoaders.vrml = new THREE.VRMLLoader();
-				return oLoaders.vrml;
+			switch ( ext ) {
+
+				case 'mmd': 
+					loader.load( d.path, d.vmdPaths, oC, oP );
+					break;
+				case 'dae':
+					if ( d.convertUpAxis ) loader.convertUpAxis = d.convertUpAxis;//continue
+				default: 
+					loader.load( d.path, oC, oP );
+
+			}
+
 		}
 
 	}
@@ -747,24 +811,19 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function getSupport ( ext ) {
+	function getMaterialLoader ( ext ) {
 
-		if ( typeof support[ ext ] === 'undefined' ) {
+		switch ( ext ) {
 
-			extensions = extensions || renderer.context.getSupportedExtensions();
-
-			if ( ext === 'PVR' ) 
-
-				support[ ext ] = extensions.indexOf( 'WEBGL_compressed_texture_pvrtc' ) > -1 
-					|| extensions.indexOf( 'WEBKIT_WEBGL_compressed_texture_pvrtc' ) > -1;
-
-			else //ktx
-
-				support[ ext ] = extensions.indexOf( 'WEBGL_compressed_texture_etc1' ) > -1;
+			case 'js':
+			case 'json'://check if they are json and js !! no example
+				mLoaders.main = mLoaders.main || new THREE.MaterialLoader();
+				return mLoaders.main;
+			case 'mtl': 
+				mLoaders.mat = mLoaders.mat || new THREE.MTLLoader();
+				return mLoaders.mat;
 
 		}
-
-		return support[ ext ];
 
 	}
 
@@ -790,11 +849,84 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
+	function getObjectLoader ( ext ) {
+
+		switch ( ext ) {
+			case '3mf': 
+				if ( ! oLoaders.threemf ) oLoaders.threemf = new THREE.ThreeMFLoader();
+				return oLoaders.threemf;
+			case 'amf': 
+				if ( ! oLoaders.amf ) oLoaders.amf = new THREE.AMFLoader();
+				return oLoaders.amf;
+			case 'assimp': 
+				if ( ! oLoaders.assimp ) oLoaders.assimp = new THREE.AssimpLoader();
+				return oLoaders.assimp;
+			case 'assimpJSON': 
+				if ( ! oLoaders.assimpJSON ) oLoaders.assimpJSON = new THREE.AssimpJSONLoader();
+				return oLoaders.assimpJSON;
+			case 'awd': 
+				if ( ! oLoaders.awd ) oLoaders.awd = new THREE.AWDLoader();
+				return oLoaders.awd;
+			case 'babylon': 
+				if ( ! oLoaders.babylon ) oLoaders.babylon = new THREE.BabylonLoader();
+				return oLoaders.babylon;
+			case 'dae': 
+				if ( ! oLoaders.dae ) oLoaders.dae = new THREE.ColladaLoader();
+				return oLoaders.dae;
+			case 'fbx': 
+				if ( ! oLoaders.fbx ) oLoaders.fbx = new THREE.FBXLoader();
+				return oLoaders.fbx;
+			case 'gltf': 
+				if ( ! oLoaders.gltf ) oLoaders.gltf = new THREE.GLTFLoader();
+				return oLoaders.gltf;
+			case 'js': 
+			case 'json': 
+				if ( ! oLoaders.main ) oLoaders.main = new THREE.ObjectLoader();
+				return oLoaders.main;
+			case 'obj': 
+				if ( ! oLoaders.obj ) oLoaders.obj = new THREE.OBJLoader();
+				return oLoaders.obj;
+			case 'pcd': 
+				if ( ! oLoaders.pcd ) oLoaders.pcd = new THREE.PCDLoader();
+				return oLoaders.pcd;
+			case 'utf8': 
+				if ( ! oLoaders.utf8 ) oLoaders.utf8 = new THREE.UTF8Loader();
+				return oLoaders.utf8;
+			case 'wrl': 
+			case 'wrz': 
+			case 'vrml': 
+				if ( ! oLoaders.vrml ) oLoaders.vrml = new THREE.VRMLLoader();
+				return oLoaders.vrml;
+		}
+
+	}
+
+	function getSupport ( ext ) {
+
+		if ( typeof support[ ext ] === 'undefined' ) {
+
+			extensions = extensions || renderer.context.getSupportedExtensions();
+
+			if ( ext === 'PVR' ) 
+
+				support[ ext ] = extensions.indexOf( 'WEBGL_compressed_texture_pvrtc' ) > -1 
+					|| extensions.indexOf( 'WEBKIT_WEBGL_compressed_texture_pvrtc' ) > -1;
+
+			else //ktx
+
+				support[ ext ] = extensions.indexOf( 'WEBGL_compressed_texture_etc1' ) > -1;
+
+		}
+
+		return support[ ext ];
+
+	}
+
 	function processResources () {
 
 		if ( verbose ) console.time( 'Processing duration' );
 
-		//1. replace files in resources
+		//1. files
 		var fA = that.resources.files,
 			oFA = output.files;
 
@@ -822,7 +954,7 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		//2. replace fonts in resources
+		//2. fonts
 		var foA = that.resources.fonts,
 			oFoA = output.fonts;
 
@@ -848,7 +980,7 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		//3. replace textures in resources
+		//3. textures
 		var tA = that.resources.textures,
 			oTA = output.textures;
 
@@ -887,9 +1019,35 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		//4. materials, todo
+		//4. materials
+		var mA = that.resources.materials,
+			oMA = output.materials;
+
+		if ( mA ) {
+
+			for ( var k in oMA ) {
+
+				for ( var p in mA[ k ] ) 
+
+					if ( typeof oMA[ k ][ p ] !== 'undefined' ) 
+
+						oMA[ k ][ p ] = mA[ k ][ p ];
+
+				if ( mA[ k ].onComplete )
+
+					mA[ k ].onComplete( oMA[ k ] );
+
+				mA[ k ] = oMA[ k ];
+
+				mA[ k ].name = k;
+
+				delete oMA[ k ];
+
+			}
+
+		}
 	
-		//5. process geometries and replace in resources
+		//5. geometries
 		var gA = that.resources.geometries, 
 			oGA = output.geometries;
 
@@ -937,7 +1095,7 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		//7. create objects
+		//7. objects
 		var oA = that.resources.objects,
 			oOA = output.objects;
 

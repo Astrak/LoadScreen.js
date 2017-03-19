@@ -187,17 +187,31 @@ ASSETS.textures.myTexture3 = new THREE.Texture(...);//Won't be processed.
 ```
 
 ### 4. Materials
-- [ ] THREE.MaterialLoader
-- [ ] THREE.MTLLoader
+- [x] THREE.MaterialLoader
+- [x] THREE.MTLLoader
 ```js
 ASSETS.materials = {
-    myMaterial1
+    myMaterial1: {
+        path: 'path/to/material.mtl',
+        fileSize: 188,
+        //Optionally :
+        map: 'myTexture1'//Asset assigned after loading.
+        //To use the MTLLoader with the OBJLoader and its 'setMaterials' method,
+        //just add a 'setMaterials' property to the object, of value 'myMaterial1'.
+        //If used alone, the output of the MTLLoader is a THREE.MTLLoader.MaterialCreator :
+        onComplete ( matCreator ) {
+            //matCreator.preload() or matCreator.getAsArray()
+        }
+
+    }
 };
 
 //After loading :
-ASSETS.materials.myMaterial1;//THREE.Material
+ASSETS.materials.myMaterial1;//THREE.MTLLoader.MaterialCreator,
+//or object with materials ( matCreator.preload() )
+//or array with materials ( matCreator.getAsArray() ).
 
-//Also simply :
+//Also in most other use cases :
 ASSETS.materials.myMaterial2 = new THREE.Material();//Won't be processed.
 ```
 
@@ -229,7 +243,7 @@ ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//Won't be proc
 ```
 
 ### 6. Animations
-- [ ] THREE.BVHLoader
+- [x] THREE.BVHLoader
 ```js
 ASSETS.animations = {
     myAnimation1: {
@@ -266,7 +280,7 @@ ASSETS.animations.myMaterial2 = new THREE.Material();//Won't be processed.
 - [ ] THREE.GLTFLoader (2)
 - [x] THREE.MMDLoader (needs the additional parameter `VMDPaths` )
 - [x] THREE.PCDLoader
-- [ ] THREE.ObjectLoader
+- [x] THREE.ObjectLoader
 - [x] THREE.OBJLoader
 - [ ] THREE.PlayCanvasLoader
 - [x] THREE.UTF8Loader
@@ -275,6 +289,7 @@ ASSETS.animations.myMaterial2 = new THREE.Material();//Won't be processed.
 ASSETS.objects = {
     myObject1: {//Load from file :
         path: 'path/to/object.obj',
+        setMaterials: 'myMaterial1',//OBJLoader option.
         fileSize: 3846//Ko
     },
     myObject2: {//Or create from asset :
@@ -289,8 +304,8 @@ ASSETS.objects = {
         path: 'path/to/object.dae',
         fileSize: 1111,
         convertUpAxis: true,//Collada loader option.
-        onComplete ( object ) {
-            //Catch object.scene, object.animation etc.
+        onComplete ( collada ) {
+            //Catch collada.scene, collada.animation etc.
             //Same with GLTF.
         }
     }
@@ -301,7 +316,7 @@ ASSETS.objects.myObject5 = {
     geometry: 'myGeometry1',
     material: new THREE.MeshPhongMaterial(),
     type: 'mesh',//Or 'points' or 'line', defaults to 'mesh'.
-    //Specify any mesh or material property 
+    //Specify any mesh or material property :
     //(if the object is a hierarchy, they will only get assigned to the root mesh).
     map: 'myTexture1',//Asset assigned to material.
     color: 0x33ff89,//Converted to a THREE.Color and assigned to material.
@@ -317,9 +332,9 @@ ASSETS.objects.myObject6 = new THREE.Mesh(...);//Won't be processed.
 ```
 
 ## Roadmap
-* add material and support THREE.MaterialLoader
-* add animations and support THREE.BVHLoader
 * auto-tween exposure after removal ?
+* percentInfo todo
+* add some 'progressElement' (on/off) parametrization
 * code the 'forcedStart' parameter
 * add fancy loader types
 * webgl loader instead of html ?
