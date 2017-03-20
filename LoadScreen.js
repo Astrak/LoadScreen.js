@@ -9,7 +9,7 @@ function LoadScreen ( renderer, style ) {
 		verbose = false, 
 		forcedStart = false, 
 		tweenDuration = .5,
-		autoTweenExposure = 5,
+		autoTweenExposure = 3,
 		progress = 0,
 		removed = false,
 		tweens = {},
@@ -22,7 +22,7 @@ function LoadScreen ( renderer, style ) {
 
 	var counter = 0, nFiles = 0;
 
-	var textInfo, sizeInfo;
+	var textInfo, sizeInfo, percentInfo;
 
 	var pmremGen, pmremcubeuvpacker;
 
@@ -116,8 +116,9 @@ function LoadScreen ( renderer, style ) {
 
 			var checkInSight = function () {
 
-				var top = renderer.domElement.getBoundingClientRect().top,
-					height = parseInt( renderer.domElement.style.height );
+				var pos = renderer.domElement.getBoundingClientRect(),
+					top = pos.top,
+					height = pos.height;
 
 				if ( top < innerHeight && ( top + height ) > 0 ) {
 
@@ -130,6 +131,8 @@ function LoadScreen ( renderer, style ) {
 			};
 
 			window.addEventListener( 'scroll', checkInSight );
+
+			checkInSight();
 
 		}
 
@@ -171,6 +174,8 @@ function LoadScreen ( renderer, style ) {
 						cancelAnimationFrame( rAFID );
 
 					}
+
+					delete tweens.disappear;
 
 				}
 			};
@@ -235,7 +240,7 @@ function LoadScreen ( renderer, style ) {
 			var t = tweens[ k ];
 
 			//increment for linear tweening
-			var incr = ( t.targetValue - t.initialValue ) / tweenDuration / 60;
+			var incr = ( t.targetValue - t.initialValue ) / t.duration / 60;
 
 			t.value = t.targetValue >= t.initialValue ? Math.min( t.targetValue, t.value + incr ) : Math.max( t.targetValue, t.value + incr );
 
@@ -1455,7 +1460,7 @@ function LoadScreen ( renderer, style ) {
 
 			tweens.progress.initialValue = tweens.progress.value;
 			tweens.progress.targetValue = progress;
-			tweens.progress.duration += tweenDuration;
+			tweens.progress.duration = tweenDuration;
 
 		});
 
@@ -1540,7 +1545,7 @@ function LoadScreen ( renderer, style ) {
 
 			tweens.progress.initialValue = tweens.progress.value;
 			tweens.progress.targetValue = progress;
-			tweens.progress.duration += tweenDuration;
+			tweens.progress.duration = tweenDuration;
 
 		});
 
@@ -1549,29 +1554,37 @@ function LoadScreen ( renderer, style ) {
 	function updateProgress ( o ) {
 
 		//1. compute progress value
-		var texProg = 0, geoProg = 0, objProg = 0, fileProg = 0, cTexProg = 0;
+		var fileProg = 0, fontProg = 0, texProg = 0, matProg = 0, geoProg = 0, animProg = 0, objProg = 0;
 
 		for ( var k in files ) 
 
-			texProg += files[ k ].prog * files[ k ].fileSize;
+			fileProg += files[ k ].prog * files[ k ].fileSize;
+
+		for ( var k in fonts ) 
+
+			fontProg += fonts[ k ].prog * fonts[ k ].fileSize;
 
 		for ( var k in textures ) 
 
 			texProg += textures[ k ].prog * textures[ k ].fileSize;
 
-		for ( var k in cubeTextures ) 
+		for ( var k in materials ) 
 
-			cTexProg += cubeTextures[ k ].prog * cubeTextures[ k ].fileSize;
+			matProg += materials[ k ].prog * materials[ k ].fileSize;
 
 		for ( var k in geometries ) 
 
 			geoProg += geometries[ k ].prog * geometries[ k ].fileSize;
 
+		for ( var k in animations ) 
+
+			animProg += animations[ k ].prog * animations[ k ].fileSize;
+
 		for ( var k in objects ) 
 
 			objProg += objects[ k ].prog * objects[ k ].fileSize;
 
-		progress = ( texProg + geoProg + objProg + fileProg ) / ( texSum + geoSum + objSum + fileSum );
+		progress = ( fileProg + fontProg + texProg + matProg + geoProg + animProg + objProg ) / ( fileSum + fontSum + texSum + matSum + geoSum + animSum + objSum );
 
 		//2. Logs data
 		if ( typeof o !== 'undefined' && verbose )

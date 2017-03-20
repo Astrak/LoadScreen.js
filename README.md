@@ -93,7 +93,7 @@ const style = {
 };
 
 const options = {
-    autoTweenExposure: 5,//Duration of the opening fading, after removal. 0 to cancel.
+    autoTweenExposure: 3,//Duration of the opening fading, after removal. 0 to cancel.
     forcedStart: false,//Start loading even if the canvas is out of sight (usually bad practice).
     verbose: false,//Logs progress, process and compile duration + total load screen duration.
     tweenDuration: .5//Progress and removal tweens durations.
@@ -253,7 +253,7 @@ ASSETS.animations = {
         path: 'path/to/anim.bvh',
         fileSize: 4827,
         onComplete ( bvh ) {
-            //catch bvh.skeleton and bvh.clip
+            //Catch bvh.skeleton and bvh.clip.
         }
     }
 };
@@ -291,7 +291,7 @@ ASSETS.animations.myMaterial2 = new THREE.Material();//Won't be processed.
 ASSETS.objects = {
     myObject1: {//Load from file :
         path: 'path/to/object.obj',
-        setMaterials: 'myMaterial1',//OBJLoader option.
+        setMaterials: 'myMaterial1',//OBJLoader option for use with MTLLoader.
         fileSize: 3846//Ko
     },
     myObject2: {//Or create from asset :
@@ -308,7 +308,7 @@ ASSETS.objects = {
         convertUpAxis: true,//Collada loader option.
         onComplete ( collada ) {
             //Catch collada.scene, collada.animation etc.
-            //Same with GLTF.
+            //Same with GLTF etc.
         }
     }
 };
