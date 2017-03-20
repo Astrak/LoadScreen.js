@@ -1120,13 +1120,17 @@ function LoadScreen ( renderer, style ) {
 
 			for ( var k in oGA ) {
 
+				if ( gA[ k ].flatNormals && oGA[ k ].type !== 'BufferGeometry' )
+
+					oGA[ k ].computeFlatVertexNormals();
+
 				if ( gA[ k ].toBufferGeometry && oGA[ k ].type !== 'BufferGeometry' )
 
 					oGA[ k ] = new THREE.BufferGeometry().fromGeometry( oGA[ k ] );
 
 				if ( gA[ k ].onComplete ) 
 
-					ga[ k ].onComplete( oGA[ k ] );
+					gA[ k ].onComplete( oGA[ k ] );
 
 				gA[ k ] = oGA[ k ];
 

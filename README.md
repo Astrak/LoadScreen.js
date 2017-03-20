@@ -231,6 +231,7 @@ ASSETS.geometries = {
         path: 'path/to/geometry.ply',
         fileSize: 9498,//Ko
         //Next two are optional :
+        flatNormals: true,//Call geometry.computeFlatVertexNormals().
         toBufferGeometry: false,//Force creation of a BufferGeometry.
         onComplete ( geometry ) {
             //geometry.computeFlatVertexNormals / translate / center / merge / addAttribute...
