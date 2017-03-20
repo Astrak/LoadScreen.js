@@ -22,7 +22,7 @@ function LoadScreen ( renderer, style ) {
 
 	var counter = 0, nFiles = 0;
 
-	var textInfo, sizeInfo, percentInfo;
+	var textInfo, sizeInfo;
 
 	var pmremGen, pmremcubeuvpacker;
 
@@ -61,7 +61,6 @@ function LoadScreen ( renderer, style ) {
 		weight: style.weight || '6px',
 		infoColor: style.infoColor || '#666',
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
-		percentInfo: typeof style.percentInfo !== 'undefined' ? style.percentInfo : false,
 		progressInfo: typeof style.progressInfo !== 'undefined' ? style.progressInfo : true,
 		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]
 	};
@@ -1376,21 +1375,8 @@ function LoadScreen ( renderer, style ) {
 		if ( style.sizeInfo ) {
 
 			sizeInfo = document.createElement( 'p' );
-			sizeInfo.textContent = '0.00 MB';
+			sizeInfo.textContent = '0.00MB';
 			sizeInfo.style.cssText = ''+ 
-				'color: ' + style.infoColor + ';'+
-				'font-family: monospace;'+
-				'font-size: 12px;'+
-				'display: inline-block;';
-
-
-		}
-
-		if ( style.percentInfo ) {
-
-			percentInfo = document.createElement( 'p' );
-			percentInfo.textContent = '0 %';
-			percentInfo.style.cssText = ''+ 
 				'color: ' + style.infoColor + ';'+
 				'font-family: monospace;'+
 				'font-size: 12px;'+
@@ -1416,6 +1402,8 @@ function LoadScreen ( renderer, style ) {
 			var progressBarContainer = document.createElement( 'div' ),
 				progressBar = document.createElement( 'div' );
 
+			style.weight = style.weight.toString().indexOf( 'px' ) > -1 ? style.weight : style.weight + 'px';
+
 			progressBarContainer.style.cssText = ''+
 				'background: ' + style.progressBarContainer + ';'+
 				'border: solid 1px ' + style.progressBarContainer + ';'+
@@ -1437,17 +1425,13 @@ function LoadScreen ( renderer, style ) {
 
 		if ( style.progressInfo ) that.infoContainer.appendChild( progressBarContainer );
 
-		if ( style.percentInfo ) that.infoContainer.appendChild( percentInfo );
-
 		if ( style.sizeInfo ) that.infoContainer.appendChild( sizeInfo );
 
 		var updateStyle = function () { 
 
 			if ( style.progressInfo ) progressBar.style.width = ( 100 * tweens.progress.value ).toString() + '%'; 
 
-			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
-
-			if ( style.percentInfo ) percentInfo.textContent = ( tweens.progress.value * 100 ).toFixed( 0 ) + ' %';
+			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + 'MB';
 
 		};
 
@@ -1493,7 +1477,7 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		if ( style.textInfo || style.sizeInfo ) {
+		if ( style.textInfo || style.sizeInfo || style.progressInfo ) {
 
 			var container;
 
@@ -1516,13 +1500,21 @@ function LoadScreen ( renderer, style ) {
 
 			}
 
-			if ( style.textInfo ) container.appendChild( textInfo );
+			if ( style.textInfo ) {
 
-			if ( style.sizeInfo ) container.appendChild( sizeInfo );
+				container.appendChild( textInfo );
 
-			if ( style.percentInfo ) container.appendChild( percentInfo );
+				textInfo.style.display = 'block';
 
-			textInfo.style.display = sizeInfo.style.display = 'block';
+			}
+
+			if ( style.sizeInfo ) {
+
+				container.appendChild( sizeInfo );
+
+				sizeInfo.style.display = 'block';
+
+			}
 			
 		}
 
@@ -1530,9 +1522,7 @@ function LoadScreen ( renderer, style ) {
 
 			if ( style.progressInfo )circleProgress.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
 
-			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + ' MB';
-
-			if ( style.percentInfo ) percentInfo.textContent = ( tweens.progress.value * 100 ).toFixed( 0 ) + ' %';
+			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + 'MB';
 
 		};
 

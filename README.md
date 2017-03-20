@@ -88,7 +88,6 @@ const style = {
     weight: '6px',//Weight of the progress element, in px ('bar' type) or svg units ('circular').
     sizeInfo: true,//Display size progress in MB.
     progressInfo: true,//Display the progress element.
-    percentInfo: false,//Display progress in % (can be redundant with progressInfo and sizeInfo).
     textInfo: [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]//Or false to remove.
 };
 
@@ -231,10 +230,10 @@ ASSETS.geometries = {
         path: 'path/to/geometry.ply',
         fileSize: 9498,//Ko
         //Next two are optional :
-        flatNormals: true,//Call geometry.computeFlatVertexNormals().
+        flatNormals: true,//Call geometry.computeFlatVertexNormals() on THREE.Geometry instances.
         toBufferGeometry: false,//Force creation of a BufferGeometry.
         onComplete ( geometry ) {
-            //geometry.computeFlatVertexNormals / translate / center / merge / addAttribute...
+            //geometry.translate / center / merge / addAttribute...
         }
     }
 };
