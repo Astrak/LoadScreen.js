@@ -9,7 +9,7 @@ function LoadScreen ( renderer, style ) {
 		verbose = false, 
 		forcedStart = false, 
 		tweenDuration = .5,
-		autoTweenExposure = 2,
+		autoTweenExposure = 1,
 		progress = 0,
 		removed = false,
 		tweens = {},
@@ -145,8 +145,7 @@ function LoadScreen ( renderer, style ) {
 
 			animate();
 
-			tweens.disappear = { 
-				key: 'opacity', 
+			tweens.disappear = {
 				duration: tweenDuration, 
 				targetValue: 0, 
 				initialValue: 1,
@@ -159,7 +158,6 @@ function LoadScreen ( renderer, style ) {
 					if ( autoTweenExposure ) {
 					
 						tweens.exposure = {
-							key: 'exposure',
 							duration: autoTweenExposure,
 							targetValue: 1,
 							initialValue: 0,
@@ -1435,8 +1433,7 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
-		tweens.progress = { 
-			key: 'progress', 
+		tweens.progress = {
 			duration: tweenDuration, 
 			targetValue: progress, 
 			initialValue: 0, 
@@ -1526,8 +1523,7 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
-		tweens.progress = { 
-			key: 'progress', 
+		tweens.progress = {
 			duration: tweenDuration, 
 			targetValue: progress, 
 			initialValue: 0, 
