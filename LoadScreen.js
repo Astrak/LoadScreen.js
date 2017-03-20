@@ -9,7 +9,7 @@ function LoadScreen ( renderer, style ) {
 		verbose = false, 
 		forcedStart = false, 
 		tweenDuration = .5,
-		autoTweenExposure = 3,
+		autoTweenExposure = 2,
 		progress = 0,
 		removed = false,
 		tweens = {},

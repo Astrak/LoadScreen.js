@@ -92,7 +92,7 @@ const style = {
 };
 
 const options = {
-    autoTweenExposure: 3,//Duration of the opening fading, after removal. 0 to cancel.
+    autoTweenExposure: 2,//Duration of the opening fading after removal. 0 to cancel.
     forcedStart: false,//Start loading even if the canvas is out of sight (usually bad practice).
     verbose: false,//Logs progress, process and compile duration + total load screen duration.
     tweenDuration: .5//Progress and removal tweens durations.
