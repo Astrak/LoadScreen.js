@@ -54,7 +54,7 @@ function LoadScreen ( renderer, style ) {
 
 	style = {
 		type: typeof style.type !== 'undefined' ? style.type : 'progress-bar',
-		size: style.size || '150px',
+		size: style.size || '170px',
 		background: typeof style.background !== 'undefined' ? style.background : '#333',
 		progressBarContainer: style.progressBarContainer || '#444',
 		progressBar: style.progressBar || '#fb0',
