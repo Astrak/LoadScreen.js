@@ -232,7 +232,7 @@ function LoadScreen ( renderer, style ) {
 
 		rAFID = requestAnimationFrame( animate );
 
-		for ( k in tweens ) {
+		for ( var k in tweens ) {
 
 			var t = tweens[ k ];
 
@@ -600,35 +600,41 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		getTextureLoader( ext.toLowerCase() ).load( 
-			d.path, 
-			function ( t ) {
+		var oC = function ( t ) {
 
-				output.textures[ p ] = t;
+			output.textures[ p ] = t;
 
-				textures[ p ].prog = 1;
+			textures[ p ].prog = 1;
 
-				counter++;
+			counter++;
 
-				updateProgress({ type: 'Texture', name: p, progress: 1 });
+			updateProgress({ type: 'Texture', name: p, progress: 1 });
 
-				update( true );
+			update( true );
 
-			}, 
-			function ( e ) {
+		};
 
-				var pr = e.loaded / e.total;
+		var oP = function ( e ) {
 
-				textures[ p ].prog = pr;
+			var pr = e.loaded / e.total;
 
-				if ( pr !== 1 ) //otherwise onLoad will be called anyway
+			textures[ p ].prog = pr;
 
-					updateProgress({ type: 'Texture', name: p, progress: pr });
+			if ( pr !== 1 ) //otherwise onLoad will be called anyway
 
-				update();
+				updateProgress({ type: 'Texture', name: p, progress: pr });
 
-			}
-		);
+			update();
+
+		};
+
+		if ( ext !== 'cubehdr' ) 
+
+			getTextureLoader( ext.toLowerCase() ).load( d.path, oC, oP );
+
+		else 
+
+			getTextureLoader( ext.toLowerCase() ).load( THREE.UnsignedByteType, d.path, oC, oP );
 
 	}
 
@@ -1229,7 +1235,7 @@ function LoadScreen ( renderer, style ) {
 
 						o.userData[ p ] = oA[ k ][ p ];
 
-					delete oA[ k ];
+					delete oA[ k ][ p ];
 
 				}
 
@@ -1275,10 +1281,10 @@ function LoadScreen ( renderer, style ) {
 
 					delete oOA[ k ];
 
-				} else if ( typeof oA[ k ].geometry === 'string' ) {//object to assemble from asset
+				} else if ( typeof oA[ k ].geometry === 'string' || typeof oA[ k ].material === 'string' ) {//object to assemble from asset
 
-					var geometry = that.resources.geometries[ oA[ k ].geometry ], 
-						material = oA[ k ].material;
+					var geometry = typeof oA[ k ].geometry === 'string' ? that.resources.geometries[ oA[ k ].geometry ] : oA[ k ].geometry, 
+						material = typeof oA[ k ].material === 'string' ? that.resources.geometries[ oA[ k ].material ] : oA[ k ].material;
 
 					delete oA[ k ].geometry;
 					delete oA[ k ].material;
