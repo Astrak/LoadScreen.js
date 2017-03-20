@@ -42,7 +42,7 @@ function init () {
 }
 ```
 
-I automatically generates a load screen. LoadScreen.js displays and follows those steps : 'Loading' > 'Processing' > 'Compiling' > 'Creating scene'.
+By default LoadScreen.js automatically generates a load screen. It displays and follows those steps : 'Loading' > 'Processing' > 'Compiling' > 'Creating scene'.
 
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
