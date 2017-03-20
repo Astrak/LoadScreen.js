@@ -21,17 +21,17 @@ A Three.js assets loading wrapper.
 1. [Roadmap](#roadmap)
 
 ## Installation
-Install with NPM :
+Include in your project :
 ```
 npm install loadscreen
 ```
-Or include in your page :
+Or in your page :
 ```html
 <script type="text/javascript" src="LoadScreen.min.js"/>
 ```
 
 ## Usage
-Short implementation :
+Main pattern :
 ```js
 //First create and append a webgl renderer, then :
 const ls = new LoadScreen( renderer ).onComplete( init ).start( ASSETS );
@@ -42,30 +42,38 @@ function init () {
 }
 ```
 
-Automatical load screens. 'Loading' > 'Processing' > 'Compiling' > 'Creating scene' messages.
+I automatically generates a load screen. LoadScreen.js displays and follows those steps : 'Loading' > 'Processing' > 'Compiling' > 'Creating scene'.
 
 ![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
 
-Simple assets management in a declarative style :
+Passed assets style is declarative, no callback hell :
 ```js
 const ASSETS = {
     textures: {
-        foliage: {
+        foliageMap: {
             path: 'path/to/pic1.png', fileSize: 1467,
             minFilter: THREE.LinearFilter
         }
-    }, 
+        foliageAO: { 
+            path: 'path/to/pic2.png', fileSize: 1275 
+        }
+    }
     geometries: {
-        treeGeo: {
+        shape: {
             path: 'path/to/model.json', fileSize: 3876,
-            toBufferGeometry: true
+            flatNormals: true,
+            toBufferGeometry: true,
+            onComplete ( geometry ) {
+                geometry.addAttribute( 'uv2', geometry.attributes.uv )
+            }
         }
     }, 
     objects: {
         tree: {
-            geometry: 'treeGeo',
-            map: 'foliage',
-            material: new THREE.MeshBasicMaterial(),
+            geometry: 'shape',
+            map: 'foliageMap',
+            aoMap: 'foliageAO',
+            material: new THREE.MeshStandardMaterial(),
             castShadow: true,
             transparent: true,
             onComplete ( object ) {

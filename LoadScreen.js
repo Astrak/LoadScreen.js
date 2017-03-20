@@ -359,11 +359,22 @@ function LoadScreen ( renderer, style ) {
 							t.path = t.GPUCompression.KTX.path;
 							t.fileSize = t.GPUCompression.KTX.fileSize;
 
-						}
+						}	
+
+					} 
+
+					textures[ k ] = { prog: 0, fileSize: t.fileSize };
+
+					if ( typeof t.path !== 'string' ) {//array
+
+						textures[ k ].subFiles = {};
+
+						for ( var i = 0 ; i < t.path.length ; i++ )
+
+							textures[ k ].subFiles[ t.path[ i ] ] = 0;
 
 					}
 
-					textures[ k ] = { prog: 0, fileSize: t.fileSize };
 					texSum += t.fileSize;
 					nFiles++;
 
@@ -533,7 +544,9 @@ function LoadScreen ( renderer, style ) {
 			}, 
 			function ( e ) {
 
-				var pr = e.loaded / e.total;
+				var total = e.total || files[ p ].fileSize * 1024;
+
+				var pr = e.loaded / total;
 
 				geometries[ p ].prog = pr;
 
@@ -569,7 +582,9 @@ function LoadScreen ( renderer, style ) {
 			}, 
 			function ( e ) {
 
-				var pr = e.loaded / e.total;
+				var total = e.total || fonts[ p ].fileSize * 1024;
+
+				var pr = e.loaded / total;
 
 				fonts[ p ].prog = pr;
 
@@ -586,7 +601,8 @@ function LoadScreen ( renderer, style ) {
 
 	function loadTexture ( p ) {
 
-		var d = that.resources.textures[ p ], arr, ext;
+		var d = that.resources.textures[ p ], arr, ext,
+			t = textures[ p ];
 
 		if ( typeof d.path === 'string' ) {
 
@@ -600,11 +616,11 @@ function LoadScreen ( renderer, style ) {
 
 		}
 
-		var oC = function ( t ) {
+		var oC = function ( result ) {
 
-			output.textures[ p ] = t;
+			output.textures[ p ] = result;
 
-			textures[ p ].prog = 1;
+			t.prog = 1;
 
 			counter++;
 
@@ -616,13 +632,35 @@ function LoadScreen ( renderer, style ) {
 
 		var oP = function ( e ) {
 
-			var pr = e.loaded / e.total;
+			var total = e.total || t.fileSize * 1024;
 
-			textures[ p ].prog = pr;
+			var pr = e.loaded / total;
 
-			if ( pr !== 1 ) //otherwise onLoad will be called anyway
+			if ( t.subFiles ) {
 
-				updateProgress({ type: 'Texture', name: p, progress: pr });
+				t.prog = 0;
+
+				for ( var k in t.subFiles ) {
+
+					if ( e.target.responseURL.indexOf( k ) > -1 )
+
+						t.subFiles[ k ] = pr;
+
+					t.prog = t.prog + t.subFiles[ k ] / 6;
+
+				}
+
+			} else {
+
+				t.prog = pr;
+
+			}
+
+			if ( t.prog !== 1 ) {//otherwise onLoad will be called anyway
+
+				updateProgress({ type: 'Texture', name: p, progress: t.prog });
+
+			}
 
 			update();
 
@@ -683,7 +721,9 @@ function LoadScreen ( renderer, style ) {
 			}, 
 			function ( e ) {
 
-				var pr = e.loaded / e.total;
+				var total = e.total || materials[ p ].fileSize * 1024;
+
+				var pr = e.loaded / total;
 
 				materials[ p ].prog = pr;
 
@@ -721,7 +761,9 @@ function LoadScreen ( renderer, style ) {
 			}, 
 			function ( e ) {
 
-				var pr = e.loaded / e.total;
+				var total = e.total || geometries[ p ].fileSize * 1024;
+
+				var pr = e.loaded / total;
 
 				geometries[ p ].prog = pr;
 
@@ -759,7 +801,9 @@ function LoadScreen ( renderer, style ) {
 			}, 
 			function ( e ) {
 
-				var pr = e.loaded / e.total;
+				var total = e.total || animations[ p ].fileSize * 1024;
+
+				var pr = e.loaded / total;
 
 				animations[ p ].prog = pr;
 
@@ -804,7 +848,9 @@ function LoadScreen ( renderer, style ) {
 
 		var oP = function ( e ) {
 
-			var pr = e.loaded / e.total;
+			var total = e.total || objects[ p ].fileSize * 1024;
+
+			var pr = e.loaded / total;
 
 			objects[ p ].prog = pr;
 
@@ -1560,7 +1606,7 @@ function LoadScreen ( renderer, style ) {
 
 			fontProg += fonts[ k ].prog * fonts[ k ].fileSize;
 
-		for ( var k in textures ) 
+		for ( var k in textures )
 
 			texProg += textures[ k ].prog * textures[ k ].fileSize;
 
