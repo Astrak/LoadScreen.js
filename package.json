@@ -1,6 +1,6 @@
 {
   "name": "loadscreen",
-  "version": "0.15.10",
+  "version": "0.16.0",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-concat": "^1.0.1",
