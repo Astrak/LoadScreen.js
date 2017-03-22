@@ -82,6 +82,8 @@ function LoadScreen ( renderer, style ) {
 
 				if ( style.progressInfo && style.type.indexOf( 'circular' ) > -1 ) {
 
+					console.log( that.infoContainer )
+
 					var mTop = - parseInt( getComputedStyle( that.infoContainer.lastElementChild, null ).height ) / 2;
 
 					that.infoContainer.lastElementChild.style.marginTop = mTop + 'px';
@@ -1422,7 +1424,8 @@ function LoadScreen ( renderer, style ) {
 
 			case 'bar': makeBarProgress(); break;
 			case 'circular': makeCircularProgress(); break;
-			case 'circular-rotate': makeCircularProgress( true ); break;
+			case 'circular-rotate': makeCircularProgress( 'rotate' ); break;
+			case 'circular-fancy': makeCircularProgress( 'fancy' ); break;
 			default: makeBarProgress(); 
 
 		}
@@ -1487,15 +1490,24 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function makeCircularProgress ( rotate ) {
+	function makeCircularProgress ( type ) {
 
 		if ( style.progressInfo ) {
 
 			//far shorter than using the namespace elements creation API.
+
+			var typeFancy = type === 'fancy' ? "<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='" + ( 80 + parseInt( style.weight ) + 2 ).toString() + "' stroke-dashoffset='1503'/>" : "";
+
+			var radius = parseInt( style.weight );
+			radius *= type === 'fancy' ? 2.5 : 1;
+			radius = 80 + radius / 2;
+			radius += type === 'fancy' ? 6 : 2;
+
 			var svg = ""+
 				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
-				"	<circle fill=" + style.progressBarContainer + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 + parseInt( style.weight ) / 2 + 2 ).toString()+ "'/>"+
+				"	<circle fill=" + style.progressBarContainer + " cx='0' cy='0' transform='translate(100,100)'  r='" + radius.toString()+ "'/>"+
 				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
+				typeFancy +
 				"	<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='80' stroke-dashoffset='1503'/>"+
 				"</svg>";
 
@@ -1507,6 +1519,18 @@ function LoadScreen ( renderer, style ) {
 				'stroke:' + style.progressBar + ';'+
 				'stroke-width:' + parseInt( style.weight )+ ';'+
 				'stroke-dasharray:502;';
+
+			if ( type === 'fancy' ) {
+
+				var circleFancy = circleProgress.previousElementSibling;
+
+				circleFancy.style.cssText = ''+
+					'stroke:' + style.progressBar + ';'+
+					'stroke-width:' + parseInt( style.weight )+ ';'+
+					'stroke-dasharray:' + ( parseInt( style.weight ) * 1.5 + 129.5 ) + ';'+
+					'opacity: .5';
+
+			}
 
 		}
 
@@ -1557,9 +1581,17 @@ function LoadScreen ( renderer, style ) {
 
 				circleProgress.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
 
-				if ( rotate ) 
+				if ( type ) 
 
 					circleProgress.setAttribute( 'transform', 'translate(100,100) rotate(' + ( -90 + 180 * tweens.progress.value ) + ')' );
+
+				if ( type === 'fancy' ) {
+
+					circleFancy.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
+
+					circleFancy.setAttribute( 'transform', 'translate(100,100) rotate(' + ( -90 + 135 * tweens.progress.value ) + ')' );
+
+				}
 
 			}
 
