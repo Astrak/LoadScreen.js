@@ -34,7 +34,7 @@ function LoadScreen ( renderer, style ) {
 		aLoader,
 		oLoaders = {};
 
-	var output = {};
+	output = {};
 
 	var extensions, support = {};
 
@@ -666,14 +666,14 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
-		if ( ext !== 'cubehdr' ) 
+		if ( ext === 'cubehdr' ) 
+
+			getTextureLoader( ext ).load( THREE.UnsignedByteType, d.path, oC, oP );
+
+		else
 
 			getTextureLoader( ext.toLowerCase() ).load( d.path, oC, oP );
-
-		else 
-
-			getTextureLoader( ext.toLowerCase() ).load( THREE.UnsignedByteType, d.path, oC, oP );
-
+ 
 	}
 
 	function loadMaterial ( p ) {
