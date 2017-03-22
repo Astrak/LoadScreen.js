@@ -9,7 +9,6 @@ function LoadScreen ( renderer, style ) {
 		verbose = false, 
 		forcedStart = false, 
 		tweenDuration = .5,
-		autoTweenExposure = 1,
 		progress = 0,
 		removed = false,
 		tweens = {},
@@ -34,7 +33,7 @@ function LoadScreen ( renderer, style ) {
 		aLoader,
 		oLoaders = {};
 
-	output = {};
+	var output = {};
 
 	var extensions, support = {};
 
@@ -81,7 +80,7 @@ function LoadScreen ( renderer, style ) {
 
 				that.infoContainer.style.marginTop = marginTop + 'px';
 
-				if ( style.progressInfo && style.type === 'circular' ) {
+				if ( style.progressInfo && style.type.indexOf( 'circular' ) > -1 ) {
 
 					var mTop = - parseInt( getComputedStyle( that.infoContainer.lastElementChild, null ).height ) / 2;
 
@@ -155,22 +154,7 @@ function LoadScreen ( renderer, style ) {
 
 					end( cb ); 
 
-					if ( autoTweenExposure ) {
-					
-						tweens.exposure = {
-							duration: autoTweenExposure,
-							targetValue: 1,
-							initialValue: 0,
-							value: 0,
-							onUpdate: function () { renderer.toneMappingExposure = tweens.exposure.value; },
-							onComplete: function () { cancelAnimationFrame( rAFID ); }
-						};
-
-					} else {
-
-						cancelAnimationFrame( rAFID );
-
-					}
+					cancelAnimationFrame( rAFID );
 
 					delete tweens.disappear;
 
@@ -195,7 +179,6 @@ function LoadScreen ( renderer, style ) {
 
 	this.setOptions = function ( o ) {
 
-		autoTweenExposure = typeof o.autoTweenExposure !== 'undefined' ? o.autoTweenExposure : autoTweenExposure;
 		forcedStart = typeof o.forcedStart !== 'undefined' ? o.forcedStart : forcedStart;
 		tweenDuration = typeof o.tweenDuration !== 'undefined' ? o.tweenDuration : tweenDuration;
 		verbose = typeof o.verbose !== 'undefined' ? o.verbose : verbose;
@@ -1439,6 +1422,7 @@ function LoadScreen ( renderer, style ) {
 
 			case 'bar': makeBarProgress(); break;
 			case 'circular': makeCircularProgress(); break;
+			case 'circular-rotate': makeCircularProgress( true ); break;
 			default: makeBarProgress(); 
 
 		}
@@ -1503,7 +1487,7 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function makeCircularProgress () {
+	function makeCircularProgress ( rotate ) {
 
 		if ( style.progressInfo ) {
 
@@ -1569,7 +1553,15 @@ function LoadScreen ( renderer, style ) {
 
 		var updateStyle = function () { 
 
-			if ( style.progressInfo )circleProgress.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
+			if ( style.progressInfo ) {
+
+				circleProgress.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
+
+				if ( rotate ) 
+
+					circleProgress.setAttribute( 'transform', 'translate(100,100) rotate(' + ( -90 + 180 * tweens.progress.value ) + ')' );
+
+			}
 
 			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + 'MB';
 
