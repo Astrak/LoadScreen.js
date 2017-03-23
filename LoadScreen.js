@@ -52,12 +52,13 @@ function LoadScreen ( renderer, style ) {
 	style = style || {};
 
 	style = {
-		type: typeof style.type !== 'undefined' ? style.type : 'progress-bar',
+		type: typeof style.type !== 'undefined' ? style.type : 'linear-horizontal',
 		size: style.size || '170px',
+		skew: typeof style.skew !== 'undefined' ? style.skew : false,
 		background: typeof style.background !== 'undefined' ? style.background : '#333',
-		progressBarContainer: style.progressBarContainer || '#444',
-		progressBar: style.progressBar || '#fb0',
-		weight: style.weight || '6px',
+		progressContainerColor: style.progressContainerColor || '#000',
+		progressColor: style.progressColor || '#666',
+		weight: style.weight || '10',
 		infoColor: style.infoColor || '#666',
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
 		progressInfo: typeof style.progressInfo !== 'undefined' ? style.progressInfo : true,
@@ -81,8 +82,6 @@ function LoadScreen ( renderer, style ) {
 				that.infoContainer.style.marginTop = marginTop + 'px';
 
 				if ( style.progressInfo && style.type.indexOf( 'circular' ) > -1 ) {
-
-					console.log( that.infoContainer )
 
 					var mTop = - parseInt( getComputedStyle( that.infoContainer.lastElementChild, null ).height ) / 2;
 
@@ -1404,6 +1403,9 @@ function LoadScreen ( renderer, style ) {
 				'font-family: monospace;'+
 				'font-size: 12px';
 
+			if ( style.skew ) 
+
+				textInfo.style.transform = 'skew( ' + style.skew + ' )';
 
 		}
 
@@ -1417,18 +1419,49 @@ function LoadScreen ( renderer, style ) {
 				'font-size: 12px;'+
 				'display: inline-block;';
 
+			if ( style.skew ) 
+
+				sizeInfo.style.transform = 'skew( ' + style.skew + ' )';
 
 		}
+
+		var cb;
 
 		switch ( style.type ) {
 
-			case 'bar': makeBarProgress(); break;
-			case 'circular': makeCircularProgress(); break;
-			case 'circular-rotate': makeCircularProgress( 'rotate' ); break;
-			case 'circular-fancy': makeCircularProgress( 'fancy' ); break;
-			default: makeBarProgress(); 
+			case 'linear-horizontal': cb = makeBarProgress(); break;
+			case 'linear-horizontal-fancy': cb = makeFancyBarProgress(); break;
+			case 'linear-circular': cb = makeCircularProgress(); break;
+			case 'linear-circular-rotate': cb = makeCircularProgress( 'rotate' ); break;
+			case 'linear-circular-fancy': cb = makeCircularProgress( 'fancy' ); break;
+			case 'stepped-horizontal': cb = makeBatteryProgress(); break;
+			case 'stepped-circular': cb = makeRoundBatteryProgress(); break;
+			case 'stepped-circular-offset': cb = makeRoundBatteryProgress( '', true ); break;
+			case 'stepped-circular-rotate': cb = makeRoundBatteryProgress( 'rotate' ); break;
+			case 'stepped-circular-rotate-offset': cb = makeRoundBatteryProgress( 'rotate', true ); break;
+			case 'stepped-circular-fancy': cb = makeRoundBatteryProgress( 'fancy' ); break;
+			case 'stepped-circular-fancy-offset': cb = makeRoundBatteryProgress( 'fancy', true ); break;
+			default: 
+				console.warn( 'Unknown progress type : \'' + style.type + '\', turning to default type \'linear-horizontal\'' );
+				cb = makeBarProgress();
 
 		}
+
+		tweens.progress = {
+			duration: tweenDuration, 
+			targetValue: progress, 
+			initialValue: 0, 
+			value: 0,
+			onUpdate: cb
+		};
+
+		updateCBs.push( function () { 
+
+			tweens.progress.initialValue = tweens.progress.value;
+			tweens.progress.targetValue = progress;
+			tweens.progress.duration = tweenDuration;
+
+		});
 
 	}
 
@@ -1442,14 +1475,18 @@ function LoadScreen ( renderer, style ) {
 			style.weight = style.weight.toString().indexOf( 'px' ) > -1 ? style.weight : style.weight + 'px';
 
 			progressBarContainer.style.cssText = ''+
-				'background: ' + style.progressBarContainer + ';'+
-				'border: solid 1px ' + style.progressBarContainer + ';'+
+				'background: ' + style.progressContainerColor + ';'+
+				'border: solid 1px ' + style.progressContainerColor + ';'+
 				'width: 100%; height: ' + style.weight + ';'+
 				'box-sizing: border-box;'+
 				'position: relative;';
 
+			if ( style.skew ) 
+
+				progressBarContainer.style.transform = 'skew( ' + style.skew + ' )';
+
 			progressBar.style.cssText = ''+
-				'background: ' + style.progressBar + ';'+
+				'background: ' + style.progressColor + ';'+
 				'width: 0%; height: 100%;'+
 				'top: 0; left: 0;'+
 				'position: absolute;';
@@ -1472,29 +1509,58 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
-		tweens.progress = {
-			duration: tweenDuration, 
-			targetValue: progress, 
-			initialValue: 0, 
-			value: 0,
-			onUpdate: updateStyle
+		return updateStyle;
+
+	}
+
+	function makeFancyBarProgress () {
+
+		if ( style.progressInfo ) {
+
+			var weight = parseInt( style.weight ),
+				w2 = weight / 2, 
+				w4 = w2 / 2,
+				offsetTop = 100 - w2, 
+				offsetBottom = 100 + w2;
+
+			var pO = 1;//progress offset
+
+			var svg = ""+
+				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
+				"	<path d='M0 102 20 102 C " + ( 20 + w4 ) + " 102, " + ( 20 + w4 ) + " " + offsetBottom + ", " + ( 20 + w2 ) + " " + offsetBottom + " L" + ( 180 - w2 ) + " " + offsetBottom + " C " + ( 180 - w4 ) + " " + offsetBottom + ", " + ( 180 - w4 ) + ", 102, 180 102 L200 102 200 " + ( 102 + w2 + 5 ) + " 0 " + ( 102 + w2 + 5 ) + " 0 102'/>"+//bottom line
+				"	<path d='M0 98 20 98 C " + ( 20 + w4 ) + " 98, " + ( 20 + w4 ) + " " + offsetTop + ", " + ( 20 + w2 ) + " " + offsetTop + " L" + ( 180 - w2 ) + " " + offsetTop + " C " + ( 180 - w4 ) + " " + offsetTop + ", " + ( 180 - w4 ) + ", 98, 180 98 L200 98 200 " + ( 98 - w2 - 5 ) + " 0 " + ( 98 - w2 - 5 ) + " 0 98'/>"+//top line
+				"	<rect d='M" + ( 20 + pO ) + " 100 M180 100' fill='" + style.progressColor + "'/>"+//progress
+				"</svg>";
+
+			that.infoContainer.innerHTML = svg;
+
+			var pathBottom = that.infoContainer.firstElementChild.firstElementChild, 
+				pathTop = pathBottom.nextElementSibling,
+				pathProgress = pathTop.nextElementSibling;
+
+			pathBottom.style.stroke = pathTop.style.stroke = style.progressContainerColor;
+			pathBottom.style.strokeWidth = pathTop.style.strokeWidth = 2;
+			pathBottom.style.fill = pathTop.style.fill = style.progressContainerColor;
+
+		}
+
+		var updateStyle = function () {
+
+			if ( style.progressInfo ) {
+
+
+
+			}
+
 		};
 
-		updateCBs.push( function () { 
-
-			tweens.progress.initialValue = tweens.progress.value;
-			tweens.progress.targetValue = progress;
-			tweens.progress.duration = tweenDuration;
-
-		});
+		return updateStyle;
 
 	}
 
 	function makeCircularProgress ( type ) {
 
 		if ( style.progressInfo ) {
-
-			//far shorter than using the namespace elements creation API.
 
 			var typeFancy = type === 'fancy' ? "<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='" + ( 80 + parseInt( style.weight ) + 2 ).toString() + "' stroke-dashoffset='1503'/>" : "";
 
@@ -1505,7 +1571,7 @@ function LoadScreen ( renderer, style ) {
 
 			var svg = ""+
 				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
-				"	<circle fill=" + style.progressBarContainer + " cx='0' cy='0' transform='translate(100,100)'  r='" + radius.toString()+ "'/>"+
+				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(100,100)'  r='" + radius.toString()+ "'/>"+
 				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
 				typeFancy +
 				"	<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='80' stroke-dashoffset='1503'/>"+
@@ -1516,7 +1582,7 @@ function LoadScreen ( renderer, style ) {
 			var circleProgress = that.infoContainer.firstElementChild.lastElementChild;
 
 			circleProgress.style.cssText = ''+
-				'stroke:' + style.progressBar + ';'+
+				'stroke:' + style.progressColor + ';'+
 				'stroke-width:' + parseInt( style.weight )+ ';'+
 				'stroke-dasharray:502;';
 
@@ -1525,7 +1591,7 @@ function LoadScreen ( renderer, style ) {
 				var circleFancy = circleProgress.previousElementSibling;
 
 				circleFancy.style.cssText = ''+
-					'stroke:' + style.progressBar + ';'+
+					'stroke:' + style.progressColor + ';'+
 					'stroke-width:' + parseInt( style.weight )+ ';'+
 					'stroke-dasharray:' + ( parseInt( style.weight ) * 1.5 + 129.5 ) + ';'+
 					'opacity: .5';
@@ -1599,21 +1665,221 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
-		tweens.progress = {
-			duration: tweenDuration, 
-			targetValue: progress, 
-			initialValue: 0, 
-			value: 0,
-			onUpdate: updateStyle
+		return updateStyle;
+
+	}
+
+	function makeBatteryProgress () {
+
+		if ( style.progressInfo ) {
+
+			var steps = 20;
+
+			var progressBarContainer = document.createElement( 'div' ),
+				progressBars = [];
+
+			style.weight = style.weight.toString().indexOf( 'px' ) > -1 ? style.weight : style.weight + 'px';
+
+			progressBarContainer.style.cssText = ''+
+				'background: ' + style.progressContainerColor + ';'+
+				'border: solid 1px ' + style.progressContainerColor + ';'+
+				'width: 100%; height: ' + style.weight + ';'+
+				'box-sizing: border-box;'+
+				'position: relative;';
+
+			if ( style.skew ) 
+
+				progressBarContainer.style.transform = 'skew( ' + style.skew + ' )';
+
+			for ( var i = 0 ; i < steps ; i++ ) {
+
+				progressBars[ i ] = document.createElement( 'div' );
+
+				progressBars[ i ].style.cssText = ''+
+					'background: ' + style.progressColor + ';'+
+					'width: ' + 100 / steps + '%; height: 100%;'+
+					'display: inline-block;'+
+					'box-sizing: inherit;'+
+					'position: absolute;'+
+					'border: solid 1px ' + style.progressContainerColor + ';'+
+					'top: 0; left: ' + ( i * 100 / steps )+ '%;';
+
+				progressBarContainer.appendChild( progressBars[ i ] );
+
+			}
+
+		}
+
+		if ( style.textInfo ) that.infoContainer.appendChild( textInfo );
+
+		if ( style.progressInfo ) that.infoContainer.appendChild( progressBarContainer );
+
+		if ( style.sizeInfo ) that.infoContainer.appendChild( sizeInfo );
+
+		var updateStyle = function () { 
+
+			if ( style.progressInfo ) {
+
+				for ( var i = 0 ; i < steps ; i++ ) {
+
+					progressBars[ i ].style.opacity = Math.min( 1, tweens.progress.value * steps - i ); 
+
+				} 
+
+			}
+
+			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + 'MB';
+
 		};
 
-		updateCBs.push( function () { 
+		return updateStyle;
 
-			tweens.progress.initialValue = tweens.progress.value;
-			tweens.progress.targetValue = progress;
-			tweens.progress.duration = tweenDuration;
+	}
 
-		});
+	function makeRoundBatteryProgress ( type, offset ) {
+
+		if ( style.progressInfo ) {
+
+			var steps = 50,
+				p2 = Math.PI / 2,
+				weight = parseInt( style.weight ), w2 = weight / 2,
+				rS = 2 * Math.PI / steps, rS2 = rS / 2,
+				shift = offset ? -.1 : 0;
+
+			var typeFancy = type === 'fancy' ? "<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='" + ( 80 + parseInt( style.weight ) + 2 ).toString() + "' stroke-dashoffset='1503'/>" : "";
+
+			var radius = parseInt( style.weight );
+			radius *= type === 'fancy' ? 2.5 : 1;
+			radius = 80 + radius / 2;
+			radius += type === 'fancy' ? 6 : 2;
+
+			var svg = ""+
+				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
+				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(100,100)'  r='" + radius.toString()+ "'/>"+
+				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>";
+
+			for ( var i = 0 ; i < steps ; i++ ) {
+
+				var p = "<path transform='translate(100,100)' d='M" + 
+					( ( Math.cos( p2 - rS * i + rS2 - rS / 8 ) * ( 80 - w2 ) ) ) + " " + ( - ( ( 80 - w2 ) * Math.sin( p2 - rS * i + rS2 - rS / 8 ) ) ) + " " +
+					"A " + ( 80 - w2 ) + " " + ( 80 - w2 ) + ", 0, 0, 1," +
+					( ( Math.cos( p2 - rS * i - rS2 + rS / 8 ) * ( 80 - w2 ) ) ) + " " + ( - ( ( 80 - w2 ) * Math.sin( p2 - rS * i - rS2 + rS / 8 ) ) ) + " L" +
+					( ( Math.cos( p2 - rS * i - shift - rS2 + rS / 8 ) * ( 80 + w2 ) ) ) + " " + ( - ( ( 80 + w2 ) * Math.sin( p2 - rS * i - shift - rS2 + rS / 8 ) ) ) + " " +
+					"A " + ( 80 + w2 ) + " " + ( 80 + w2 ) + ", 0, 0, 0," +
+					( ( Math.cos( p2 - rS * i - shift + rS2 - rS / 8 ) * ( 80 + w2 ) ) ) + " " + ( - ( ( 80 + w2 ) * Math.sin( p2 - rS * i - shift + rS2 - rS / 8 ) ) ) + " " +
+					"'/>";
+
+				svg += p;
+
+			}
+
+			if ( type === 'fancy' ) svg += typeFancy;
+
+			svg += "</svg>";
+
+			that.infoContainer.innerHTML = svg;
+
+			var progressEls = [];
+
+			var el = that.infoContainer.firstElementChild.firstElementChild.nextElementSibling.nextElementSibling;
+
+			for ( var i = 0 ; i < steps ; i++ ) {
+
+				el.style.fill = style.progressColor;
+				el.style.opacity = 0;
+
+				progressEls[ i ] = el;
+
+				el = el.nextElementSibling;
+
+			}
+
+			if ( type === 'fancy' ) {
+
+				var circleFancy = that.infoContainer.firstElementChild.lastElementChild;
+
+				circleFancy.style.cssText = ''+
+					'stroke:' + style.progressColor + ';'+
+					'stroke-width:' + parseInt( style.weight )+ ';'+
+					'stroke-dasharray:' + ( parseInt( style.weight ) * 1.5 + 129.5 ) + ';'+
+					'opacity: .5';
+
+			}
+
+		}
+
+		if ( style.textInfo || style.sizeInfo || style.progressInfo ) {
+
+			var container;
+
+			if ( style.progressInfo ) {
+
+				var textContainer = document.createElement( 'div' );
+
+				textContainer.style.cssText = ''+
+					'width: 100%; left: 50%; top: 50%;'+
+					'margin-left: -50%;'+
+					'position: absolute;';
+
+				that.infoContainer.appendChild( textContainer );
+
+				container = textContainer;
+
+			} else {
+
+				container = that.infoContainer;
+
+			}
+
+			if ( style.textInfo ) {
+
+				container.appendChild( textInfo );
+
+				textInfo.style.display = 'block';
+
+			}
+
+			if ( style.sizeInfo ) {
+
+				container.appendChild( sizeInfo );
+
+				sizeInfo.style.display = 'block';
+
+			}
+			
+		}
+
+		var updateStyle = function () { 
+
+			if ( style.progressInfo ) {
+
+				for ( var i = 0 ; i < steps ; i++ ) {
+
+					progressEls[ i ].style.opacity = Math.min( 1, tweens.progress.value * steps - i ); 
+
+				}
+
+				if ( type ) 
+
+					for ( var i = 0 ; i < progressEls.length ; i++ )
+
+						progressEls[ i ].setAttribute( 'transform', 'translate(100,100) rotate(' + ( 180 * tweens.progress.value ) + ')' );
+
+				if ( type === 'fancy' ) {
+
+					circleFancy.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
+
+					circleFancy.setAttribute( 'transform', 'translate(100,100) rotate(' + ( -90 + 135 * tweens.progress.value ) + ')' );
+
+				}
+
+			}
+
+			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + 'MB';
+
+		};
+
+		return updateStyle;
 
 	}
 

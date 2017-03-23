@@ -54,11 +54,11 @@ const ASSETS = {
         foliageMap: {
             path: 'path/to/pic1.png', fileSize: 1467,
             minFilter: THREE.LinearFilter
-        }
+        },
         foliageAO: { 
             path: 'path/to/pic2.png', fileSize: 1275 
         }
-    }
+    },
     geometries: {
         shape: {
             path: 'path/to/model.json', fileSize: 3876,
@@ -88,20 +88,20 @@ const ASSETS = {
 Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
 const style = {
-    type: 'progress-bar',//Main look. Also 'circular'. 'custom' empties the info container.
+    type: 'linear-horizontal',//Main look. 'custom' empties the info container.
     size: '150px',//Width of the central info container, in px or in %.
     background: '#333',
-    progressBarContainer: '#444',
-    progressBar: '#fb0',
+    progressContainerColor: '#000',
+    progressColor: '#333',
     infoColor: '#666',//Text color.
-    weight: '6px',//Weight of the progress element, in px ('bar' type) or svg units ('circular').
+    skew: false,//Or '-10deg' to skew the main container.
+    weight: '10',//Weight of the progress element, in px ('bar' type) or svg units ('circular').
     sizeInfo: true,//Display size progress in MB.
     progressInfo: true,//Display the progress element.
     textInfo: [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]//Or false to remove.
 };
 
 const options = {
-    autoTweenExposure: 1,//Duration of the opening fading after removal. 0 to cancel.
     forcedStart: false,//Start loading even if the canvas is out of sight (usually bad practice).
     verbose: false,//Logs progress, process and compile duration + total load screen duration.
     tweenDuration: .5//Progress and removal tweens durations.
@@ -350,12 +350,7 @@ Why is it mandatory to indicate `fileSize` ?
 >- UX quality : with this information the loader has a linear progress. Contrarily, if two files of different sizes were to be loaded without the `fileSize` information, one big and one small, and if the small one is immediately received before even having a progress event of the other one, the progress bar can jump to 50%, then take more time to reach 100%, giving a mistaken information. 
 
 ## Roadmap
-* second progress bar at top of screen for assets loading after start
-* add setStyle method for another style if further calls
-* add fancy loader types
-* add webgl loaders
-* handle custom message/warning/buttons before loading without setting style type to custom.. ?
-* add 'gui' parameter that creates a dat.GUI UI for specified parameters, like gui: [ 'metalness', 'side', 'castShadow' ].. ?
+* add hilbert curve loader etc
 
 [npm-badge]: https://img.shields.io/npm/v/loadscreen.svg
 [npm-badge-url]: https://www.npmjs.com/package/loadscreen
