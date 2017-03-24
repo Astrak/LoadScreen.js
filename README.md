@@ -94,8 +94,7 @@ const style = {
     progressContainerColor: '#000',
     progressColor: '#333',
     infoColor: '#666',//Text color.
-    skew: false,//Or '-10deg' to skew the main container.
-    weight: '10',//Weight of the progress element, in px ('bar' type) or svg units ('circular').
+    weight: '10',//Weight of the progress element (svg units).
     sizeInfo: true,//Display size progress in MB.
     progressInfo: true,//Display the progress element.
     textInfo: [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]//Or false to remove.

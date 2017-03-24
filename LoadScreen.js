@@ -54,7 +54,6 @@ function LoadScreen ( renderer, style ) {
 	style = {
 		type: typeof style.type !== 'undefined' ? style.type : 'linear-horizontal',
 		size: style.size || '170px',
-		skew: typeof style.skew !== 'undefined' ? style.skew : false,
 		background: typeof style.background !== 'undefined' ? style.background : '#333',
 		progressContainerColor: style.progressContainerColor || '#000',
 		progressColor: style.progressColor || '#666',
@@ -77,13 +76,13 @@ function LoadScreen ( renderer, style ) {
 
 				that.domElement.appendChild( that.infoContainer );
 
-				var marginTop = - parseInt( getComputedStyle( that.infoContainer, null ).height ) / 2;
+				var marginTop = - parseFloat( getComputedStyle( that.infoContainer, null ).height ) / 2;
 
 				that.infoContainer.style.marginTop = marginTop + 'px';
 
-				if ( style.progressInfo && style.type.indexOf( 'circular' ) > -1 ) {
+				if ( style.progressInfo ) {
 
-					var mTop = - parseInt( getComputedStyle( that.infoContainer.lastElementChild, null ).height ) / 2;
+					var mTop = - parseFloat( getComputedStyle( that.infoContainer.lastElementChild, null ).height ) / 2;
 
 					that.infoContainer.lastElementChild.style.marginTop = mTop + 'px';
 
@@ -1399,13 +1398,8 @@ function LoadScreen ( renderer, style ) {
 			textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 0 ];
 			textInfo.style.cssText = ''+ 
 				'color: ' + style.infoColor + ';'+
-				'display: inline-block;'+
 				'font-family: monospace;'+
 				'font-size: 12px';
-
-			if ( style.skew ) 
-
-				textInfo.style.transform = 'skew( ' + style.skew + ' )';
 
 		}
 
@@ -1416,12 +1410,7 @@ function LoadScreen ( renderer, style ) {
 			sizeInfo.style.cssText = ''+ 
 				'color: ' + style.infoColor + ';'+
 				'font-family: monospace;'+
-				'font-size: 12px;'+
-				'display: inline-block;';
-
-			if ( style.skew ) 
-
-				sizeInfo.style.transform = 'skew( ' + style.skew + ' )';
+				'font-size: 12px;';
 
 		}
 
@@ -1429,21 +1418,22 @@ function LoadScreen ( renderer, style ) {
 
 		switch ( style.type ) {
 
-			case 'linear-horizontal': cb = makeBarProgress(); break;
+			case 'linear-horizontal': cb = makeLinearHorizontal(); break;
 			case 'linear-horizontal-fancy': cb = makeFancyBarProgress(); break;
-			case 'linear-circular': cb = makeCircularProgress(); break;
-			case 'linear-circular-rotate': cb = makeCircularProgress( 'rotate' ); break;
-			case 'linear-circular-fancy': cb = makeCircularProgress( 'fancy' ); break;
-			case 'stepped-horizontal': cb = makeBatteryProgress(); break;
-			case 'stepped-circular': cb = makeRoundBatteryProgress(); break;
-			case 'stepped-circular-offset': cb = makeRoundBatteryProgress( '', true ); break;
-			case 'stepped-circular-rotate': cb = makeRoundBatteryProgress( 'rotate' ); break;
-			case 'stepped-circular-rotate-offset': cb = makeRoundBatteryProgress( 'rotate', true ); break;
-			case 'stepped-circular-fancy': cb = makeRoundBatteryProgress( 'fancy' ); break;
-			case 'stepped-circular-fancy-offset': cb = makeRoundBatteryProgress( 'fancy', true ); break;
+			case 'linear-circular': cb = makeLinearCircular(); break;
+			case 'linear-circular-rotate': cb = makeLinearCircular( 'rotate' ); break;
+			case 'linear-circular-fancy': cb = makeLinearCircular( 'fancy' ); break;
+			case 'stepped-horizontal': cb = makeSteppedHorizontal(); break;
+			case 'stepped-horizontal-offset': cb = makeSteppedHorizontal( true ); break;
+			case 'stepped-circular': cb = makeSteppedCircular(); break;
+			case 'stepped-circular-offset': cb = makeSteppedCircular( '', true ); break;
+			case 'stepped-circular-rotate': cb = makeSteppedCircular( 'rotate' ); break;
+			case 'stepped-circular-rotate-offset': cb = makeSteppedCircular( 'rotate', true ); break;
+			case 'stepped-circular-fancy': cb = makeSteppedCircular( 'fancy' ); break;
+			case 'stepped-circular-fancy-offset': cb = makeSteppedCircular( 'fancy', true ); break;
 			default: 
 				console.warn( 'Unknown progress type : \'' + style.type + '\', turning to default type \'linear-horizontal\'' );
-				cb = makeBarProgress();
+				cb = makeLinearHorizontal();
 
 		}
 
@@ -1465,45 +1455,74 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function makeBarProgress () {
+	function makeLinearHorizontal () {
 
 		if ( style.progressInfo ) {
 
-			var progressBarContainer = document.createElement( 'div' ),
-				progressBar = document.createElement( 'div' );
+			style.weight = parseInt( style.weight );
 
-			style.weight = style.weight.toString().indexOf( 'px' ) > -1 ? style.weight : style.weight + 'px';
+			var w2 = style.weight / 2;
 
-			progressBarContainer.style.cssText = ''+
-				'background: ' + style.progressContainerColor + ';'+
-				'border: solid 1px ' + style.progressContainerColor + ';'+
-				'width: 100%; height: ' + style.weight + ';'+
-				'box-sizing: border-box;'+
-				'position: relative;';
+			var svg = ""+
+				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
+				"	<path d='M20 " + ( 100 - w2 ) + " 20 " + ( 100 + w2 ) + " 180 " + ( 100 + w2 ) + " 180 " + ( 100 - w2 ) + "' fill='" + style.progressContainerColor + "'/>"+
+				"	<path d='M22 " + ( 102 - w2 ) + " 22 " + ( 98 + w2 ) + " 22 " + ( 98 + w2 ) + " 22 " + ( 102 - w2 ) + "' fill='" + style.progressColor + "'/>"+
+				"</svg>";
 
-			if ( style.skew ) 
+			that.infoContainer.innerHTML = svg;
 
-				progressBarContainer.style.transform = 'skew( ' + style.skew + ' )';
-
-			progressBar.style.cssText = ''+
-				'background: ' + style.progressColor + ';'+
-				'width: 0%; height: 100%;'+
-				'top: 0; left: 0;'+
-				'position: absolute;';
-
-			progressBarContainer.appendChild( progressBar );
+			var progressBar = that.infoContainer.firstElementChild.firstElementChild.nextElementSibling;
 
 		}
 
-		if ( style.textInfo ) that.infoContainer.appendChild( textInfo );
+		if ( style.textInfo || style.sizeInfo || style.progressInfo ) {
 
-		if ( style.progressInfo ) that.infoContainer.appendChild( progressBarContainer );
+			var container;
 
-		if ( style.sizeInfo ) that.infoContainer.appendChild( sizeInfo );
+			if ( style.progressInfo ) {
+
+				var textContainer = document.createElement( 'div' );
+
+				textContainer.style.cssText = ''+
+					'width: 100%; left: 50%; top: 50%;'+
+					'margin-left: -50%;'+
+					'position: absolute;';
+
+				that.infoContainer.appendChild( textContainer );
+
+				container = textContainer;
+
+			} else {
+
+				container = that.infoContainer;
+
+			}
+
+			if ( style.textInfo ) {
+
+				if ( style.progressInfo )
+
+					textInfo.style.paddingBottom = w2 + 10 + 'px';
+
+				container.appendChild( textInfo );
+
+			}
+
+			if ( style.sizeInfo ) {
+
+				if ( style.progressInfo )
+
+					sizeInfo.style.paddingTop = w2 + 10 + 'px';
+
+				container.appendChild( sizeInfo );
+			
+			}
+
+		}
 
 		var updateStyle = function () { 
 
-			if ( style.progressInfo ) progressBar.style.width = ( 100 * tweens.progress.value ).toString() + '%'; 
+			if ( style.progressInfo ) progressBar.setAttribute( 'd', "M22 " + ( 102 - w2 ) + " 22 " + ( 98 + w2 ) + " " + ( 22 + 156 * tweens.progress.value ) + " " + ( 98 + w2 ) + " " + ( 22 + 156 * tweens.progress.value ) + " " + ( 102 - w2 ) ); 
 
 			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + 'MB';
 
@@ -1558,23 +1577,27 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function makeCircularProgress ( type ) {
+	function makeLinearCircular ( type ) {
 
 		if ( style.progressInfo ) {
-
-			var typeFancy = type === 'fancy' ? "<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='" + ( 80 + parseInt( style.weight ) + 2 ).toString() + "' stroke-dashoffset='1503'/>" : "";
 
 			var radius = parseInt( style.weight );
 			radius *= type === 'fancy' ? 2.5 : 1;
 			radius = 80 + radius / 2;
 			radius += type === 'fancy' ? 6 : 2;
 
+			var vB = Math.max( 11, radius ) - 11,
+				cS = 100 + vB,
+				vBS = cS * 2;
+
+			var typeFancy = type === 'fancy' ? "<circle fill='none' cx='0' cy='0' transform='translate(" + cS + "," + cS + ") rotate(-90)' r='" + ( 80 + parseInt( style.weight ) + 2 ).toString() + "' stroke-dashoffset='1503'/>" : "";
+
 			var svg = ""+
-				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
-				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(100,100)'  r='" + radius.toString()+ "'/>"+
-				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
+				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 " + vBS + " " + vBS + "' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
+				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + radius.toString()+ "'/>"+
+				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
 				typeFancy +
-				"	<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='80' stroke-dashoffset='1503'/>"+
+				"	<circle fill='none' cx='0' cy='0' transform='translate(" + cS + "," + cS + ") rotate(-90)' r='80' stroke-dashoffset='1503'/>"+
 				"</svg>";
 
 			that.infoContainer.innerHTML = svg;
@@ -1623,21 +1646,13 @@ function LoadScreen ( renderer, style ) {
 
 			}
 
-			if ( style.textInfo ) {
+			if ( style.textInfo )
 
 				container.appendChild( textInfo );
 
-				textInfo.style.display = 'block';
-
-			}
-
-			if ( style.sizeInfo ) {
+			if ( style.sizeInfo )
 
 				container.appendChild( sizeInfo );
-
-				sizeInfo.style.display = 'block';
-
-			}
 			
 		}
 
@@ -1649,13 +1664,13 @@ function LoadScreen ( renderer, style ) {
 
 				if ( type ) 
 
-					circleProgress.setAttribute( 'transform', 'translate(100,100) rotate(' + ( -90 + 180 * tweens.progress.value ) + ')' );
+					circleProgress.setAttribute( 'transform', "translate(" + cS + "," + cS + ") rotate(" + ( -90 + 180 * tweens.progress.value ) + ")" );
 
 				if ( type === 'fancy' ) {
 
 					circleFancy.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
 
-					circleFancy.setAttribute( 'transform', 'translate(100,100) rotate(' + ( -90 + 135 * tweens.progress.value ) + ')' );
+					circleFancy.setAttribute( 'transform', "translate(" + cS + "," + cS + ") rotate(" + ( -90 + 135 * tweens.progress.value ) + ")" );
 
 				}
 
@@ -1669,64 +1684,110 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function makeBatteryProgress () {
+	function makeSteppedHorizontal ( offset ) {
 
 		if ( style.progressInfo ) {
 
-			var steps = 20;
+			var steps = 20, 
+				s = 156 / steps,
+				s2 = s / 2,
+				sh = 1,
+				os = offset ? 5 : 0,
+				os2 = os / 2;
 
-			var progressBarContainer = document.createElement( 'div' ),
-				progressBars = [];
+			style.weight = parseInt( style.weight );
 
-			style.weight = style.weight.toString().indexOf( 'px' ) > -1 ? style.weight : style.weight + 'px';
+			var w2 = style.weight / 2;
 
-			progressBarContainer.style.cssText = ''+
-				'background: ' + style.progressContainerColor + ';'+
-				'border: solid 1px ' + style.progressContainerColor + ';'+
-				'width: 100%; height: ' + style.weight + ';'+
-				'box-sizing: border-box;'+
-				'position: relative;';
-
-			if ( style.skew ) 
-
-				progressBarContainer.style.transform = 'skew( ' + style.skew + ' )';
+			var svg = ""+
+				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
+				"	<path d='M21 " + ( 100 - w2 ) + " 21 " + ( 100 + w2 ) + " 179 " + ( 100 + w2 ) + " 179 " + ( 100 - w2 ) + "' fill='" + style.progressContainerColor + "'/>";
 
 			for ( var i = 0 ; i < steps ; i++ ) {
 
-				progressBars[ i ] = document.createElement( 'div' );
+				var x1 = 22 + i * s + sh,
+					x2 = 22 + ( i + 1 ) * s - sh,
+					yTop = 102 - w2,
+					yBottom = 98 + w2,
+					osL = i === 0 ? 0 : os2,
+					osR = i === ( steps - 1 ) ? 0 : os2;
 
-				progressBars[ i ].style.cssText = ''+
-					'background: ' + style.progressColor + ';'+
-					'width: ' + 100 / steps + '%; height: 100%;'+
-					'display: inline-block;'+
-					'box-sizing: inherit;'+
-					'position: absolute;'+
-					'border: solid 1px ' + style.progressContainerColor + ';'+
-					'top: 0; left: ' + ( i * 100 / steps )+ '%;';
+				svg += "<path d='M" + ( x1 + osL ) + " " + yTop + " " + ( x1 - osL ) + " " + yBottom + " " + ( x2 - osR ) + " " + yBottom + " " + ( x2 + osR ) + " " + yTop + "' fill='" + style.progressColor + "'/>";
 
-				progressBarContainer.appendChild( progressBars[ i ] );
+			}
+
+			svg += "</svg>";
+
+			that.infoContainer.innerHTML = svg;
+
+			var el = that.infoContainer.firstElementChild.firstElementChild;
+
+			var progressEls = [];
+
+			for ( var i = 0 ; i < steps ; i++ ) {
+
+				el = el.nextElementSibling;
+
+				el.style.opacity = 0;
+
+				progressEls[ i ] = el;
 
 			}
 
 		}
 
-		if ( style.textInfo ) that.infoContainer.appendChild( textInfo );
+		if ( style.textInfo || style.sizeInfo || style.progressInfo ) {
 
-		if ( style.progressInfo ) that.infoContainer.appendChild( progressBarContainer );
-
-		if ( style.sizeInfo ) that.infoContainer.appendChild( sizeInfo );
-
-		var updateStyle = function () { 
+			var container;
 
 			if ( style.progressInfo ) {
 
-				for ( var i = 0 ; i < steps ; i++ ) {
+				var textContainer = document.createElement( 'div' );
 
-					progressBars[ i ].style.opacity = Math.min( 1, tweens.progress.value * steps - i ); 
+				textContainer.style.cssText = ''+
+					'width: 100%; left: 50%; top: 50%;'+
+					'margin-left: -50%;'+
+					'position: absolute;';
 
-				} 
+				that.infoContainer.appendChild( textContainer );
+
+				container = textContainer;
+
+			} else {
+
+				container = that.infoContainer;
 
 			}
+
+			if ( style.textInfo ) {
+
+				if ( style.progressInfo )
+
+					textInfo.style.paddingBottom = w2 + 10 + 'px';
+
+				container.appendChild( textInfo );
+
+			}
+
+			if ( style.sizeInfo ) {
+
+				if ( style.progressInfo )
+
+					sizeInfo.style.paddingTop = w2 + 10 + 'px';
+
+				container.appendChild( sizeInfo );
+			
+			}
+
+		}
+
+		var updateStyle = function () { 
+
+			if ( style.progressInfo ) 
+
+				for ( var i = 0 ; i < steps ; i++ )
+
+					progressEls[ i ].style.opacity = Math.min( 1, tweens.progress.value * steps - i ); 
 
 			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + 'MB';
 
@@ -1736,7 +1797,7 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function makeRoundBatteryProgress ( type, offset ) {
+	function makeSteppedCircular ( type, offset ) {
 
 		if ( style.progressInfo ) {
 
@@ -1746,21 +1807,25 @@ function LoadScreen ( renderer, style ) {
 				rS = 2 * Math.PI / steps, rS2 = rS / 2,
 				shift = offset ? -.1 : 0;
 
-			var typeFancy = type === 'fancy' ? "<circle fill='none' cx='0' cy='0' transform='translate(100,100) rotate(-90)' r='" + ( 80 + parseInt( style.weight ) + 2 ).toString() + "' stroke-dashoffset='1503'/>" : "";
-
 			var radius = parseInt( style.weight );
 			radius *= type === 'fancy' ? 2.5 : 1;
 			radius = 80 + radius / 2;
 			radius += type === 'fancy' ? 6 : 2;
 
+			var vB = Math.max( 11, radius ) - 11,
+				cS = 100 + vB,
+				vBS = cS * 2;
+
+			var typeFancy = type === 'fancy' ? "<circle fill='none' cx='0' cy='0' transform='translate(" + cS + "," + cS + ") rotate(-90)' r='" + ( 80 + parseInt( style.weight ) + 2 ).toString() + "' stroke-dashoffset='1503'/>" : "";
+
 			var svg = ""+
-				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
-				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(100,100)'  r='" + radius.toString()+ "'/>"+
-				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(100,100)'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>";
+				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 " + vBS + " " + vBS + "' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
+				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + radius.toString()+ "'/>"+
+				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>";
 
 			for ( var i = 0 ; i < steps ; i++ ) {
 
-				var p = "<path transform='translate(100,100)' d='M" + 
+				var p = "<path transform='translate(" + cS + "," + cS + ")' d='M" + 
 					( ( Math.cos( p2 - rS * i + rS2 - rS / 8 ) * ( 80 - w2 ) ) ) + " " + ( - ( ( 80 - w2 ) * Math.sin( p2 - rS * i + rS2 - rS / 8 ) ) ) + " " +
 					"A " + ( 80 - w2 ) + " " + ( 80 - w2 ) + ", 0, 0, 1," +
 					( ( Math.cos( p2 - rS * i - rS2 + rS / 8 ) * ( 80 - w2 ) ) ) + " " + ( - ( ( 80 - w2 ) * Math.sin( p2 - rS * i - rS2 + rS / 8 ) ) ) + " L" +
@@ -1831,21 +1896,13 @@ function LoadScreen ( renderer, style ) {
 
 			}
 
-			if ( style.textInfo ) {
+			if ( style.textInfo )
 
 				container.appendChild( textInfo );
 
-				textInfo.style.display = 'block';
-
-			}
-
-			if ( style.sizeInfo ) {
+			if ( style.sizeInfo )
 
 				container.appendChild( sizeInfo );
-
-				sizeInfo.style.display = 'block';
-
-			}
 			
 		}
 
@@ -1863,13 +1920,13 @@ function LoadScreen ( renderer, style ) {
 
 					for ( var i = 0 ; i < progressEls.length ; i++ )
 
-						progressEls[ i ].setAttribute( 'transform', 'translate(100,100) rotate(' + ( 180 * tweens.progress.value ) + ')' );
+						progressEls[ i ].setAttribute( 'transform', "translate(" + cS + "," + cS + ") rotate(" + ( 180 * tweens.progress.value ) + ")" );
 
 				if ( type === 'fancy' ) {
 
 					circleFancy.setAttribute( 'stroke-dashoffset', ( ( 1 - tweens.progress.value ) * 502 ).toString() );
 
-					circleFancy.setAttribute( 'transform', 'translate(100,100) rotate(' + ( -90 + 135 * tweens.progress.value ) + ')' );
+					circleFancy.setAttribute( 'transform', "translate(" + cS + "," + cS + ") rotate(" + ( -90 + 135 * tweens.progress.value ) + ")" );
 
 				}
 
