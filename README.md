@@ -8,7 +8,10 @@ A Three.js assets loading wrapper.
 ## Summary
 
 1. [Installation](#installation)
-1. [Usage](#usage)
+1. [Overview](#overview)
+    1. [Main pattern](#main-pattern)
+    1. [Load screens](#load-screens)
+    1. [Declarative assets style](#assets-style)
 1. [Full pattern](#full-pattern)
 1. [Assets declaration](#assets-declaration)
     1. [Files](#1-files)
@@ -31,8 +34,8 @@ Or in your page :
 <script type="text/javascript" src="LoadScreen.min.js"/>
 ```
 
-## Usage
-Main pattern :
+## Overview
+### Main pattern
 ```js
 //First create and append a webgl renderer, then :
 const ls = new LoadScreen( renderer ).onComplete( init ).start( ASSETS );
@@ -43,8 +46,10 @@ function init () {
 }
 ```
 
+### Load screens
 By default LoadScreen.js automatically generates a load screen. It displays and follows those steps : 'Loading' > 'Processing' > 'Compiling' > 'Creating scene'.
 
+### Assets style
 Passed assets style is declarative, no callback hell. 
 ```js
 const ASSETS = {
