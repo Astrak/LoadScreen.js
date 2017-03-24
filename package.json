@@ -1,7 +1,7 @@
 {
   "name": "loadscreen",
   "description": "A three.js assets loading wrapper",
-  "version": "0.17.2",
+  "version": "0.17.3",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-concat": "^1.0.1",
