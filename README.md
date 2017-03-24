@@ -45,8 +45,6 @@ function init () {
 
 By default LoadScreen.js automatically generates a load screen. It displays and follows those steps : 'Loading' > 'Processing' > 'Compiling' > 'Creating scene'.
 
-![Default loader](https://github.com/Astrak/LoadScreen.js/blob/master/default_loader.gif)
-
 Passed assets style is declarative, no callback hell. 
 ```js
 const ASSETS = {

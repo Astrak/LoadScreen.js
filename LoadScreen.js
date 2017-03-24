@@ -1419,16 +1419,18 @@ function LoadScreen ( renderer, style ) {
 		switch ( style.type ) {
 
 			case 'linear-horizontal': cb = makeLinearHorizontal(); break;
-			case 'linear-horizontal-fancy': cb = makeFancyBarProgress(); break;
+			//case 'linear-horizontal-fancy': cb = makeFancyBarProgress(); break;
 			case 'linear-circular': cb = makeLinearCircular(); break;
-			case 'linear-circular-rotate': cb = makeLinearCircular( 'rotate' ); break;
+			case 'linear-circular-slide': cb = makeLinearCircular( 'rotate' ); break;
 			case 'linear-circular-fancy': cb = makeLinearCircular( 'fancy' ); break;
 			case 'stepped-horizontal': cb = makeSteppedHorizontal(); break;
 			case 'stepped-horizontal-offset': cb = makeSteppedHorizontal( true ); break;
+			//case 'stepped-horizontal-slide': cb = makeSteppedHorizontal( false, true ); break;
+			//case 'stepped-horizontal-slide-offset': cb = makeSteppedHorizontal( true, true ); break;
 			case 'stepped-circular': cb = makeSteppedCircular(); break;
 			case 'stepped-circular-offset': cb = makeSteppedCircular( '', true ); break;
-			case 'stepped-circular-rotate': cb = makeSteppedCircular( 'rotate' ); break;
-			case 'stepped-circular-rotate-offset': cb = makeSteppedCircular( 'rotate', true ); break;
+			case 'stepped-circular-slide': cb = makeSteppedCircular( 'rotate' ); break;
+			case 'stepped-circular-slide-offset': cb = makeSteppedCircular( 'rotate', true ); break;
 			case 'stepped-circular-fancy': cb = makeSteppedCircular( 'fancy' ); break;
 			case 'stepped-circular-fancy-offset': cb = makeSteppedCircular( 'fancy', true ); break;
 			default: 
@@ -1532,7 +1534,7 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function makeFancyBarProgress () {
+	/*function makeFancyBarProgress () {
 
 		if ( style.progressInfo ) {
 
@@ -1575,7 +1577,7 @@ function LoadScreen ( renderer, style ) {
 
 		return updateStyle;
 
-	}
+	}*/
 
 	function makeLinearCircular ( type ) {
 
@@ -1684,7 +1686,7 @@ function LoadScreen ( renderer, style ) {
 
 	}
 
-	function makeSteppedHorizontal ( offset ) {
+	function makeSteppedHorizontal ( offset, slide ) {
 
 		if ( style.progressInfo ) {
 
@@ -1697,38 +1699,45 @@ function LoadScreen ( renderer, style ) {
 
 			style.weight = parseInt( style.weight );
 
-			var w2 = style.weight / 2;
+			var w2 = style.weight / 2,
+				yTop = 102 - w2,
+				yBottom = 98 + w2;
 
 			var svg = ""+
 				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
 				"	<path d='M21 " + ( 100 - w2 ) + " 21 " + ( 100 + w2 ) + " 179 " + ( 100 + w2 ) + " 179 " + ( 100 - w2 ) + "' fill='" + style.progressContainerColor + "'/>";
 
+			var progressEls = [];
+
 			for ( var i = 0 ; i < steps ; i++ ) {
 
 				var x1 = 22 + i * s + sh,
 					x2 = 22 + ( i + 1 ) * s - sh,
-					yTop = 102 - w2,
-					yBottom = 98 + w2,
 					osL = i === 0 ? 0 : os2,
 					osR = i === ( steps - 1 ) ? 0 : os2;
+
+				progressEls[ i ] = [ x1, x2 ];
 
 				svg += "<path d='M" + ( x1 + osL ) + " " + yTop + " " + ( x1 - osL ) + " " + yBottom + " " + ( x2 - osR ) + " " + yBottom + " " + ( x2 + osR ) + " " + yTop + "' fill='" + style.progressColor + "'/>";
 
 			}
 
-			svg += "</svg>";
+			svg += ""+
+				//"<path fill-rule='evenodd' d='M20 " + ( 100 - w2 ) + " 20 " + ( 100 + w2 ) + " 180 " + ( 100 + w2 ) + " 180 " + ( 100 - w2 ) + " M22 " + ( 101 - w2 ) + " 22 " + ( 99 + w2 ) + " 178 " + ( 99 + w2 ) + " 178 " + ( 101 - w2 ) + "' fill='" + style.progressContainerColor + "'/>";
+				"</svg>";
 
 			that.infoContainer.innerHTML = svg;
 
 			var el = that.infoContainer.firstElementChild.firstElementChild;
-
-			var progressEls = [];
 
 			for ( var i = 0 ; i < steps ; i++ ) {
 
 				el = el.nextElementSibling;
 
 				el.style.opacity = 0;
+
+				el.x1 = progressEls[ i ][ 0 ];
+				el.x2 = progressEls[ i ][ 1 ];
 
 				progressEls[ i ] = el;
 
@@ -1785,9 +1794,41 @@ function LoadScreen ( renderer, style ) {
 
 			if ( style.progressInfo ) 
 
-				for ( var i = 0 ; i < steps ; i++ )
+				for ( var i = 0 ; i < steps ; i++ ) {
 
-					progressEls[ i ].style.opacity = Math.min( 1, tweens.progress.value * steps - i ); 
+					/*if ( slide ) {
+
+						var x1 = progressEls[ i ].x1,
+							x2 = progressEls[ i ].x2;
+
+						x1 = Math.max( 22, x1 + .2 );
+						x2 = Math.min( 178, x2 + .2 );
+
+						var av = ( x1 + x2 ) / 2;
+
+						if ( av >= 178 ) {
+
+							x1 -= 156;
+							x2 -= 156;
+
+						}
+
+						var osL = os2, osR = os2;
+
+						progressEls[ i ].setAttribute( 'd', "M" + ( x1 + osL ) + " " + yTop + " " + ( x1 - osL ) + " " + yBottom + " " + ( x2 - osR ) + " " + yBottom + " " + ( x2 + osR ) + " " + yTop );
+
+						progressEls[ i ].style.opacity = Math.min( 1, tweens.progress.value * steps - Math.floor(av/(156/steps)) ); 
+
+						progressEls[ i ].x1 = x1;
+						progressEls[ i ].x2 = x2;
+
+					} else {*/
+
+						progressEls[ i ].style.opacity = Math.min( 1, tweens.progress.value * steps - i ); 
+
+					//}					
+
+				}
 
 			if ( style.sizeInfo ) sizeInfo.textContent = ( tweens.progress.value * ( texSum + geoSum ) / 1024 ).toFixed( 2 ) + 'MB';
 
