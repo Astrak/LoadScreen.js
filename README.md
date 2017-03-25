@@ -48,6 +48,8 @@ function init () {
 ### Load screens
 By default LoadScreen.js automatically generates the 'linear-horizontal' load screen. It displays and follows those steps : 'Loading' > 'Processing' > 'Compiling' > 'Creating scene'.
 
+![Loader types](https://raw.githubusercontent.com/Astrak/LoadScreen.js/master/loaders.png "Loader types")
+
 ### Assets style
 Passed assets style is declarative, no callback hell. 
 ```js
