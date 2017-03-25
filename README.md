@@ -92,11 +92,16 @@ Methods are chainable, except `remove` and `setProgress`. Values are default.
 ```js
 const style = {
     type: 'linear-horizontal',//Main look. 'custom' empties the info container.
-    size: '150px',//Width of the central info container, in px or in %.
+    size: '170px',//Width of the central info container, in px or in %.
     background: '#333',
     progressContainerColor: '#000',
     progressColor: '#333',
-    infoColor: '#666',//Text color.
+    infoStyle: {//Text style : default values.
+        fontFamily: 'monospace',
+        color: '#666',
+        fontSize: '12px',
+        padding: '10px'
+    },
     weight: '10',//Weight of the progress element (svg units).
     sizeInfo: true,//Display size progress in MB.
     progressInfo: true,//Display the progress element.

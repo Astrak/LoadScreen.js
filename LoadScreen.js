@@ -58,11 +58,18 @@ function LoadScreen ( renderer, style ) {
 		progressContainerColor: style.progressContainerColor || '#000',
 		progressColor: style.progressColor || '#666',
 		weight: style.weight || '10',
-		infoColor: style.infoColor || '#666',
+		infoStyle: style.infoStyle,
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
 		progressInfo: typeof style.progressInfo !== 'undefined' ? style.progressInfo : true,
 		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]
 	};
+
+	var iS = style.infoStyle;
+
+	iS.color = iS.color || '#666';
+	iS.fontFamily = iS.fontFamily || 'monospace';
+	iS.fontSize = iS.fontSize || '12px';
+	iS.padding = iS.padding || '10px';
 
 	setLoadScreen();
 
@@ -1402,10 +1409,12 @@ function LoadScreen ( renderer, style ) {
 
 			textInfo = document.createElement( 'p' );
 			textInfo.textContent = typeof style.textInfo === 'string' ? style.textInfo : style.textInfo[ 0 ];
-			textInfo.style.cssText = ''+ 
-				'color: ' + style.infoColor + ';'+
-				'font-family: monospace;'+
-				'font-size: 12px';
+
+			for ( var k in style.infoStyle )
+
+				if ( typeof textInfo.style[ k ] !== 'undefined' )
+
+					textInfo.style[ k ] = style.infoStyle[ k ];
 
 		}
 
@@ -1413,10 +1422,12 @@ function LoadScreen ( renderer, style ) {
 
 			sizeInfo = document.createElement( 'p' );
 			sizeInfo.textContent = '0.00MB';
-			sizeInfo.style.cssText = ''+ 
-				'color: ' + style.infoColor + ';'+
-				'font-family: monospace;'+
-				'font-size: 12px;';
+
+			for ( var k in style.infoStyle ) 
+
+				if ( typeof sizeInfo.style[ k ] !== 'undefined' )
+
+					sizeInfo.style[ k ] = style.infoStyle[ k ];
 
 		}
 
@@ -1498,25 +1509,13 @@ function LoadScreen ( renderer, style ) {
 
 			}
 
-			if ( style.textInfo ) {
-
-				if ( style.progressInfo )
-
-					textInfo.style.paddingBottom = w2 + 10 + 'px';
+			if ( style.textInfo )
 
 				container.appendChild( textInfo );
 
-			}
-
-			if ( style.sizeInfo ) {
-
-				if ( style.progressInfo )
-
-					sizeInfo.style.paddingTop = w2 + 10 + 'px';
+			if ( style.sizeInfo )
 
 				container.appendChild( sizeInfo );
-			
-			}
 
 		}
 
@@ -1588,6 +1587,8 @@ function LoadScreen ( renderer, style ) {
 
 			var m = type === 'fancy' ? 2 : 1;
 
+			var containerRadius = type === 'fancy' ? ( 80 + parseInt( style.weight ) * 1.5 + 4 ) : radius;
+
 			var vB = Math.max( 11, parseInt( style.weight ) * m ) - 11,
 				cS = 100 + vB,
 				vBS = cS * 2;
@@ -1596,7 +1597,7 @@ function LoadScreen ( renderer, style ) {
 
 			var svg = ""+
 				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 " + vBS + " " + vBS + "' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
-				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + ( 80 + parseInt( style.weight ) * 1.5 + 4 ) + "'/>"+
+				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + containerRadius + "'/>"+
 				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
 				typeFancy +
 				"	<circle fill='none' cx='0' cy='0' transform='translate(" + cS + "," + cS + ") rotate(-90)' r='80' stroke-dashoffset='1503'/>"+
@@ -1768,25 +1769,13 @@ function LoadScreen ( renderer, style ) {
 
 			}
 
-			if ( style.textInfo ) {
-
-				if ( style.progressInfo )
-
-					textInfo.style.paddingBottom = w2 + 10 + 'px';
+			if ( style.textInfo )
 
 				container.appendChild( textInfo );
 
-			}
-
-			if ( style.sizeInfo ) {
-
-				if ( style.progressInfo )
-
-					sizeInfo.style.paddingTop = w2 + 10 + 'px';
+			if ( style.sizeInfo )
 
 				container.appendChild( sizeInfo );
-			
-			}
 
 		}
 
@@ -1859,11 +1848,13 @@ function LoadScreen ( renderer, style ) {
 				cS = 100 + vB,
 				vBS = cS * 2;
 
+			var containerRadius = type === 'fancy' ? ( 80 + parseInt( style.weight ) * 1.5 + 4 ) : radius;
+
 			var typeFancy = type === 'fancy' ? "<circle fill='none' cx='0' cy='0' transform='translate(" + cS + "," + cS + ") rotate(-90)' r='" + ( 80 + parseInt( style.weight ) + 2 ).toString() + "' stroke-dashoffset='1503'/>" : "";
 
 			var svg = ""+
 				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 " + vBS + " " + vBS + "' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
-				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + ( 80 + parseInt( style.weight ) * 1.5 + 4 ) + "'/>"+
+				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + containerRadius + "'/>"+
 				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>";
 
 			for ( var i = 0 ; i < steps ; i++ ) {
