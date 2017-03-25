@@ -58,7 +58,7 @@ function LoadScreen ( renderer, style ) {
 		progressContainerColor: style.progressContainerColor || '#000',
 		progressColor: style.progressColor || '#666',
 		weight: style.weight || '10',
-		infoStyle: style.infoStyle,
+		infoStyle: style.infoStyle || {},
 		sizeInfo: typeof style.sizeInfo !== 'undefined' ? style.sizeInfo : true,
 		progressInfo: typeof style.progressInfo !== 'undefined' ? style.progressInfo : true,
 		textInfo: typeof style.textInfo !== 'undefined' ? style.textInfo : [ 'Loading', 'Processing', 'Compiling', 'Creating scene' ]
@@ -66,14 +66,10 @@ function LoadScreen ( renderer, style ) {
 
 	var iS = style.infoStyle;
 
-	if ( iS ) {
-
-		iS.color = iS.color || '#666';
-		iS.fontFamily = iS.fontFamily || 'monospace';
-		iS.fontSize = iS.fontSize || '12px';
-		iS.padding = iS.padding || '10px';
-
-	}
+	iS.color = iS.color || '#666';
+	iS.fontFamily = iS.fontFamily || 'monospace';
+	iS.fontSize = iS.fontSize || '12px';
+	iS.padding = iS.padding || '10px';
 
 	setLoadScreen();
 
