@@ -1588,7 +1588,7 @@ function LoadScreen ( renderer, style ) {
 			radius = 80 + radius / 2;
 			radius += type === 'fancy' ? 6 : 2;
 
-			var vB = Math.max( 11, radius ) - 11,
+			var vB = Math.max( 11, parseInt( style.weight ) ) - 11,
 				cS = 100 + vB,
 				vBS = cS * 2;
 
@@ -1853,7 +1853,7 @@ function LoadScreen ( renderer, style ) {
 			radius = 80 + radius / 2;
 			radius += type === 'fancy' ? 6 : 2;
 
-			var vB = Math.max( 11, radius ) - 11,
+			var vB = Math.max( 11, parseInt( style.weight ) ) - 11,
 				cS = 100 + vB,
 				vBS = cS * 2;
 
