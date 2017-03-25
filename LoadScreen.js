@@ -1586,7 +1586,9 @@ function LoadScreen ( renderer, style ) {
 			radius = 80 + radius / 2;
 			radius += type === 'fancy' ? 6 : 2;
 
-			var vB = Math.max( 11, parseInt( style.weight ) ) - 11,
+			var m = type === 'fancy' ? 2 : 1;
+
+			var vB = Math.max( 11, parseInt( style.weight ) * m ) - 11,
 				cS = 100 + vB,
 				vBS = cS * 2;
 
@@ -1594,7 +1596,7 @@ function LoadScreen ( renderer, style ) {
 
 			var svg = ""+
 				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 " + vBS + " " + vBS + "' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
-				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + radius.toString()+ "'/>"+
+				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + ( 80 + parseInt( style.weight ) * 1.5 + 4 ) + "'/>"+
 				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>"+
 				typeFancy +
 				"	<circle fill='none' cx='0' cy='0' transform='translate(" + cS + "," + cS + ") rotate(-90)' r='80' stroke-dashoffset='1503'/>"+
@@ -1851,7 +1853,9 @@ function LoadScreen ( renderer, style ) {
 			radius = 80 + radius / 2;
 			radius += type === 'fancy' ? 6 : 2;
 
-			var vB = Math.max( 11, parseInt( style.weight ) ) - 11,
+			var m = type === 'fancy' ? 2 : 1;
+
+			var vB = Math.max( 11, parseInt( style.weight ) * m ) - 11,
 				cS = 100 + vB,
 				vBS = cS * 2;
 
@@ -1859,7 +1863,7 @@ function LoadScreen ( renderer, style ) {
 
 			var svg = ""+
 				"<svg style='width: 100%; height: 100%;' width=200 height=200 viewBox='0 0 " + vBS + " " + vBS + "' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"+
-				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + radius.toString()+ "'/>"+
+				"	<circle fill=" + style.progressContainerColor + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + ( 80 + parseInt( style.weight ) * 1.5 + 4 ) + "'/>"+
 				"	<circle fill=" + style.background + " cx='0' cy='0' transform='translate(" + cS + "," + cS + ")'  r='" + ( 80 - parseInt( style.weight ) / 2 - 2 ).toString()+ "'/>";
 
 			for ( var i = 0 ; i < steps ; i++ ) {
