@@ -226,6 +226,12 @@ function LoadScreen ( renderer, style ) {
 
 			if ( typeof t.onUpdate === 'function' ) t.onUpdate();
 
+			if ( k === 'progress' )
+
+				for ( var i = 0 ; i < updateCBs.length ; i++ ) 
+
+					updateCBs[ i ]( t.value );
+
 			if ( t.value === t.targetValue ) {
 
 				if ( typeof t.onComplete === 'function' ) t.onComplete();
@@ -1447,14 +1453,6 @@ function LoadScreen ( renderer, style ) {
 			onUpdate: cb
 		};
 
-		updateCBs.push( function () { 
-
-			tweens.progress.initialValue = tweens.progress.value;
-			tweens.progress.targetValue = progress;
-			tweens.progress.duration = tweenDuration;
-
-		});
-
 	}
 
 	function makeLinearHorizontal () {
@@ -2028,9 +2026,9 @@ function LoadScreen ( renderer, style ) {
 
 	function update ( fromCompleteCb ) {
 
-		for ( var i = 0 ; i < updateCBs.length ; i++ ) 
-
-			updateCBs[ i ]( progress );
+		tweens.progress.initialValue = tweens.progress.value;
+		tweens.progress.targetValue = progress;
+		tweens.progress.duration = tweenDuration;
 
 		if ( progress === 1 && fromCompleteCb ) {
 
