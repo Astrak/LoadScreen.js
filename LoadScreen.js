@@ -1326,7 +1326,7 @@ function LoadScreen ( renderer, style ) {
 				} else if ( typeof oA[ k ].geometry === 'string' || typeof oA[ k ].material === 'string' ) {//object to assemble from asset
 
 					var geometry = typeof oA[ k ].geometry === 'string' ? that.resources.geometries[ oA[ k ].geometry ] : oA[ k ].geometry, 
-						material = typeof oA[ k ].material === 'string' ? that.resources.geometries[ oA[ k ].material ] : oA[ k ].material;
+						material = typeof oA[ k ].material === 'string' ? that.resources.materials[ oA[ k ].material ] : oA[ k ].material;
 
 					delete oA[ k ].geometry;
 					delete oA[ k ].material;
