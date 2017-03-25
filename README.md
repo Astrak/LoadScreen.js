@@ -275,12 +275,6 @@ ASSETS.animations = {
         }
     }
 };
-
-//After loading :
-ASSETS.animations.myMaterial1;//THREE.Material
-
-//Also simply :
-ASSETS.animations.myMaterial2 = new THREE.Material();//Won't be processed.
 ```
 
 ### 7. Objects
