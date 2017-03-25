@@ -46,7 +46,7 @@ function init () {
 ```
 
 ### Load screens
-By default LoadScreen.js automatically generates a load screen. It displays and follows those steps : 'Loading' > 'Processing' > 'Compiling' > 'Creating scene'.
+By default LoadScreen.js automatically generates the 'linear-horizontal' load screen. It displays and follows those steps : 'Loading' > 'Processing' > 'Compiling' > 'Creating scene'.
 
 ### Assets style
 Passed assets style is declarative, no callback hell. 
