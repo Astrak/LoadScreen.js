@@ -66,10 +66,14 @@ function LoadScreen ( renderer, style ) {
 
 	var iS = style.infoStyle;
 
-	iS.color = iS.color || '#666';
-	iS.fontFamily = iS.fontFamily || 'monospace';
-	iS.fontSize = iS.fontSize || '12px';
-	iS.padding = iS.padding || '10px';
+	if ( iS ) {
+
+		iS.color = iS.color || '#666';
+		iS.fontFamily = iS.fontFamily || 'monospace';
+		iS.fontSize = iS.fontSize || '12px';
+		iS.padding = iS.padding || '10px';
+
+	}
 
 	setLoadScreen();
 
