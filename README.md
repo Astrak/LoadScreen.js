@@ -22,7 +22,6 @@ A Three.js assets loading wrapper.
     1. [Animations](#6-animations)
     1. [Objects](#7-objects)
 1. [FAQ](#faq)
-1. [Roadmap](#roadmap)
 
 ## Installation
 Include in your project :
@@ -355,9 +354,6 @@ Why is it mandatory to indicate `fileSize` ?
 
 >- XHR issue handling : sometimes the progress events can have `e.total` equaling zero, resulting in an infinite progress value when doing `e.loaded/e.total`. With `fileSize` in Ko, the library has a fallback.
 >- UX quality : with this information the loader has a linear progress. Contrarily, if two files of different sizes were to be loaded without the `fileSize` information, one big and one small, and if the small one is immediately received before even having a progress event of the other one, the progress bar can jump to 50%, then take more time to reach 100%, giving a mistaken information. 
-
-## Roadmap
-* add hilbert curve loader etc
 
 [npm-badge]: https://img.shields.io/npm/v/loadscreen.svg
 [npm-badge-url]: https://www.npmjs.com/package/loadscreen
