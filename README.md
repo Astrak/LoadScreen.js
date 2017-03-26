@@ -34,6 +34,9 @@ Or in your page :
 ```
 
 ## Overview
+
+A full demo is proposed on codepen [here](http://codepen.io/Astrak/pen/OpwEZj?editors=0010).
+
 ### Main pattern
 ```js
 //First create and append a webgl renderer, then :
