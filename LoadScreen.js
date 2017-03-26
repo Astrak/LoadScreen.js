@@ -396,10 +396,6 @@ function LoadScreen ( renderer, style ) {
 					matSum += m.fileSize;
 					nFiles++;
 
-				} else {
-
-					output.materials[ k ] = m;
-
 				}
 
 			}
