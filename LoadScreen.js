@@ -1155,9 +1155,17 @@ function LoadScreen ( renderer, style ) {
 
 				for ( var p in mA[ k ] ) 
 
-					if ( typeof oMA[ k ][ p ] !== 'undefined' ) 
+					if ( typeof oMA[ k ][ p ] !== 'undefined' ) {
 
-						oMA[ k ][ p ] = mA[ k ][ p ];
+						if ( [ 'emissive', 'color' ].indexOf( p ) > -1 && ! mA[ k ][ p ] instanceof THREE.Color )
+
+							oMA[ k ][ p ].set( mA[ k ][ p ] );
+
+						else
+
+							oMA[ k ][ p ] = mA[ k ][ p ];
+
+					}
 
 				if ( mA[ k ].onComplete )
 
@@ -1243,7 +1251,7 @@ function LoadScreen ( renderer, style ) {
 
 						} else if ( [ 'emissive', 'color' ].indexOf( p ) > -1 && ! oA[ k ][ p ] instanceof THREE.Color ) {
 
-							m[ p ] = new THREE.Color( oA[ k ][ p ] );
+							m[ p ].set( oA[ k ][ p ] );
 
 						} else {
 
