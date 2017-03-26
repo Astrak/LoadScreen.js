@@ -386,15 +386,19 @@ function LoadScreen ( renderer, style ) {
 
 			for ( var k in r.materials ) {
 
-				var t = r.materials[ k ];
+				var m = r.materials[ k ];
 
-				if ( t.path && t.fileSize ) {//avoid ready materials
+				if ( m.path && m.fileSize ) {//avoid ready materials
 
 					output.materials[ k ] = {};
 
-					materials[ k ] = { prog: 0, fileSize: t.fileSize };
-					matSum += t.fileSize;
+					materials[ k ] = { prog: 0, fileSize: m.fileSize };
+					matSum += m.fileSize;
 					nFiles++;
+
+				} else {
+
+					output.materials[ k ] = m;
 
 				}
 
