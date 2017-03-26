@@ -662,13 +662,29 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
-		if ( ext === 'cubehdr' ) 
+		if ( ext === 'cubehdr' )  {
 
-			getTextureLoader( ext ).load( THREE.UnsignedByteType, d.path, oC, oP );
+			var loader = getTextureLoader( ext );
 
-		else
+			if ( typeof d.crossOrigin !== 'undefined' )
 
-			getTextureLoader( ext.toLowerCase() ).load( d.path, oC, oP );
+				loader.crossOrigin = d.crossOrigin;
+
+			loader.load( THREE.UnsignedByteType, d.path, oC, oP );
+
+		}
+
+		else {
+
+			var loader = getTextureLoader( ext.toLowerCase() );
+
+			if ( typeof d.crossOrigin !== 'undefined' )
+
+				loader.crossOrigin = d.crossOrigin;
+
+			loader.load( d.path, oC, oP );
+
+		}
  
 	}
 
