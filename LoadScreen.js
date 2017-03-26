@@ -1157,13 +1157,19 @@ function LoadScreen ( renderer, style ) {
 
 					if ( typeof oMA[ k ][ p ] !== 'undefined' ) {
 
-						if ( [ 'emissive', 'color' ].indexOf( p ) > -1 && ! mA[ k ][ p ] instanceof THREE.Color )
+						if ( ( p.indexOf( 'map' ) > -1 || p.indexOf( 'Map' ) > -1 ) && p !== 'aoMapIntensity' ) {
+
+							oMA[ k ][ p ] = tA[ mA[ k ][ p ] ];
+
+						} else if ( [ 'emissive', 'color' ].indexOf( p ) > -1 ) {
 
 							oMA[ k ][ p ].set( mA[ k ][ p ] );
 
-						else
+						} else {
 
 							oMA[ k ][ p ] = mA[ k ][ p ];
+
+						}
 
 					}
 
@@ -1245,11 +1251,11 @@ function LoadScreen ( renderer, style ) {
 
 					if ( p !== 'type' && typeof m[ p ] !== 'undefined' ) {
 
-						if ( p.indexOf( 'map' ) > -1 || p.indexOf( 'Map' ) > -1 ) {
+						if ( ( p.indexOf( 'map' ) > -1 || p.indexOf( 'Map' ) > -1 ) && p !== 'aoMapIntensity' ) {
 
 							m[ p ] = tA[ oA[ k ][ p ] ];
 
-						} else if ( [ 'emissive', 'color' ].indexOf( p ) > -1 && ! oA[ k ][ p ] instanceof THREE.Color ) {
+						} else if ( [ 'emissive', 'color' ].indexOf( p ) > -1 ) {
 
 							m[ p ].set( oA[ k ][ p ] );
 
