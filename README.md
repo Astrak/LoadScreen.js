@@ -354,6 +354,10 @@ Why is it mandatory to indicate `fileSize` ?
 >- XHR issue handling : sometimes the progress events can have `e.total` equaling zero, resulting in an infinite progress value when doing `e.loaded/e.total`. With `fileSize` in Ko, the library has a fallback.
 >- UX quality : with this information the loader has a linear progress. Contrarily, if two files of different sizes were to be loaded without the `fileSize` information, one big and one small, and if the small one is immediately received before even having a progress event of the other one, the progress bar can jump to 50%, then take more time to reach 100%, giving a mistaken information. 
 
+Why isn't the indicator progression perfectly smooth ?
+
+> For one file it should be, but for more, though the progress should be linear, it relies on the three.js loaders which automatically process the received data to output a geometry, a cubemap etc, while other files are still loading. Thus the processing time inside the native loaders can still freeze the rest of the loading sometimes. The HDRCubeTextureLoader is particularly concerned. Of course for performance reasons it should be more visible on mobile than pc.
+
 [npm-badge]: https://img.shields.io/npm/v/loadscreen.svg
 [npm-badge-url]: https://www.npmjs.com/package/loadscreen
 [license-badge]: https://img.shields.io/npm/l/loadscreen.svg
