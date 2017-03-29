@@ -1431,7 +1431,7 @@ function LoadScreen ( renderer, style ) {
 		that.domElement = overlay;
 		that.infoContainer = infoContainer;
 
-		that.setSize( renderer.domElement.style.width, renderer.domElement.style.height );
+		that.setSize( parseInt( renderer.domElement.style.width ), parseInt( renderer.domElement.style.height ) );
 
 		renderer.domElement.parentNode.appendChild( overlay );
 
