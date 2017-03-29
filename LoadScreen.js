@@ -273,9 +273,9 @@ function LoadScreen ( renderer, style ) {
 
 		if ( ! removed ) {
 
-			that.domElement.style.marginTop = '-' + height / devicePixelRatio + 'px';
-			that.domElement.style.height = height / devicePixelRatio + 'px';
-			that.domElement.style.width = width / devicePixelRatio + 'px';
+			that.domElement.style.marginTop = '-' + height + 'px';
+			that.domElement.style.height = height + 'px';
+			that.domElement.style.width = width + 'px';
 
 		}
 		
@@ -1431,7 +1431,7 @@ function LoadScreen ( renderer, style ) {
 		that.domElement = overlay;
 		that.infoContainer = infoContainer;
 
-		that.setSize( renderer.domElement.width, renderer.domElement.height );
+		that.setSize( renderer.domElement.style.width, renderer.domElement.style.height );
 
 		renderer.domElement.parentNode.appendChild( overlay );
 
