@@ -1135,6 +1135,10 @@ function LoadScreen ( renderer, style ) {
 
 						oTA[ k ][ p ] = tA[ k ][ p ];
 
+				if ( tA[ k ].onComplete )
+
+					tA[ k ].onComplete( oTA[ k ] );
+
 				tA[ k ] = oTA[ k ];
 
 				tA[ k ].name = k;

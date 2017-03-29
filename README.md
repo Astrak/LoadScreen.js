@@ -186,7 +186,10 @@ ASSETS.textures = {
         path: 'path/to/pic.jpg',
         fileSize: 2789,//in Ko
         //Other threejs textures properties can be specified.
-        minFilter: THREE.LinearFilter
+        minFilter: THREE.LinearFilter,
+        onComplete ( texture ) {
+            //Do something.
+        }
     },
     myTexture2: {//Cubemaps.
         path: [ '1.hdr', '2.hdr', '3.hdr', '4.hdr', '5.hdr', '6.hdr' ],
