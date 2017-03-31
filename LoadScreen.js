@@ -49,8 +49,6 @@ function LoadScreen ( renderer, style ) {
 
 	this.setSize = setSize;
 
-	style = style || {};
-
 	style = {
 		type: typeof style.type !== 'undefined' ? style.type : 'linear-horizontal',
 		size: style.size || '170px',
