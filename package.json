@@ -3,9 +3,10 @@
   "description": "A three.js assets loading wrapper",
   "version": "0.18.14",
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-uglify": "^1.0.1"
+    "grunt": "latest",
+    "grunt-contrib-concat": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-bump": "latest"
   },
   "repository": {
     "type": "git",
