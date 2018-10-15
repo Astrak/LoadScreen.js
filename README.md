@@ -1,4 +1,5 @@
 # LoadScreen.js
+
 [![Latest NPM release][npm-badge]][npm-badge-url]
 [![License][license-badge]][license-badge-url]
 [![Dependencies][dependencies-badge]][dependencies-badge-url]
@@ -24,11 +25,15 @@ A Three.js assets loading wrapper.
 1. [FAQ](#faq)
 
 ## Installation
+
 Include in your project :
+
 ```
 npm install loadscreen
 ```
+
 Or in your page :
+
 ```html
 <script type="text/javascript" src="LoadScreen.min.js"/>
 ```
@@ -38,61 +43,71 @@ Or in your page :
 A full demo is proposed on codepen [here](http://codepen.io/Astrak/pen/OpwEZj?editors=0010).
 
 ### Main pattern
+
 ```js
 //First create and append a webgl renderer, then :
-const ls = new LoadScreen( renderer ).onComplete( init ).start( ASSETS );
+const ls = new LoadScreen(renderer).onComplete(init).start(ASSETS);
 
-function init () {
+function init() {
     //Init scene, then :
-    ls.remove( animate );
+    ls.remove(animate);
 }
 ```
 
 ### Load screens
+
 By default LoadScreen.js automatically generates the 'linear-horizontal' load screen. It displays and follows those steps : 'Loading' > 'Processing' > 'Compiling' > 'Creating scene'.
 
 ![Loader types](https://raw.githubusercontent.com/Astrak/LoadScreen.js/master/loaders.png "Loader types")
 
 ### Assets style
-Passed assets style is declarative, no callback hell. 
+
+Passed assets style is declarative, no callback hell.
+
 ```js
 const ASSETS = {
     textures: {
         foliageMap: {
-            path: 'path/to/pic1.png', fileSize: 1467,
+            path: "path/to/pic1.png",
+            fileSize: 1467,
             minFilter: THREE.LinearFilter
         },
-        foliageAO: { 
-            path: 'path/to/pic2.png', fileSize: 1275 
+        foliageAO: {
+            path: "path/to/pic2.png",
+            fileSize: 1275
         }
     },
     geometries: {
         shape: {
-            path: 'path/to/model.json', fileSize: 3876,
+            path: "path/to/model.json",
+            fileSize: 3876,
             flatNormals: true,
             toBufferGeometry: true,
-            onComplete ( geometry ) {
-                geometry.addAttribute( 'uv2', geometry.attributes.uv )
+            onComplete(geometry) {
+                geometry.addAttribute("uv2", geometry.attributes.uv);
             }
         }
-    }, 
+    },
     objects: {
         tree: {
-            geometry: 'shape',
-            map: 'foliageMap',
-            aoMap: 'foliageAO',
+            geometry: "shape",
+            map: "foliageMap",
+            aoMap: "foliageAO",
             material: new THREE.MeshStandardMaterial(),
             castShadow: true,
             transparent: true,
-            onComplete ( object ) {
-                object.scale.set( 1, 3, 1 );
+            onComplete(object) {
+                object.scale.set(1, 3, 1);
             }
         }
     }
 };
 ```
+
 ## Full pattern
+
 Methods are chainable, except `remove` and `setProgress`. Values are default.
+
 ```js
 const style = {
     type: 'linear-horizontal',//Main look. 'custom' empties the info container.
@@ -120,9 +135,9 @@ const options = {
 
 const ls = new LoadScreen( renderer, style );//Style is optional.
 
-window.addEventListener( 'resize', () => { 
-    renderer.setSize( width, height ); 
-    ls.setSize( width, height ); 
+window.addEventListener( 'resize', () => {
+    renderer.setSize( width, height );
+    ls.setSize( width, height );
 });
 
 ls.setOptions( options )
@@ -144,17 +159,20 @@ ls.remove( animate );//Removal is tweened so next action is a callback.
 ```
 
 ## Assets declaration
+
 Note : the `fileSize` parameter is necessary for every files, [explication here](#faq).
 By order of processing :
 
 ### 1. Files
-- [x] THREE.FileLoader
+
+-   [x] THREE.FileLoader
+
 ```js
 ASSETS.files = {
-    myFile1: { 
-        path: 'path/to/file.txt',
-        fileSize: 2789,//in Ko
-        onComplete ( file ) {
+    myFile1: {
+        path: "path/to/file.txt",
+        fileSize: 2789, //in Ko
+        onComplete(file) {
             //do something
         }
     }
@@ -162,24 +180,28 @@ ASSETS.files = {
 ```
 
 ### 2. Fonts
-- [x] THREE.TTFLoader
+
+-   [x] THREE.TTFLoader
+
 ```js
 ASSETS.fonts.myFont1 = {
-    path: 'path/to/font.ttf',
+    path: "path/to/font.ttf",
     fileSize: 321
 };
 
 //After loading :
-ASSETS.fonts.myFont1;//THREE.Font
+ASSETS.fonts.myFont1; //THREE.Font
 ```
 
 ### 3. Textures
-- [x] THREE.CubeTextureLoader
-- [x] THREE.HDRCubeTextureLoader
-- [x] THREE.KTXLoader
-- [x] THREE.PVRLoader
-- [x] THREE.TextureLoader
-- [x] THREE.TGALoader
+
+-   [x] THREE.CubeTextureLoader
+-   [x] THREE.HDRCubeTextureLoader
+-   [x] THREE.KTXLoader
+-   [x] THREE.PVRLoader
+-   [x] THREE.TextureLoader
+-   [x] THREE.TGALoader
+
 ```js
 ASSETS.textures = {
     myTexture1: {//Regular textures.
@@ -213,8 +235,10 @@ ASSETS.textures.myTexture3 = new THREE.Texture(...);//Won't be processed.
 ```
 
 ### 4. Materials
-- [x] THREE.MaterialLoader
-- [x] THREE.MTLLoader
+
+-   [x] THREE.MaterialLoader
+-   [x] THREE.MTLLoader
+
 ```js
 ASSETS.materials = {
     myMaterial1: {
@@ -242,41 +266,45 @@ ASSETS.materials.myMaterial2 = new THREE.Material();//Won't be processed.
 ```
 
 ### 5. Geometries
-- [ ] THREE.BufferGeometryLoader (format conflict with JSONLoader)
-- [x] THREE.CTMLoader (`load` method)
-- [x] THREE.JSONLoader (threejs blender exporter)
-- [x] THREE.PLYLoader
-- [x] THREE.STLLoader
-- [x] THREE.VTKLoader
+
+-   [ ] THREE.BufferGeometryLoader (format conflict with JSONLoader)
+-   [x] THREE.CTMLoader (`load` method)
+-   [x] THREE.JSONLoader (threejs blender exporter)
+-   [x] THREE.PLYLoader
+-   [x] THREE.STLLoader
+-   [x] THREE.VTKLoader
+
 ```js
 ASSETS.geometries = {
     myGeometry1: {
-        path: 'path/to/geometry.ply',
-        fileSize: 9498,//Ko
+        path: "path/to/geometry.ply",
+        fileSize: 9498, //Ko
         //Next two are optional :
-        flatNormals: true,//Call geometry.computeFlatVertexNormals() on THREE.Geometry instances.
-        toBufferGeometry: false,//Force creation of a BufferGeometry.
-        onComplete ( geometry ) {
+        flatNormals: true, //Call geometry.computeFlatVertexNormals() on THREE.Geometry instances.
+        toBufferGeometry: false, //Force creation of a BufferGeometry.
+        onComplete(geometry) {
             //geometry.translate / center / merge / addAttribute...
         }
     }
 };
 
 //After loading :
-ASSETS.geometries.myGeometry1;//THREE.Geometry
+ASSETS.geometries.myGeometry1; //THREE.Geometry
 
 //Also simply :
-ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry( 3, 2, 1 );//Won't be processed.
+ASSETS.geometries.myGeometry2 = new THREE.BoxGeometry(3, 2, 1); //Won't be processed.
 ```
 
 ### 6. Animations
-- [x] THREE.BVHLoader
+
+-   [x] THREE.BVHLoader
+
 ```js
 ASSETS.animations = {
     myAnimation1: {
-        path: 'path/to/anim.bvh',
+        path: "path/to/anim.bvh",
         fileSize: 4827,
-        onComplete ( bvh ) {
+        onComplete(bvh) {
             //Catch bvh.skeleton and bvh.clip.
         }
     }
@@ -284,27 +312,29 @@ ASSETS.animations = {
 ```
 
 ### 7. Objects
-- [x] THREE.ThreeMFLoader
-- [x] THREE.AMFLoader
-- [x] THREE.AssimpLoader
-- [x] THREE.AssimpJSONLoader
-- [x] THREE.AWDLoader
-- [x] THREE.BabylonLoader
-- [x] THREE.BinaryLoader
-- [x] THREE.ColladaLoader
-- [x] THREE.ColladaLoader (2)
-- [ ] THREE.CTMLoader (`loadParts` method for multiple geometries)
-- [x] THREE.FBXLoader
-- [x] THREE.FBXLoader (2)
-- [x] THREE.GLTFLoader
-- [x] THREE.GLTFLoader (2)
-- [x] THREE.MMDLoader (needs the additional parameter `VMDPaths` )
-- [x] THREE.PCDLoader
-- [x] THREE.ObjectLoader
-- [x] THREE.OBJLoader
-- [ ] THREE.PlayCanvasLoader (format conflict with ObjectLoader)
-- [x] THREE.UTF8Loader
-- [x] THREE.VRMLLoader
+
+-   [x] THREE.ThreeMFLoader
+-   [x] THREE.AMFLoader
+-   [x] THREE.AssimpLoader
+-   [x] THREE.AssimpJSONLoader
+-   [x] THREE.AWDLoader
+-   [x] THREE.BabylonLoader
+-   [x] THREE.BinaryLoader
+-   [x] THREE.ColladaLoader
+-   [x] THREE.ColladaLoader (2)
+-   [ ] THREE.CTMLoader (`loadParts` method for multiple geometries)
+-   [x] THREE.FBXLoader
+-   [x] THREE.FBXLoader (2)
+-   [x] THREE.GLTFLoader
+-   [x] THREE.GLTFLoader (2)
+-   [x] THREE.MMDLoader (needs the additional parameter `VMDPaths` )
+-   [x] THREE.PCDLoader
+-   [x] THREE.ObjectLoader
+-   [x] THREE.OBJLoader
+-   [ ] THREE.PlayCanvasLoader (format conflict with ObjectLoader)
+-   [x] THREE.UTF8Loader
+-   [x] THREE.VRMLLoader
+
 ```js
 ASSETS.objects = {
     myObject1: {//Load from file :
@@ -344,7 +374,7 @@ ASSETS.objects.myObject5 = {
     info: 'This is my object',//Unknown key 'info' in mesh and material > assigned to mesh.userData.
 };
 
-//After loading : 
+//After loading :
 ASSETS.objects.myObject5;//THREE.Mesh
 
 //Also simply :
@@ -352,10 +382,11 @@ ASSETS.objects.myObject6 = new THREE.Mesh(...);//Won't be processed.
 ```
 
 ## FAQ
+
 Why is it mandatory to indicate `fileSize` ?
 
->- XHR issue handling : sometimes the progress events can have `e.total` equaling zero, resulting in an infinite progress value when doing `e.loaded/e.total`. With `fileSize` in Ko, the library has a fallback.
->- UX quality : with this information the loader has a linear progress. Contrarily, if two files of different sizes were to be loaded without the `fileSize` information, one big and one small, and if the small one is immediately received before even having a progress event of the other one, the progress bar can jump to 50%, then take more time to reach 100%, giving a mistaken information. 
+> -   XHR issue handling : sometimes the progress events can have `e.total` equaling zero, resulting in an infinite progress value when doing `e.loaded/e.total`. With `fileSize` in Ko, the library has a fallback.
+> -   UX quality : with this information the loader has a linear progress. Contrarily, if two files of different sizes were to be loaded without the `fileSize` information, one big and one small, and if the small one is immediately received before even having a progress event of the other one, the progress bar can jump to 50%, then take more time to reach 100%, giving a mistaken information.
 
 Why isn't the indicator progression perfectly smooth ?
 
